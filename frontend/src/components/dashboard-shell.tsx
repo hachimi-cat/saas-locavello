@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import {
   BookMarked,
+  CreditCard,
   BookOpen,
   DatabaseZap,
   FileText,
@@ -61,6 +62,10 @@ const SECTIONS: NavSection[] = [
   {
     label: 'Developers',
     items: [{ href: '/dashboard/developers', label: 'API keys & CLI', icon: KeyRound }],
+  },
+  {
+    label: 'Workspace',
+    items: [{ href: '/dashboard/billing', label: 'Billing', icon: CreditCard }],
   },
 ];
 
