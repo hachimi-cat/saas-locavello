@@ -3,8 +3,8 @@ import { Mail, Phone, MapPin, MessageCircle } from 'lucide-react';
 
 // Suppuo hosted help center (live chat + ticket form) for this product.
 // Handle = brand slug (Suppuo resolves slug-or-acc); rename.sh rewrites
-// `forjio-brand`. See (marketing)/layout.tsx for the family rationale.
-const SUPPUO_SUPPORT_URL = 'https://suppuo.com/support/forjio-brand';
+// `locavello`. See (marketing)/layout.tsx for the family rationale.
+const SUPPUO_SUPPORT_URL = 'https://suppuo.com/support/locavello';
 
 /*
  * The mailbox, phone, and registered address are family-stable — every
@@ -13,8 +13,8 @@ const SUPPUO_SUPPORT_URL = 'https://suppuo.com/support/forjio-brand';
  */
 
 export const metadata: Metadata = {
-  title: 'Contact — Forjio Brand',
-  description: 'Get in touch with the Forjio Brand team. Support, sales, partnerships, legal, privacy.',
+  title: 'Contact — Locavello',
+  description: 'Get in touch with the Locavello team. Support, sales, partnerships, legal, privacy.',
 };
 
 export default function ContactPage() {

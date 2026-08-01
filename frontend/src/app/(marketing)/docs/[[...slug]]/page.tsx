@@ -22,7 +22,7 @@ const FORJIO_PRODUCTS = [
   { name: 'Storlaunch',  href: 'https://storlaunch.com/docs', tagline: 'E-commerce' },
   { name: 'Fulkruma',    href: 'https://fulkruma.com/docs',   tagline: 'Fulfillment' },
   { name: 'Ripllo',      href: 'https://ripllo.com/docs',     tagline: 'Marketing' },
-  { name: 'Forjio Brand', href: '/docs',                      tagline: 'This product' },
+  { name: 'Locavello', href: '/docs',                      tagline: 'This product' },
 ];
 
 export function generateStaticParams(): Array<{ slug?: string[] }> {
@@ -41,7 +41,7 @@ export async function generateMetadata({
   const slug = (p.slug ?? []).join('/');
   const { title } = readDoc(slug);
   return {
-    title: title === 'Introduction' ? 'Forjio Brand Docs' : `${title} · Forjio Brand Docs`,
+    title: title === 'Introduction' ? 'Locavello Docs' : `${title} · Locavello Docs`,
   };
 }
 
@@ -55,7 +55,7 @@ export default async function DocsPage({ params }: { params: Promise<Params> }) 
 
   return (
     <>
-      <CrossProductNav products={FORJIO_PRODUCTS} current="Forjio Brand" />
+      <CrossProductNav products={FORJIO_PRODUCTS} current="Locavello" />
 
       {/* Docs header — search + mobile sidebar trigger */}
       <div className="sticky top-0 z-30 border-b border-border bg-background/80 backdrop-blur">
@@ -64,7 +64,7 @@ export default async function DocsPage({ params }: { params: Promise<Params> }) 
             href="/docs"
             className="text-sm font-semibold whitespace-nowrap hover:text-primary"
           >
-            Forjio Brand Docs
+            Locavello Docs
           </Link>
           <div className="flex-1 flex justify-center">
             <DocsSearch index={searchIndex} />

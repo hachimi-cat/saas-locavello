@@ -1,17 +1,25 @@
-# CLAUDE.md — Forjio Service Template
+# CLAUDE.md — saas-locavello
 
-This repo is the **template**. When a Forjio product is forked from it,
-copy this file into the forked repo and replace `FORJIO_BRAND` /
-`forjio-brand` / `Forjio Brand` with the actual product identity.
-
-## For Claude working inside a product repo forked from this template
+Locavello — localization platform for SaaS. Extract strings, agent-translate,
+review, and ship your product in every language. Two product modes, one
+backend: **Mode A (SDK)** — developers wrap strings with `t()`, catalogs are
+committed, `locavello pull` in CI, zero runtime dependency on Locavello;
+**Mode B (proxy)** — paste a URL, the crawler extracts + translates, Locavello
+serves the translated site (fails OPEN to the source language, never a blank
+page). Forjio products always use Mode A — Locavello must never be a runtime
+dependency of the family.
 
 ### Product identity
 
-- Brand: `FORJIO_BRAND` (e.g., "huudis")
-- Domain: `brand.com` + `brand.forjio.com`
-- Repo: `hachimi-cat/FORJIO_BRAND`
-- CLI package: `@forjio/FORJIO_BRAND-cli`
+- Brand: `locavello` / "Locavello"
+- Domain: `locavello.forjio.com` (locavello.com not yet purchased — on bang's OPEN list)
+- Repo: `hachimi-cat/saas-locavello`
+- CLI package: `@forjio/locavello-cli`
+- Ports: backend `4270`, frontend `3270`
+- Theme: dark (family default) · Accent: amber `#F59E0B`
+- Pricing: Free Rp 0 / Starter Rp 90,000 / Pro Rp 290,000 / Scale Quote
+  (matches catentio's ladder; translators + reviewers are FREE seats on
+  every tier; agent overage bills from the catentio credit wallet)
 
 ### Non-negotiable
 
@@ -60,14 +68,15 @@ copy this file into the forked repo and replace `FORJIO_BRAND` /
 | `backend/` | Express + Prisma. `app.ts` (`createApp` factory) + `index.ts` (listener) split. Auth: `routes/auth.ts` (cookie-first Huudis SSO — login/signup/OIDC) is a thin `createAuthRouter` over the shared `@forjio/sdk/auth-server` BFF kit; product-specific config (cookie name, client id, scope, accountId derivation, roles, sign-in gate) lives in `src/auth-config.ts` — which ships two roles: the open multi-tenant `merchant` and the workspace-gated `admin`. `routes/huudis-proxy.ts` (`createHuudisProxy`, mounted `/api/v1/huudis`) proxies account + workspace management to Huudis. JWT verify for API callers via `@forjio/sdk/auth`. Shared `src/lib/` (http envelope helpers, ids, cursor, async-handler, zod-error, test-keys) + `src/middleware/` (request-id, rate-limit, idempotency, zod-error, auth, **admin-guard** — guards `/api/v1/admin/*` on an admin session or `X-Forjio-Admin-Secret`). Add product routes under `backend/src/routes/`; mount admin routers under `/admin` behind `adminGuard`. |
 | `frontend/` | Next.js 15 App Router. Marketing at `/`, dashboard at `/dashboard`, OIDC at `/callback`. Built-in admin portal at `/admin/*` (the `(admin)` route group: login/forgot/reset + a gated `(portal)` dashboard via `@forjio/portal-ui` `brandTag="Admin"`; admin BFF proxy at `app/api/v1/console/[...path]`). `src/lib/api.ts` (client fetch) + `src/lib/api-server.ts` (RSC cookie forwarding). Error + loading boundaries at `src/app/(dashboard)/` and `src/app/(admin)/admin/(portal)/`. |
 | `deploy/` | `nginx/<brand>.conf` — reference vhost. `^~ /api/v1/console/` → frontend (admin BFF proxy), everything else under `/api/v1/` → backend, default → frontend. `scripts/install.sh` symlinks it into `sites-enabled`. |
-| `cli/` | Commander-based CLI. `auth login/whoami/logout` ship; session stored via `src/lib/session.ts` at `~/.FORJIO_BRAND/session.json`. |
+| `cli/` | Commander-based CLI. `auth login/whoami/logout` ship; session stored via `src/lib/session.ts` at `~/.locavello/session.json`. |
 | `e2e/` | Playwright. `playwright.config.ts` (local dev) + `playwright.ci.config.ts` (CI against staging — see ci-cd.yml). Health smoke ships; add per-flow tests per milestone. |
 
 ### CI/CD — shared staging E2E pattern
 
-- `.github/workflows/ci-cd.yml` carries the `forjio-brand` /
-  `forjio_brand` / `:4000` / `:3000` placeholders — `scripts/rename.sh`
-  rewrites them when forking; the rest is mechanical.
+- **CI runs on Depllo, not GitHub Actions** (family standard since
+  2026-07-15 — GHA quota). `.github/workflows/ci-cd.yml` is kept as an
+  inert fallback with push/PR triggers disabled; the live pipeline is
+  the Depllo project `saas-locavello`.
 - Job sequence: `lint → test → build → deploy-staging → e2e-staging →
   deploy-production → release`.
 - **Frontend deploys as a dynamic Next app** (`next start` under pm2,
@@ -77,7 +86,8 @@ copy this file into the forked repo and replace `FORJIO_BRAND` /
   `npm ci --omit=dev` + `pm2 start npm -- start`. No static `out/`.
 - **E2E reaches staging at `http://${{ secrets.STAGING_HOST }}/`** over
   the **tailnet** — the SHARED staging box is reachable only over the
-  tailnet (its tailnet IP is `100.123.65.113`), so both `deploy-staging`
+  tailnet (live box `stg-share`, tailnet IP `100.66.19.22`, public
+  `159.223.51.169` — the old `100.123.65.113` box is dead), so both `deploy-staging`
   and `e2e-staging` first join the tailnet as an ephemeral CI node via
   `tailscale/github-action` (new required secret **`TS_AUTHKEY`**, a
   reusable + ephemeral Tailscale auth key). `STAGING_HOST` stays the
@@ -167,7 +177,7 @@ copy this file into the forked repo and replace `FORJIO_BRAND` /
   runs with `--passWithNoTests` so scaffolding doesn't break CI
   before coverage ramps.
 - E2E in `e2e/tests/` (Playwright). Run locally against
-  `localhost:3000/4000`; CI hits `${{ secrets.STAGING_HOST }}` =
+  `localhost:3270/4270`; CI hits `${{ secrets.STAGING_HOST }}` =
   `staging-<brand>.forjio.com` (the shared box, reached over the tailnet —
   the runner joins via `TS_AUTHKEY` and maps the hostname to the box's
   tailnet IP in `/etc/hosts`).

@@ -8,7 +8,7 @@ import releases from '@/data/changelog.json';
 
 export const metadata: Metadata = {
   title: 'Changelog',
-  description: "What's new in Forjio Brand. Product updates, improvements, and fixes.",
+  description: "What's new in Locavello. Product updates, improvements, and fixes.",
 };
 
 export default function ChangelogPage() {

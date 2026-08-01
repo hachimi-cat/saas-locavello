@@ -7,8 +7,8 @@ import type { Metadata } from 'next';
  */
 
 export const metadata: Metadata = {
-  title: 'Refund Policy — Forjio Brand',
-  description: 'Forjio Brand refund policy for subscription fees.',
+  title: 'Refund Policy — Locavello',
+  description: 'Locavello refund policy for subscription fees.',
 };
 
 export default function RefundPage() {
@@ -23,7 +23,7 @@ export default function RefundPage() {
         <section>
           <h2 className="text-lg font-semibold text-foreground">1. Subscription Fees</h2>
           <p className="mt-3">
-            Forjio Brand sells access to the platform via monthly and annual subscription
+            Locavello sells access to the platform via monthly and annual subscription
             plans. Subscription fees are charged in advance for the upcoming billing period
             and are non-refundable for the current period once it has started.
           </p>
@@ -86,7 +86,7 @@ export default function RefundPage() {
           <h2 className="text-lg font-semibold text-foreground">5. Governing Law</h2>
           <p className="mt-3">
             This Refund Policy is governed by the laws of the Republic of Indonesia. PT Forjio
-            Teknologi Indonesia is the legal entity behind Forjio Brand.
+            Teknologi Indonesia is the legal entity behind Locavello.
           </p>
         </section>
 

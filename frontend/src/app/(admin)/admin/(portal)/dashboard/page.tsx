@@ -21,7 +21,7 @@
 
 import { AdminOverviewPanel } from '@forjio/admin-ui';
 
-const brand = process.env.NEXT_PUBLIC_BRAND_NAME ?? 'Forjio Brand';
+const brand = process.env.NEXT_PUBLIC_BRAND_NAME ?? 'Locavello';
 
 export default function AdminDashboardPage() {
   return (

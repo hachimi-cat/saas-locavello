@@ -10,9 +10,9 @@ import { ResetPasswordForm } from '@forjio/auth-ui';
  * by `createAuthRouter`, which proxies to Huudis. Role-agnostic —
  * wrapped in Suspense because the form reads search params.
  *
- * rename.sh rewrites the "Forjio Brand" display name.
+ * rename.sh rewrites the "Locavello" display name.
  */
-const brand = process.env.NEXT_PUBLIC_BRAND_NAME ?? 'Forjio Brand';
+const brand = process.env.NEXT_PUBLIC_BRAND_NAME ?? 'Locavello';
 
 export default function AdminResetPasswordPage() {
   return (

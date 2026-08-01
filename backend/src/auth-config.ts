@@ -28,14 +28,14 @@ import {
  * A product that needs more roles adds entries to `roles`; one that
  * needs a single-user gate tightens `gate`.
  *
- * FORKERS: `scripts/rename.sh` rewrites the `forjio-brand` slug. Set
+ * FORKERS: `scripts/rename.sh` rewrites the `locavello` slug. Set
  * HUUDIS_CLIENT_ID + HUUDIS_CLIENT_SECRET in backend/.env
  * (scripts/bootstrap.mjs registers the OIDC client and writes them).
  * Manage admins by managing this product's Huudis workspace membership
  * — there is no per-product admin allowlist.
  */
 
-const CLIENT_ID = process.env.HUUDIS_CLIENT_ID ?? 'forjio-brand';
+const CLIENT_ID = process.env.HUUDIS_CLIENT_ID ?? 'locavello';
 
 /** Stable per-user account id — hashing the Huudis sub keeps it opaque
  *  and fixed-width; the same user always resolves to the same acc_*. */
@@ -58,13 +58,13 @@ export const authConfig: AuthServerConfig = {
   }),
   roles: {
     merchant: {
-      cookie: 'forjio-brand_session',
+      cookie: 'locavello_session',
       accountId: deriveAccountId,
       returnTo: '/dashboard',
       loginPath: '/login',
     },
     admin: {
-      cookie: 'forjio-brand_admin_session',
+      cookie: 'locavello_admin_session',
       // adm_<sub> — keeps the admin accountId in its own namespace,
       // distinct from the merchant `acc_*` derivation, so admin and
       // merchant data never collide for the same Huudis identity.
@@ -87,11 +87,11 @@ export const authConfig: AuthServerConfig = {
     role !== 'admin' ||
     ctx?.claims?.workspace_role === 'owner' ||
     ctx?.claims?.workspace_role === 'admin',
-  stateCookie: 'forjio-brand_oidc_state',
+  stateCookie: 'locavello_oidc_state',
   stateSecret:
     process.env.OIDC_SIGNING_SECRET ??
     process.env.HUUDIS_CLIENT_SECRET ??
     'dev-only-fallback-oidc-secret',
-  roleHeader: 'x-forjio-brand-role',
+  roleHeader: 'x-locavello-role',
   allowIdpHint: true,
 };

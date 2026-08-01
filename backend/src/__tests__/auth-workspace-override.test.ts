@@ -19,8 +19,8 @@ import express from 'express';
 import { requireAuth } from '../middleware/auth.js';
 import { authConfig } from '../auth-config.js';
 
-const SESSION_COOKIE = 'forjio-brand_session';
-const OVERRIDE_COOKIE = 'forjio-brand_active_workspace';
+const SESSION_COOKIE = 'locavello_session';
+const OVERRIDE_COOKIE = 'locavello_active_workspace';
 
 function mintSession(overrides: Record<string, unknown> = {}): string {
   return authConfig.codec.encode({

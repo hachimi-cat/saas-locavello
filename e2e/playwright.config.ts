@@ -7,7 +7,7 @@ import { defineConfig } from '@playwright/test';
  * on the shared box, no webServer). See .github/workflows/ci-cd.yml.
  */
 
-const FRONTEND_URL = process.env.FRONTEND_URL ?? 'http://localhost:3000';
+const FRONTEND_URL = process.env.FRONTEND_URL ?? 'http://localhost:3270';
 
 const isRemote = !!(process.env.FRONTEND_URL || process.env.BACKEND_URL || process.env.CI);
 

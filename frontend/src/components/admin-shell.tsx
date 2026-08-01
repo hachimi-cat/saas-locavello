@@ -25,15 +25,15 @@ import { Sidebar, type SessionUser, type NavSection } from '@forjio/portal-ui';
  * merchant dashboard.
  *
  * FORKERS: add your admin pages as `SECTIONS` entries below — keep
- * "Overview → Dashboard" first. rename.sh rewrites "Forjio Brand" /
- * "forjio-brand".
+ * "Overview → Dashboard" first. rename.sh rewrites "Locavello" /
+ * "locavello".
  */
 
 // rename.sh rewrites these placeholders. Brand color follows the
 // theme's `--primary` token (the pawpado role-shell convention) —
 // don't hardcode a hex here.
-const BRAND = 'Forjio Brand';
-const BRAND_SLUG = 'forjio-brand';
+const BRAND = 'Locavello';
+const BRAND_SLUG = 'locavello';
 const BRAND_COLOR = 'hsl(var(--primary))';
 const BRAND_COLOR_SOFT = 'hsl(var(--primary) / 0.15)';
 

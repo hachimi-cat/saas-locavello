@@ -62,7 +62,7 @@ export default function HomePage() {
               <br />
               what{' '}
               <span className="relative whitespace-nowrap">
-                <span className="relative z-10">Forjio Brand</span>
+                <span className="relative z-10">Locavello</span>
                 <span
                   aria-hidden
                   className="absolute inset-x-0 bottom-1 h-3 md:h-4 bg-primary/60 dark:bg-primary/30 -z-0 rounded-sm"
@@ -72,7 +72,7 @@ export default function HomePage() {
             </h1>
 
             <p className="mt-5 text-[15px] md:text-base leading-relaxed text-muted-foreground max-w-[60ch] mx-auto">
-              A second line clarifying who Forjio Brand is for and why they&apos;d switch
+              A second line clarifying who Locavello is for and why they&apos;d switch
               from whatever they use today. Priced in IDR. Part of the Forjio family.
             </p>
 
@@ -156,7 +156,7 @@ export default function HomePage() {
           <div className="max-w-2xl">
             <SectionEyebrow>Features</SectionEyebrow>
             <h2 className="text-[28px] md:text-[36px] leading-[1.1] font-semibold tracking-[-0.02em]">
-              Everything Forjio Brand ships.
+              Everything Locavello ships.
             </h2>
             <p className="mt-4 text-[15px] leading-relaxed text-muted-foreground max-w-[52ch]">
               Six concrete capabilities. Only list what runs in production today — no roadmap fluff.
@@ -285,7 +285,7 @@ export default function HomePage() {
           <div className="text-center max-w-2xl mx-auto">
             <SectionEyebrow>Compare</SectionEyebrow>
             <h2 className="text-[28px] md:text-[36px] leading-[1.1] font-semibold tracking-[-0.02em]">
-              How Forjio Brand stacks up.
+              How Locavello stacks up.
             </h2>
             <p className="mt-4 text-[15px] leading-relaxed text-muted-foreground max-w-[60ch] mx-auto">
               Name the two alternatives your buyers actually evaluate, and the capabilities that
@@ -300,7 +300,7 @@ export default function HomePage() {
                   <th className="text-left px-4 py-3 font-medium text-muted-foreground text-xs uppercase tracking-wider">
                     Capability
                   </th>
-                  <th className="px-4 py-3 font-semibold text-primary">Forjio Brand</th>
+                  <th className="px-4 py-3 font-semibold text-primary">Locavello</th>
                   <th className="px-4 py-3 font-medium text-muted-foreground">Alternative A</th>
                   <th className="px-4 py-3 font-medium text-muted-foreground">Alternative B</th>
                 </tr>
@@ -340,7 +340,7 @@ export default function HomePage() {
               </h2>
               <p className="mt-4 text-[15px] leading-relaxed text-muted-foreground max-w-[52ch]">
                 A real CLI, type-safe SDKs for Node.js, Python, and Go, and a REST API with
-                idempotency keys. Wire Forjio Brand into your stack without writing glue.
+                idempotency keys. Wire Locavello into your stack without writing glue.
               </p>
               <ul className="mt-6 space-y-3">
                 {[
@@ -364,7 +364,7 @@ export default function HomePage() {
                   <ArrowRight className="size-4" strokeWidth={1.5} />
                 </Link>
                 <a
-                  href="https://github.com/hachimi-cat/forjio-brand"
+                  href="https://github.com/hachimi-cat/locavello"
                   className="inline-flex items-center gap-1.5 h-10 px-5 rounded-lg text-sm font-medium border border-border bg-card hover:bg-muted transition-colors"
                 >
                   <Code2 className="size-4" strokeWidth={1.5} />
@@ -374,20 +374,20 @@ export default function HomePage() {
             </div>
 
             <div className="space-y-4">
-              <TerminalCard label="forjio-brand">
+              <TerminalCard label="locavello">
                 <span className="text-white/40"># Install once</span>
                 {'\n'}
-                <span className="text-white/90">$ npm i -g @forjio/forjio-brand-cli</span>
+                <span className="text-white/90">$ npm i -g @forjio/locavello-cli</span>
                 {'\n\n'}
                 <span className="text-white/40"># Log in with your Forjio account</span>
                 {'\n'}
-                <span className="text-white/90">$ forjio-brand auth login</span>
+                <span className="text-white/90">$ locavello auth login</span>
                 {'\n'}
                 <span className="text-green-300">✔ Authenticated as you@example.com via Huudis</span>
                 {'\n\n'}
                 <span className="text-white/40"># Run the core action</span>
                 {'\n'}
-                <span className="text-white/90">$ forjio-brand create --name "demo"</span>
+                <span className="text-white/90">$ locavello create --name "demo"</span>
                 {'\n'}
                 <span className="text-green-300">✔ Created.</span>
               </TerminalCard>
@@ -396,7 +396,7 @@ export default function HomePage() {
                 <span className="text-purple-300">import</span>
                 <span className="text-white/90">{' { ForjioBrand } '}</span>
                 <span className="text-purple-300">from</span>
-                <span className="text-green-300">{' "@forjio/forjio-brand"'}</span>
+                <span className="text-green-300">{' "@forjio/locavello"'}</span>
                 <span className="text-white/90">;</span>
                 {'\n\n'}
                 <span className="text-purple-300">const</span>
@@ -404,7 +404,7 @@ export default function HomePage() {
                 <span className="text-purple-300">new</span>
                 <span className="text-white/90">{' ForjioBrand({'}</span>
                 {'\n'}
-                <span className="text-white/90">{'  apiKey: process.env.FORJIO_BRAND_KEY!,'}</span>
+                <span className="text-white/90">{'  apiKey: process.env.LOCAVELLO_KEY!,'}</span>
                 {'\n'}
                 <span className="text-white/90">{'});'}</span>
                 {'\n\n'}
@@ -435,7 +435,7 @@ export default function HomePage() {
               Sign in once. Use every Forjio product.
             </h2>
             <p className="mt-4 text-[15px] leading-relaxed text-muted-foreground max-w-[60ch] mx-auto">
-              Forjio Brand shares its account system with the rest of the Forjio family through
+              Locavello shares its account system with the rest of the Forjio family through
               Huudis SSO. Add a teammate here and they&apos;re already part of your other
               Forjio workspaces.
             </p>
@@ -453,7 +453,7 @@ export default function HomePage() {
 
               <div className="mt-8 grid grid-cols-3 gap-3">
                 {[
-                  { name: 'Forjio Brand', icon: Hexagon, current: true, label: 'this product' },
+                  { name: 'Locavello', icon: Hexagon, current: true, label: 'this product' },
                   { name: 'Storlaunch', icon: Zap, label: 'storefront' },
                   { name: 'Plugipay', icon: CircleDollarSign, label: 'payments' },
                   { name: 'Fulkruma', icon: Boxes, label: 'fulfillment' },
@@ -559,7 +559,7 @@ export default function HomePage() {
               <Hexagon className="size-6" strokeWidth={2} />
             </div>
             <h2 className="text-[28px] md:text-[36px] leading-[1.1] font-semibold tracking-[-0.02em] max-w-[24ch]">
-              Get started with Forjio Brand today.
+              Get started with Locavello today.
             </h2>
             <p className="mt-4 text-[15px] leading-relaxed text-muted-foreground max-w-[52ch]">
               Free forever on the starter tier. No card. Upgrade when you outgrow it.
@@ -637,7 +637,7 @@ function HeroPreview() {
             <span className="size-2.5 rounded-full bg-primary/70" />
             <Hexagon className="ml-2 size-3.5 text-muted-foreground" strokeWidth={1.5} />
             <span className="text-[11px] text-muted-foreground font-mono">
-              forjio-brand.com / dashboard
+              locavello.com / dashboard
             </span>
           </div>
           <MoreHorizontal className="size-3.5 text-muted-foreground" strokeWidth={1.5} />

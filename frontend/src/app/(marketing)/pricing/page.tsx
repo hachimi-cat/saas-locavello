@@ -6,13 +6,13 @@ import { Price } from '@forjio/website-ui';
 /*
  * FORKERS: the tier names (Free / Pro / Business) and the IDR + USD
  * dual-pricing are the family standard. Replace the comparison rows
- * with the real per-tier limits of Forjio Brand. usdCents should
+ * with the real per-tier limits of Locavello. usdCents should
  * mirror backend/src/config/plans.ts once that exists.
  */
 
 export const metadata: Metadata = {
   title: 'Pricing',
-  description: 'Transparent pricing for Forjio Brand. Start free, upgrade when you need to.',
+  description: 'Transparent pricing for Locavello. Start free, upgrade when you need to.',
 };
 
 const tiers = [

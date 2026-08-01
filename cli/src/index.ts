@@ -1,7 +1,7 @@
 import { Command } from 'commander';
 import { auth } from './commands/auth.js';
 
-const brand = process.env.FORJIO_BRAND ?? 'forjio-brand';
+const brand = process.env.LOCAVELLO ?? 'locavello';
 
 const program = new Command()
   .name(brand)

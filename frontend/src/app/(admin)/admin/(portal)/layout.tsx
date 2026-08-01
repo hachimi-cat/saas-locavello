@@ -7,7 +7,7 @@ import type { SessionUser } from '@forjio/portal-ui';
  * Admin portal route-group layout — the admin auth gate. Mirrors the
  * merchant `(dashboard)/layout.tsx`, with three differences:
  *
- *   1. It gates on the admin session cookie (`forjio-brand_admin_session`),
+ *   1. It gates on the admin session cookie (`locavello_admin_session`),
  *      not the merchant one.
  *   2. It stamps the role header (`X-Forjio-Brand-Role: admin`) on the
  *      `/auth/me` call so the shared auth-server kit resolves the
@@ -26,16 +26,16 @@ import type { SessionUser } from '@forjio/portal-ui';
  * this layout would still be rejected by every `/api/v1/admin/*` route
  * (guarded by `adminGuard`).
  *
- * rename.sh rewrites the `forjio-brand` slug.
+ * rename.sh rewrites the `locavello` slug.
  */
 
-const ADMIN_SESSION_COOKIE = 'forjio-brand_admin_session';
-const ROLE_HEADER = 'x-forjio-brand-role';
+const ADMIN_SESSION_COOKIE = 'locavello_admin_session';
+const ROLE_HEADER = 'x-locavello-role';
 // Server-side fetches need an ABSOLUTE origin; the CI build sets
 // NEXT_PUBLIC_API_URL to the RELATIVE '/api/v1' (browser-only).
 // Strip the suffix and fall back to the co-located backend.
-const API_ORIGIN = (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000').replace(/\/api\/v1\/?$/, '') ||
-  'http://127.0.0.1:4000';
+const API_ORIGIN = (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4270').replace(/\/api\/v1\/?$/, '') ||
+  'http://127.0.0.1:4270';
 
 async function fetchAdminUser(cookieHeader: string): Promise<SessionUser | null> {
   try {

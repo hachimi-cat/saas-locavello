@@ -29,19 +29,19 @@ import {
  * the family canon; do not switch to localStorage.
  */
 
-// rename.sh rewrites "Forjio Brand" / "forjio-brand". Brand color
+// rename.sh rewrites "Locavello" / "locavello". Brand color
 // follows the theme's `--primary` token (set in app/globals.css) —
 // the pawpado role-shell convention — so retuning the token rebrands
 // the shell too; don't hardcode a hex here.
-const BRAND = 'Forjio Brand';
-const BRAND_SLUG = 'forjio-brand';
+const BRAND = 'Locavello';
+const BRAND_SLUG = 'locavello';
 const BRAND_COLOR = 'hsl(var(--primary))';
 const BRAND_COLOR_SOFT = 'hsl(var(--primary) / 0.15)';
 
 // Hosted Suppuo support portal for this product's Suppuo workspace — the
 // family helpdesk entry point (ticket history + live chat). Handle = brand
-// slug (Suppuo resolves slug-or-acc); rename.sh rewrites `forjio-brand`.
-const SUPPORT_URL = 'https://suppuo.com/portal/forjio-brand';
+// slug (Suppuo resolves slug-or-acc); rename.sh rewrites `locavello`.
+const SUPPORT_URL = 'https://suppuo.com/portal/locavello';
 
 const SECTIONS: NavSection[] = [
   {

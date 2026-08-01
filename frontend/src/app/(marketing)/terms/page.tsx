@@ -8,7 +8,7 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Terms of Service',
-  description: 'Forjio Brand Terms of Service. The rules for using the platform.',
+  description: 'Locavello Terms of Service. The rules for using the platform.',
 };
 
 export default function TermsPage() {
@@ -21,7 +21,7 @@ export default function TermsPage() {
         <section>
           <h2 className="text-lg font-semibold text-foreground">1. Acceptance of Terms</h2>
           <p className="mt-3">
-            By creating an account or using Forjio Brand, you agree to these terms. If you
+            By creating an account or using Locavello, you agree to these terms. If you
             don&apos;t agree, don&apos;t use the service.
           </p>
         </section>
@@ -38,7 +38,7 @@ export default function TermsPage() {
         <section>
           <h2 className="text-lg font-semibold text-foreground">3. Acceptable Use</h2>
           <p className="mt-3">
-            You may not use Forjio Brand for illegal content, spam, content that violates
+            You may not use Locavello for illegal content, spam, content that violates
             intellectual property rights, or content that promotes violence or hate speech.
             We reserve the right to disable resources or accounts that violate this policy.
           </p>
@@ -91,7 +91,7 @@ export default function TermsPage() {
         <section>
           <h2 className="text-lg font-semibold text-foreground">9. Limitation of Liability</h2>
           <p className="mt-3">
-            Forjio Brand is provided &quot;as is&quot; without warranties of any kind. To the
+            Locavello is provided &quot;as is&quot; without warranties of any kind. To the
             maximum extent permitted by law, Forjio is not liable for any indirect, incidental,
             special, or consequential damages arising from your use of the service. Our total
             liability for any claim shall not exceed the amount you paid us in the 3 months
@@ -112,7 +112,7 @@ export default function TermsPage() {
         <section>
           <h2 className="text-lg font-semibold text-foreground">11. Refunds</h2>
           <p className="mt-3">
-            Refunds for Forjio Brand subscription fees are governed by our{' '}
+            Refunds for Locavello subscription fees are governed by our{' '}
             <a href="/refund" className="text-primary hover:underline">Refund Policy</a>. By
             subscribing you agree to that policy.
           </p>
@@ -121,7 +121,7 @@ export default function TermsPage() {
         <section>
           <h2 className="text-lg font-semibold text-foreground">12. Legal Entity &amp; Contact</h2>
           <p className="mt-3">
-            Forjio Brand is operated by <strong>PT Forjio Teknologi Indonesia</strong>.
+            Locavello is operated by <strong>PT Forjio Teknologi Indonesia</strong>.
           </p>
           <p className="mt-2">
             Jl. Parkit, Blok I, No. 48, RT 004, RW 001, Cempaka Permai, Gading Cempaka, Bengkulu,

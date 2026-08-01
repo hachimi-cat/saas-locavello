@@ -1,10 +1,10 @@
 name: CI/CD
 
+# Locavello deploys through DEPLLO, not GitHub Actions — the GHA quota is the
+# whole reason Depllo exists. The push/PR triggers are deliberately removed
+# so this workflow never auto-fires; it stays as a manually-dispatchable
+# fallback for the day Depllo is down. Do not re-enable them.
 on:
-  push:
-    branches: [main, master]
-  pull_request:
-    branches: [main, master]
   workflow_dispatch:
     inputs:
       update_baselines:
@@ -50,11 +50,11 @@ jobs:
         image: postgres:16
         env:
           POSTGRES_PASSWORD: test
-          # Lowercase snake placeholder — rename.sh rewrites `forjio_brand`
+          # Lowercase snake placeholder — rename.sh rewrites `locavello`
           # to the product's snake id (uppercase placeholders here produced
           # an UPPERCASE db name after rename; template bug found spawning
           # suppuo).
-          POSTGRES_DB: forjio_brand_test
+          POSTGRES_DB: locavello_test
         ports: ['5432:5432']
         options: >-
           --health-cmd pg_isready
@@ -74,9 +74,9 @@ jobs:
       - name: Backend tests
         run: |
           cd backend && npm ci
-          DATABASE_URL=postgresql://postgres:test@localhost:5432/forjio_brand_test \
+          DATABASE_URL=postgresql://postgres:test@localhost:5432/locavello_test \
             npx prisma migrate deploy
-          DATABASE_URL=postgresql://postgres:test@localhost:5432/forjio_brand_test \
+          DATABASE_URL=postgresql://postgres:test@localhost:5432/locavello_test \
             REDIS_URL=redis://localhost:6379 \
             JWT_SECRET=test-secret JWT_REFRESH_SECRET=test-refresh-secret \
             npm test
@@ -152,7 +152,7 @@ jobs:
         uses: tailscale/github-action@v2
         with:
           authkey: ${{ secrets.TS_AUTHKEY }}
-          hostname: forjio-brand-deploy-ci
+          hostname: locavello-deploy-ci
       - uses: actions/download-artifact@v7
         with:
           name: backend-dist
@@ -177,32 +177,32 @@ jobs:
           rsync -avz --delete \
             --exclude node_modules --exclude .git --exclude .env --exclude .npmrc --exclude frontend/.next/cache \
             -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=30" \
-            ./ root@100.123.65.113:/opt/saas/forjio-brand/
+            ./ root@100.123.65.113:/opt/saas/locavello/
       # bash -se: -e aborts (and fails the job, blocking prod) if
       # `prisma migrate deploy` fails — replacing appleboy's silent
       # script-continue. -s reads the script from the heredoc on stdin.
       - name: Migrate + restart (over tailnet)
         run: |
           ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=30 root@100.123.65.113 'bash -se' <<'SCRIPT'
-          cd /opt/saas/forjio-brand/backend
+          cd /opt/saas/locavello/backend
           # --omit=dev — runtime deps only. dist/ + prisma client are
           # already in the artifact from the Build job, so we just need
           # the production node_modules tree here.
           npm ci --omit=dev
           npx prisma migrate deploy
-          pm2 restart forjio-brand || pm2 start dist/index.js --name forjio-brand -i 1
-          cd /opt/saas/forjio-brand/frontend
+          pm2 restart locavello || pm2 start dist/index.js --name locavello -i 1
+          cd /opt/saas/locavello/frontend
           # Dynamic Next app — `.next/` is pre-built in the artifact
           # (no on-box `next build`; that step OOMed on the 1GB box and
           # added ~5min to every deploy). Install runtime deps + run
           # `next start` under pm2.
           npm ci --omit=dev
-          pm2 restart forjio-brand-frontend || pm2 start npm --name forjio-brand-frontend -- start
+          pm2 restart locavello-frontend || pm2 start npm --name locavello-frontend -- start
           pm2 save
           # Wait for backend to be healthy
           echo "Waiting for backend health..."
           for i in $(seq 1 30); do
-            if curl -sf http://localhost:4000/api/v1/health > /dev/null 2>&1; then
+            if curl -sf http://localhost:4270/api/v1/health > /dev/null 2>&1; then
               echo "Backend healthy after ${i}s"
               break
             fi
@@ -211,7 +211,7 @@ jobs:
           # Wait for frontend to be serving
           echo "Waiting for frontend..."
           for i in $(seq 1 30); do
-            if curl -sf http://localhost:3000/ > /dev/null 2>&1; then
+            if curl -sf http://localhost:3270/ > /dev/null 2>&1; then
               echo "Frontend healthy after ${i}s"
               break
             fi
@@ -241,7 +241,7 @@ jobs:
         uses: tailscale/github-action@v2
         with:
           authkey: ${{ secrets.TS_AUTHKEY }}
-          hostname: forjio-brand-e2e-ci
+          hostname: locavello-e2e-ci
       - name: Route staging host over the tailnet
         run: echo "100.123.65.113 ${{ secrets.STAGING_HOST }}" | sudo tee -a /etc/hosts
       - uses: actions/setup-node@v5
@@ -320,7 +320,7 @@ jobs:
         uses: tailscale/github-action@v2
         with:
           authkey: ${{ secrets.TS_AUTHKEY }}
-          hostname: forjio-brand-visual-ci
+          hostname: locavello-visual-ci
       - name: Route staging host over the tailnet
         run: |
           echo "100.123.65.113 ${{ secrets.STAGING_HOST }}" | sudo tee -a /etc/hosts
@@ -407,7 +407,7 @@ jobs:
         with:
           switches: -avz --delete --exclude node_modules --exclude .git --exclude .env --exclude .npmrc --exclude frontend/.next/cache
           path: ./
-          remote_path: /opt/saas/forjio-brand/
+          remote_path: /opt/saas/locavello/
           remote_host: ${{ secrets.PRODUCTION_HOST }}
           remote_user: root
           remote_key: ${{ secrets.SSH_PRIVATE_KEY }}
@@ -419,15 +419,15 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           command_timeout: 30m
           script: |
-            cd /opt/saas/forjio-brand/backend
+            cd /opt/saas/locavello/backend
             npm ci --omit=dev
             npx prisma generate
             npx prisma migrate deploy
-            pm2 restart forjio-brand || pm2 start dist/index.js --name forjio-brand -i 1
-            cd /opt/saas/forjio-brand/frontend
+            pm2 restart locavello || pm2 start dist/index.js --name locavello -i 1
+            cd /opt/saas/locavello/frontend
             # Dynamic Next app — `.next/` pre-built in the artifact.
             npm ci --omit=dev
-            pm2 restart forjio-brand-frontend || pm2 start npm --name forjio-brand-frontend -- start
+            pm2 restart locavello-frontend || pm2 start npm --name locavello-frontend -- start
             pm2 save
 
   release:

@@ -1,7 +1,7 @@
 import { Suspense } from 'react';
 import { AuthForm, fetchSocialProviders } from '@forjio/auth-ui';
 
-const brand = process.env.NEXT_PUBLIC_BRAND_NAME ?? 'Forjio Brand';
+const brand = process.env.NEXT_PUBLIC_BRAND_NAME ?? 'Locavello';
 
 export default async function SignupPage() {
   // Only render social buttons Huudis actually has live (Google). Passing

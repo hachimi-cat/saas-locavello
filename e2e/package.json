@@ -1,12 +1,12 @@
 {
-  "name": "forjio-brand-e2e",
+  "name": "locavello-e2e",
   "version": "0.0.1",
   "private": true,
   "type": "module",
   "scripts": {
     "test": "playwright test",
     "test:headed": "playwright test --headed",
-    "test:staging": "FRONTEND_URL=${FRONTEND_URL:-http://staging-forjio-brand} BACKEND_URL=${BACKEND_URL:-http://staging-forjio-brand/api/v1} playwright test --config=playwright.ci.config.ts",
+    "test:staging": "FRONTEND_URL=${FRONTEND_URL:-http://staging-locavello} BACKEND_URL=${BACKEND_URL:-http://staging-locavello/api/v1} playwright test --config=playwright.ci.config.ts",
     "lint": "tsc --noEmit",
     "type-check": "tsc --noEmit"
   },

@@ -9,17 +9,17 @@ import type { SessionUser } from '@forjio/portal-ui';
  * bounce to /login. With one, resolve the user via the backend's
  * /auth/me and hand it to the portal shell.
  *
- * Cookie name is `forjio-brand_session` (rename.sh rewrites the
- * `forjio-brand` slug).
+ * Cookie name is `locavello_session` (rename.sh rewrites the
+ * `locavello` slug).
  */
 
-const SESSION_COOKIE = 'forjio-brand_session';
+const SESSION_COOKIE = 'locavello_session';
 // Server-side fetches need an ABSOLUTE origin; the CI build sets
 // NEXT_PUBLIC_API_URL to the RELATIVE '/api/v1' (browser-only) and Node
 // fetch throws on relative URLs — which bounced every real login.
 // Strip the suffix and fall back to the co-located backend.
-const API_ORIGIN = (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000').replace(/\/api\/v1\/?$/, '') ||
-  'http://127.0.0.1:4000';
+const API_ORIGIN = (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4270').replace(/\/api\/v1\/?$/, '') ||
+  'http://127.0.0.1:4270';
 
 type Resolved = { user: SessionUser; accountId: string };
 
@@ -73,10 +73,10 @@ export default async function DashboardLayout({
       {children}
       {/* Suppuo helpdesk widget — live chat in the authenticated portal too
           (matches the family; the bubble follows the workspace brand accent).
-          Handle = brand slug; rename.sh rewrites `forjio-brand`. */}
+          Handle = brand slug; rename.sh rewrites `locavello`. */}
       <Script
         src="https://suppuo.com/widget.js"
-        data-suppuo-account="forjio-brand"
+        data-suppuo-account="locavello"
         strategy="afterInteractive"
       />
     </DashboardShell>

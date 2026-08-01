@@ -11,7 +11,7 @@ import { authConfig } from '../auth-config.js';
  * Accepts EITHER of two credentials, so a single set of routes serves
  * both the in-product admin portal and any first-party automation:
  *
- *   1. An `admin`-role BFF session cookie (`forjio-brand_admin_session`).
+ *   1. An `admin`-role BFF session cookie (`locavello_admin_session`).
  *      This is the in-product admin portal — the frontend admin data
  *      proxy at `/api/v1/console/*` forwards the cookie + the role
  *      header (`X-Forjio-Brand-Role: admin`), which the shared
@@ -21,7 +21,7 @@ import { authConfig } from '../auth-config.js';
  *      present `admin` session is by definition an authorised admin.
  *
  *   2. The `X-Forjio-Admin-Secret` header matching the env var
- *      `FORJIO_BRAND_ADMIN_SECRET`. This is the server-to-server path:
+ *      `LOCAVELLO_ADMIN_SECRET`. This is the server-to-server path:
  *      first-party tooling (the Forjio platform, a cron, an ops
  *      script) that has no browser session calls these endpoints with
  *      the shared secret.
@@ -29,19 +29,19 @@ import { authConfig } from '../auth-config.js';
  * On success it stamps `req.auth` (so handlers can read a reviewerId)
  * and continues; otherwise 401.
  *
- * FORKERS: `scripts/rename.sh` rewrites the `forjio-brand` slug and the
- * `FORJIO_BRAND` env-var prefix. The admin portal ships as a shell —
+ * FORKERS: `scripts/rename.sh` rewrites the `locavello` slug and the
+ * `LOCAVELLO` env-var prefix. The admin portal ships as a shell —
  * mount your product's admin routers behind this guard under
  * `/api/v1/admin` in `routes/index.ts`.
  */
 
 const issuer = process.env.HUUDIS_ISSUER ?? 'https://huudis.com';
 const audience =
-  process.env.HUUDIS_AUDIENCE ?? process.env.FORJIO_SERVICE ?? 'forjio-brand';
+  process.env.HUUDIS_AUDIENCE ?? process.env.FORJIO_SERVICE ?? 'locavello';
 
 /** Constant-time compare of the inbound admin secret header. */
 function secretMatches(req: Request): boolean {
-  const expected = process.env.FORJIO_BRAND_ADMIN_SECRET;
+  const expected = process.env.LOCAVELLO_ADMIN_SECRET;
   const got = req.headers['x-forjio-admin-secret'];
   if (!expected || typeof got !== 'string' || !got) return false;
   const a = Buffer.from(expected);

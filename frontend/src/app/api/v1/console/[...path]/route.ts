@@ -22,16 +22,16 @@ import { NextRequest } from 'next/server';
  *   /api/v1/console/auth/logout  → /api/v1/auth/logout  (clear cookie)
  *   /api/v1/console/<anything>   → /api/v1/admin/<anything>
  *
- * FORKERS: `scripts/rename.sh` rewrites the `forjio-brand` slug and
- * `:4000`.
+ * FORKERS: `scripts/rename.sh` rewrites the `locavello` slug and
+ * `:4270`.
  */
 
 // Server-side fetches need an ABSOLUTE origin; the CI build sets
 // NEXT_PUBLIC_API_URL to the RELATIVE '/api/v1' (browser-only).
 // Strip the suffix and fall back to the co-located backend.
-const BACKEND = (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000').replace(/\/api\/v1\/?$/, '') ||
-  'http://127.0.0.1:4000';
-const ROLE_HEADER = 'x-forjio-brand-role';
+const BACKEND = (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4270').replace(/\/api\/v1\/?$/, '') ||
+  'http://127.0.0.1:4270';
+const ROLE_HEADER = 'x-locavello-role';
 
 /** Map a `/console/*` browser path to the backend path. `auth/*` is a
  *  passthrough (the shared auth router lives at `/api/v1/auth`);

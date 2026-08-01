@@ -8,7 +8,7 @@ import { Hexagon } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'About',
-  description: 'Forjio Brand is built by Forjio — replace this with your real about copy.',
+  description: 'Locavello is built by Forjio — replace this with your real about copy.',
 };
 
 export default function AboutPage() {
@@ -17,12 +17,12 @@ export default function AboutPage() {
       <div className="mx-auto max-w-3xl">
         <div className="flex items-center gap-3">
           <Hexagon className="h-8 w-8 text-primary" />
-          <h1 className="text-4xl font-bold tracking-tight">About Forjio Brand</h1>
+          <h1 className="text-4xl font-bold tracking-tight">About Locavello</h1>
         </div>
 
         <div className="mt-10 space-y-6 text-muted-foreground">
           <p className="text-lg">
-            One sentence on the problem Forjio Brand exists to solve.
+            One sentence on the problem Locavello exists to solve.
           </p>
 
           <p>
@@ -31,7 +31,7 @@ export default function AboutPage() {
           </p>
 
           <p>
-            A paragraph on what Forjio Brand is, in plain terms — the core capability, who
+            A paragraph on what Locavello is, in plain terms — the core capability, who
             it&apos;s for, and the one thing it does better than the alternatives.
           </p>
 
@@ -59,7 +59,7 @@ export default function AboutPage() {
           <h2 className="pt-4 text-2xl font-bold text-foreground">Built by Forjio</h2>
 
           <p>
-            Forjio Brand is built and maintained by the Forjio team — a family of products
+            Locavello is built and maintained by the Forjio team — a family of products
             that share one identity layer (Huudis) and one billing spine (Plugipay). Sign
             up once, work across all of them.
           </p>

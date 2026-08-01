@@ -10,9 +10,9 @@ import { ForgotPasswordForm } from '@forjio/auth-ui';
  * The flow is role-agnostic — Huudis owns the identity — so no
  * `endpoints` override is needed.
  *
- * rename.sh rewrites the "Forjio Brand" display name.
+ * rename.sh rewrites the "Locavello" display name.
  */
-const brand = process.env.NEXT_PUBLIC_BRAND_NAME ?? 'Forjio Brand';
+const brand = process.env.NEXT_PUBLIC_BRAND_NAME ?? 'Locavello';
 
 export default function AdminForgotPasswordPage() {
   return (

@@ -7,7 +7,7 @@ export default defineConfig({
     include: ['src/**/*.test.ts'],
     env: {
       NODE_ENV: 'test',
-      FORJIO_SERVICE: 'forjio-brand',
+      FORJIO_SERVICE: 'locavello',
     },
   },
 });

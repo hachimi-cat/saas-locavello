@@ -5,7 +5,7 @@ import path from 'node:path';
 /**
  * On-disk session store for the CLI. Ported from saas-huudis.
  *
- * Lives at `~/.FORJIO_BRAND/session.json` with 0600 perms. Holds the
+ * Lives at `~/.LOCAVELLO/session.json` with 0600 perms. Holds the
  * tokens from `auth login` so subsequent commands don't re-prompt.
  *
  * The actual wiring into `auth login/whoami/logout` lands once Huudis
@@ -24,7 +24,7 @@ export interface StoredSession {
 }
 
 function brand(): string {
-  return process.env.FORJIO_BRAND ?? 'forjio-brand';
+  return process.env.LOCAVELLO ?? 'locavello';
 }
 
 function sessionPath(): string {

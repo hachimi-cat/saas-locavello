@@ -18,10 +18,10 @@ import { MarketingShell, MarketingNav, MarketingFooter } from '@forjio/website-u
 
 // Suppuo handle = this product's brand slug. Suppuo resolves slug-or-acc on
 // every public surface (widget-config included), so the rename.sh rewrite of
-// `forjio-brand` is all the wiring needed. One-time setup: claim this slug in
+// `locavello` is all the wiring needed. One-time setup: claim this slug in
 // the product's Suppuo workspace (TEMPLATE.md Step 2) so the URLs resolve —
 // until then, drop the workspace's `acc_…` id here instead.
-const SUPPUO_ACCOUNT = 'forjio-brand';
+const SUPPUO_ACCOUNT = 'locavello';
 const SUPPUO_SUPPORT_URL = `https://suppuo.com/support/${SUPPUO_ACCOUNT}`;
 
 // Mirrors @forjio/website-ui DEFAULT_COLUMNS, adding ONE family-standard
@@ -54,7 +54,7 @@ const FOOTER_COLUMNS = [
   },
 ];
 
-const brand = process.env.NEXT_PUBLIC_BRAND_NAME ?? 'Forjio Brand';
+const brand = process.env.NEXT_PUBLIC_BRAND_NAME ?? 'Locavello';
 
 export default function MarketingLayout({
   children,

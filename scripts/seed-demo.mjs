@@ -33,7 +33,7 @@ import { argv, exit } from "node:process";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(__dirname, "..");
 
-const API_BASE = process.env.API_BASE ?? "http://localhost:4000";
+const API_BASE = process.env.API_BASE ?? "http://localhost:4270";
 const DRY_RUN = argv.includes("--dry-run");
 
 // ─── The canonical Indonesian-merchant set ───────────────────────────

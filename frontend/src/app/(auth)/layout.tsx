@@ -6,7 +6,7 @@ import { MarketingNav, MarketingFooter } from '@forjio/website-ui';
  * wrapping the login / signup / password-reset pages. Mirrors every
  * shipped Forjio product.
  */
-const brand = process.env.NEXT_PUBLIC_BRAND_NAME ?? 'Forjio Brand';
+const brand = process.env.NEXT_PUBLIC_BRAND_NAME ?? 'Locavello';
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (

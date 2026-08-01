@@ -23,8 +23,8 @@ a multi-PR exercise.
 
 | Variable        | Example                            | Used by                                              |
 |-----------------|------------------------------------|------------------------------------------------------|
-| `FORJIO_BRAND`  | `kalium`                           | Repo slug, npm scope, Go module, env var prefix      |
-| `Forjio Brand`  | `Kalium`                           | UI text, README headline, GitHub description         |
+| `LOCAVELLO`  | `kalium`                           | Repo slug, npm scope, Go module, env var prefix      |
+| `Locavello`  | `Kalium`                           | UI text, README headline, GitHub description         |
 | `<one-liner>`   | "Bulk-import CSV → Storlaunch."    | Marketing tagline, GitHub description, README intro  |
 | `<accent-hex>`  | `#7C3AED`                          | Brand color across MarketingShell + PortalShell      |
 | `<backend-port>`| `4180`                             | Dev port + nginx upstream + CI `BACKEND_PORT`        |
@@ -44,19 +44,19 @@ silently refuses it and login loops.
 
 ```bash
 # From agent-box (repos live under /root/code)
-gh repo create hachimi-cat/saas-$FORJIO_BRAND \
+gh repo create hachimi-cat/saas-$LOCAVELLO \
   --template hachimi-cat/forjio-service-template \
   --public \
   --description "<one-liner>" \
   --clone
 
-cd saas-$FORJIO_BRAND
+cd saas-$LOCAVELLO
 ./scripts/rename.sh kalium "Kalium" "#7C3AED" 4180 3180
 git add -A && git commit -m "chore: scaffold from template"
 git push origin master
 ```
 
-`scripts/rename.sh` (✓ shipped 2026-05-19) replaces `FORJIO_BRAND` / `Forjio
+`scripts/rename.sh` (✓ shipped 2026-05-19) replaces `LOCAVELLO` / `Forjio
 Brand` / port placeholders / brand colors across the entire tree
 (backend, frontend, cli, e2e, sdk, scripts, CI workflows, README,
 CLAUDE.md). One source of truth — change here, everything else picks
@@ -582,7 +582,7 @@ planned/pending. Provenance table:
 Sprint landed on 2026-05-19, single autonomous session:
 
 - ✓ CI/CD re-ported from saas-linksnap (build-once + visual-regression
-  opt-in, FORJIO_BRAND placeholder)
+  opt-in, LOCAVELLO placeholder)
 - ✓ `scripts/rename.sh` — idempotent brand placeholder + port + accent
   replacer (validates on bad inputs, prints per-file ✓ summary)
 - ✓ `scripts/bootstrap.mjs` — Huudis OIDC client registration (real

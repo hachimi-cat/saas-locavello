@@ -3,9 +3,9 @@ import { startOutboxWorker } from './services/outbox-worker.js';
 
 const app = createApp();
 
-const port = Number(process.env.PORT ?? 4000);
+const port = Number(process.env.PORT ?? 4270);
 app.listen(port, () => {
-  console.log(`[api] ${process.env.FORJIO_SERVICE ?? 'forjio-brand'} listening on ${port}`);
+  console.log(`[api] ${process.env.FORJIO_SERVICE ?? 'locavello'} listening on ${port}`);
 });
 
 // Outbox worker runs alongside the API process. For production, prefer a

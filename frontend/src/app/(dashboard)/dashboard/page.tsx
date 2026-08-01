@@ -3,7 +3,7 @@
  * layout (`(dashboard)/layout.tsx`) — this page is just the content.
  * FORKERS: replace the empty state with your product's overview.
  */
-const brand = process.env.NEXT_PUBLIC_BRAND_NAME ?? 'Forjio Brand';
+const brand = process.env.NEXT_PUBLIC_BRAND_NAME ?? 'Locavello';
 
 export default function DashboardPage() {
   return (

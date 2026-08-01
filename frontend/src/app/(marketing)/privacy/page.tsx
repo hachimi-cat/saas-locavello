@@ -9,7 +9,7 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Privacy Policy',
-  description: 'Forjio Brand Privacy Policy. How we handle your data.',
+  description: 'Locavello Privacy Policy. How we handle your data.',
 };
 
 export default function PrivacyPage() {
@@ -24,7 +24,7 @@ export default function PrivacyPage() {
           <p className="mt-3">
             When you create an account we collect your name, email address, and hashed
             password (identity is managed by Huudis). Describe here any additional usage
-            telemetry Forjio Brand records, and whether it is stored permanently.
+            telemetry Locavello records, and whether it is stored permanently.
           </p>
         </section>
 
@@ -90,7 +90,7 @@ export default function PrivacyPage() {
 
         <section>
           <h2 className="text-lg font-semibold text-foreground">9. Data Controller &amp; Contact</h2>
-          <p className="mt-3">The data controller for Forjio Brand is:</p>
+          <p className="mt-3">The data controller for Locavello is:</p>
           <p className="mt-3">
             <strong>PT Forjio Teknologi Indonesia</strong>
             <br />

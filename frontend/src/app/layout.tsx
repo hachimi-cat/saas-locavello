@@ -5,7 +5,7 @@ import { gellix } from '@forjio/website-ui/fonts';
 import '@forjio/website-ui/styles/marketing.css';
 import './globals.css';
 
-const brand = process.env.NEXT_PUBLIC_BRAND_NAME ?? 'Forjio Brand';
+const brand = process.env.NEXT_PUBLIC_BRAND_NAME ?? 'Locavello';
 
 // Geist Sans / Mono — the Forjio family body + mono faces. They expose
 // `.variable` (--font-geist-sans / --font-geist-mono); globals.css binds

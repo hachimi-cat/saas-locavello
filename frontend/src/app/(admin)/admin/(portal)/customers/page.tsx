@@ -10,13 +10,13 @@
  * forked product ships) so it renders correctly regardless of which
  * Tailwind utilities a product has configured.
  *
- * rename.sh rewrites the "Forjio Brand" display name.
+ * rename.sh rewrites the "Locavello" display name.
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { adminFetch, fmtDate, fmtRelative } from '@/components/admin/ui';
 
-const brand = process.env.NEXT_PUBLIC_BRAND_NAME ?? 'Forjio Brand';
+const brand = process.env.NEXT_PUBLIC_BRAND_NAME ?? 'Locavello';
 
 interface Customer {
   id: string;

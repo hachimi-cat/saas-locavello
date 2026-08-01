@@ -26,9 +26,9 @@ import { AuthForm, fetchSocialProviders } from '@forjio/auth-ui';
  * workspace is rejected at session-mint time, so a non-admin who
  * signs in here never gets an admin cookie.
  *
- * rename.sh rewrites the "Forjio Brand" display name.
+ * rename.sh rewrites the "Locavello" display name.
  */
-const brand = process.env.NEXT_PUBLIC_BRAND_NAME ?? 'Forjio Brand';
+const brand = process.env.NEXT_PUBLIC_BRAND_NAME ?? 'Locavello';
 
 export default async function AdminLoginPage() {
   const providers = await fetchSocialProviders(

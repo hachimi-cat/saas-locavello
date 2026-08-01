@@ -3,14 +3,14 @@ import Link from 'next/link';
 import { Boxes, Layers, Activity, ShieldCheck, Zap, Code2, ArrowRight } from 'lucide-react';
 
 /*
- * FORKERS: replace the placeholder feature copy with what Forjio Brand
+ * FORKERS: replace the placeholder feature copy with what Locavello
  * actually ships. Keep the structure (centered hero → 2-col grid →
  * CTA) — it's the family standard.
  */
 
 export const metadata: Metadata = {
   title: 'Features',
-  description: 'Everything Forjio Brand ships — replace this with your real feature summary.',
+  description: 'Everything Locavello ships — replace this with your real feature summary.',
 };
 
 const features = [
@@ -52,11 +52,11 @@ const features = [
   {
     Icon: Code2,
     title: 'API + CLI',
-    body: 'REST API with idempotency keys, type-safe SDKs (Node, Python, Go), and a CLI: npm i -g @forjio/forjio-brand-cli.',
+    body: 'REST API with idempotency keys, type-safe SDKs (Node, Python, Go), and a CLI: npm i -g @forjio/locavello-cli.',
     details: [
       'REST + idempotency keys',
       'SDKs for Node, Python, Go',
-      '@forjio/forjio-brand-cli on npm',
+      '@forjio/locavello-cli on npm',
       'Per-workspace API keys with scoped permissions',
     ],
   },
@@ -67,7 +67,7 @@ export default function FeaturesPage() {
     <div className="mx-auto max-w-7xl px-4 py-20 md:px-6">
       <div className="text-center">
         <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
-          Everything you need from Forjio Brand.
+          Everything you need from Locavello.
         </h1>
         <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
           Replace this with a one-paragraph summary of what the product does and which

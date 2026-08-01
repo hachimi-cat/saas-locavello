@@ -4,13 +4,13 @@ title: "API reference"
 
 # API reference
 
-The Forjio Brand REST API. Replace the placeholders below with your
+The Locavello REST API. Replace the placeholders below with your
 product's real endpoints.
 
 ## Base URL
 
 ```
-https://forjio-brand.com/api/v1
+https://locavello.com/api/v1
 ```
 
 ## Authentication

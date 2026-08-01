@@ -2,13 +2,13 @@
 title: "Introduction"
 ---
 
-# Forjio Brand Docs
+# Locavello Docs
 
-Welcome to the Forjio Brand documentation. Replace this page with a
+Welcome to the Locavello documentation. Replace this page with a
 short overview of what the product does and where a new reader should
 go next.
 
-## What Forjio Brand is
+## What Locavello is
 
 One or two paragraphs. State the core capability plainly, name the
 audience, and link to the [getting-started guide](/docs/getting-started).
@@ -21,6 +21,6 @@ audience, and link to the [getting-started guide](/docs/getting-started).
 
 ## The Forjio family
 
-Forjio Brand shares one identity layer (Huudis) and one billing spine
+Locavello shares one identity layer (Huudis) and one billing spine
 (Plugipay) with the rest of the Forjio family. One account works
 everywhere — see the product switcher at the top of these docs.

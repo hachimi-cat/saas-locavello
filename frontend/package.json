@@ -1,11 +1,11 @@
 {
-  "name": "forjio-brand-frontend",
+  "name": "locavello-frontend",
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 3000",
+    "dev": "next dev -p 3270",
     "build": "next build",
-    "start": "next start -p 3000",
+    "start": "next start -p 3270",
     "test": "vitest run --passWithNoTests",
     "test:watch": "vitest --passWithNoTests",
     "lint": "tsc --noEmit",

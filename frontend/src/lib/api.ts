@@ -37,14 +37,14 @@ export class ApiRequestError extends Error {
   }
 }
 
-// NEXT_PUBLIC_API_URL may be a bare origin (dev: http://localhost:4000) OR
+// NEXT_PUBLIC_API_URL may be a bare origin (dev: http://localhost:4270) OR
 // already include the prefix — CI sets it to the RELATIVE '/api/v1'. Strip a
 // trailing /api/v1 so API_PREFIX is added exactly once (else every client
 // call doubles to /api/v1/api/v1/… → 404). Mirrors the server-side
 // API_ORIGIN normalization in the dashboard/admin layouts + console proxy.
 const BASE_URL = (
   (typeof process !== 'undefined' && process.env.NEXT_PUBLIC_API_URL) ||
-  'http://localhost:4000'
+  'http://localhost:4270'
 ).replace(/\/api\/v1\/?$/, '');
 
 const API_PREFIX = '/api/v1';

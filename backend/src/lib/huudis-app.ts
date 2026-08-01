@@ -10,7 +10,7 @@
  */
 
 const HUUDIS_ISSUER = process.env.HUUDIS_ISSUER ?? 'https://huudis.com';
-const CLIENT_ID = process.env.HUUDIS_CLIENT_ID ?? 'forjio-brand';
+const CLIENT_ID = process.env.HUUDIS_CLIENT_ID ?? 'locavello';
 const CLIENT_SECRET = process.env.HUUDIS_CLIENT_SECRET ?? '';
 
 export function huudisAppConfigured(): boolean {

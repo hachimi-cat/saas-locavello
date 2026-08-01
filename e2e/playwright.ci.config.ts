@@ -12,7 +12,7 @@ import { defineConfig, devices } from '@playwright/test';
  * Local dev keeps using the base `playwright.config.ts` with its
  * own webServer. This file is CI-only.
  */
-const FRONTEND_URL = process.env.FRONTEND_URL || 'http://staging-forjio-brand.forjio.com';
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://staging-locavello.forjio.com';
 
 export default defineConfig({
   testDir: './tests',

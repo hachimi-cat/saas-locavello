@@ -1,11 +1,11 @@
 {
-  "name": "@forjio/forjio-brand-cli",
+  "name": "@forjio/locavello-cli",
   "version": "0.0.1",
-  "description": "CLI for Forjio Brand (part of the Forjio commerce suite).",
+  "description": "CLI for Locavello (part of the Forjio commerce suite).",
   "type": "module",
   "main": "dist/index.js",
   "bin": {
-    "forjio-brand": "bin/cli.js"
+    "locavello": "bin/cli.js"
   },
   "scripts": {
     "build": "tsc",

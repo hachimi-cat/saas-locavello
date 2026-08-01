@@ -11,7 +11,7 @@ declare module 'express-serve-static-core' {
 }
 
 const issuer = process.env.HUUDIS_ISSUER ?? 'https://huudis.com';
-const audience = process.env.HUUDIS_AUDIENCE ?? process.env.FORJIO_SERVICE ?? 'forjio-brand';
+const audience = process.env.HUUDIS_AUDIENCE ?? process.env.FORJIO_SERVICE ?? 'locavello';
 
 /** Product-route auth. Two paths:
  *
@@ -45,11 +45,11 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
   const bffSession = resolveSessionForRequest(authConfig, req);
   if (bffSession && bffSession.role !== 'admin') {
     // Workspace switcher override (fulkruma pattern): honor the
-    // `forjio-brand_active_workspace` cookie (set by @forjio/portal-ui's
+    // `locavello_active_workspace` cookie (set by @forjio/portal-ui's
     // switcher, `${brandSlug}_active_workspace`) when it names a
     // workspace the session is actually a member of, else the derived
     // personal id.
-    const override = parseCookie(req.headers.cookie, 'forjio-brand_active_workspace');
+    const override = parseCookie(req.headers.cookie, 'locavello_active_workspace');
     const allowed = new Set([bffSession.accountId, ...(bffSession.accountIds ?? [])]);
     let accountId = override && allowed.has(override) ? override : bffSession.accountId;
     if (override && !allowed.has(override) && bffSession.huudisAccessToken) {
