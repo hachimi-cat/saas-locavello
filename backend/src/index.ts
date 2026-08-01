@@ -1,5 +1,6 @@
 import { createApp } from './app.js';
 import { startOutboxWorker } from './services/outbox-worker.js';
+import { startTranslationWorker } from './services/translation-worker.js';
 
 const app = createApp();
 
@@ -20,4 +21,21 @@ if (outboxEnabled) {
     console.error('[outbox] fatal', e);
     process.exit(1);
   });
+}
+
+// Translation worker — the agent machine-pass consumer. Runs alongside
+// the API like the outbox worker; requires CATENTIO_API_KEY. Off in
+// tests, and off (with a loud log) when the key is absent so a
+// misconfigured box degrades to human-only translation, not a crash.
+const translateEnabled = process.env.TRANSLATION_WORKER_ENABLED
+  ? process.env.TRANSLATION_WORKER_ENABLED !== 'false'
+  : !outboxDefaultOff;
+if (translateEnabled) {
+  if (!process.env.CATENTIO_API_KEY) {
+    console.error('[translate] CATENTIO_API_KEY missing — agent translation disabled');
+  } else {
+    startTranslationWorker().catch((e) => {
+      console.error('[translate] fatal', e);
+    });
+  }
 }

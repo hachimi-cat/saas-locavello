@@ -17,6 +17,7 @@ import releasesRouter from './releases.js';
 import glossaryRouter from './glossary.js';
 import tmRouter from './tm.js';
 import apiKeysRouter from './api-keys.js';
+import translateRouter from './translate.js';
 
 /**
  * Route factory. Ported from saas-plugipay.
@@ -101,6 +102,7 @@ export default function routes(_opts: RoutesOptions = {}): ExpressRouter {
   router.use('/projects', keysRouter);
   router.use('/', translationsRouter); // /keys/:keyId/*, /translations/:id/*, /projects/:id/review-queue
   router.use('/projects', releasesRouter);
+  router.use('/projects', translateRouter); // /:id/translate, /:id/jobs, /jobs/:jobId
   router.use('/glossary', glossaryRouter);
   router.use('/tm', tmRouter);
   router.use('/api-keys', apiKeysRouter);
