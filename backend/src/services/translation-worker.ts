@@ -55,7 +55,10 @@ export async function processJob(jobId: string): Promise<void> {
     data: { status: 'running' },
   });
   try {
-    const stats = await runMachinePass(job.accountId, job.projectId!, job.locale!, job.id);
+    const stats =
+      job.kind === 'crawl'
+        ? await runCrawl(job.projectId!)
+        : await runMachinePass(job.accountId, job.projectId!, job.locale!, job.id);
     await prisma.translationJob.update({
       where: { id: job.id },
       data: { status: 'done', stats },
@@ -67,6 +70,103 @@ export async function processJob(jobId: string): Promise<void> {
       data: { status: 'failed', error: e instanceof Error ? e.message : String(e) },
     });
   }
+}
+
+const CRAWL_PAGE_CAP = Number(process.env.CRAWL_PAGE_CAP ?? 50);
+
+/**
+ * Mode B crawl: discover same-origin pages from the project's siteUrl,
+ * extract visible strings per page, and upsert them as Keys in the
+ * 'site' namespace (source-text-as-key — the crawler is just another
+ * extractor). Never prunes: a page temporarily failing to fetch must
+ * not archive its strings.
+ */
+export async function runCrawl(projectId: string): Promise<Record<string, number>> {
+  const { safeFetchHtml } = await import('../lib/safe-fetch.js');
+  const { extractStringsFromHtml, extractLinks } = await import('../lib/extract-html.js');
+
+  const project = await prisma.project.findUnique({ where: { id: projectId } });
+  if (!project?.siteUrl) throw new Error('project has no siteUrl');
+
+  let ns = await prisma.namespace.findUnique({
+    where: { projectId_name: { projectId, name: 'site' } },
+  });
+  if (!ns) {
+    ns = await prisma.namespace.create({
+      data: { id: newId('ns'), projectId, name: 'site' },
+    });
+  }
+
+  const stats = { pages: 0, errors: 0, strings: 0, newKeys: 0 };
+  const queue: string[] = ['/'];
+  const visited = new Set<string>();
+  const base = new URL(project.siteUrl);
+
+  while (queue.length > 0 && stats.pages < CRAWL_PAGE_CAP) {
+    const path = queue.shift()!;
+    if (visited.has(path)) continue;
+    visited.add(path);
+    const pageUrl = new URL(path, base).toString();
+    const page = await prisma.sitePage.upsert({
+      where: { projectId_path: { projectId, path } },
+      create: { id: newId('pg'), projectId, path },
+      update: {},
+    });
+    try {
+      const { html } = await safeFetchHtml(pageUrl);
+      const strings = extractStringsFromHtml(html);
+      for (const link of extractLinks(html, pageUrl)) {
+        if (!visited.has(link) && queue.length + visited.size < CRAWL_PAGE_CAP * 2) queue.push(link);
+      }
+      let newKeys = 0;
+      for (const s of strings) {
+        const existing = await prisma.key.findUnique({
+          where: {
+            projectId_namespaceId_name: { projectId, namespaceId: ns.id, name: s.text },
+          },
+        });
+        if (existing) {
+          const ctx = (existing.context ?? {}) as { pages?: string[] };
+          const pages = new Set(ctx.pages ?? []);
+          if (!pages.has(path)) {
+            pages.add(path);
+            await prisma.key.update({
+              where: { id: existing.id },
+              data: { context: { ...ctx, pages: [...pages] }, archived: false },
+            });
+          }
+        } else {
+          await prisma.key.create({
+            data: {
+              id: newId('key'),
+              projectId,
+              namespaceId: ns.id,
+              name: s.text,
+              sourceText: s.text,
+              description: `on-page element: <${s.tag}>`,
+              placeholders: [],
+              context: { pages: [path] },
+            },
+          });
+          newKeys += 1;
+        }
+      }
+      stats.pages += 1;
+      stats.strings += strings.length;
+      stats.newKeys += newKeys;
+      await prisma.sitePage.update({
+        where: { id: page.id },
+        data: { status: 'crawled', keyCount: strings.length, lastCrawledAt: new Date(), lastError: null },
+      });
+    } catch (e) {
+      stats.errors += 1;
+      await prisma.sitePage.update({
+        where: { id: page.id },
+        data: { status: 'error', lastError: e instanceof Error ? e.message : String(e) },
+      });
+    }
+  }
+  return stats;
 }
 
 export async function runMachinePass(

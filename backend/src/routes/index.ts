@@ -18,6 +18,8 @@ import glossaryRouter from './glossary.js';
 import tmRouter from './tm.js';
 import apiKeysRouter from './api-keys.js';
 import translateRouter from './translate.js';
+import publicRouter from './public.js';
+import { rateLimit } from '../middleware/rate-limit.js';
 
 /**
  * Route factory. Ported from saas-plugipay.
@@ -87,6 +89,12 @@ export default function routes(_opts: RoutesOptions = {}): ExpressRouter {
   router.use('/admin/metrics', adminGuard, adminMetricsRouter);
   router.use('/admin/system-health', adminGuard, adminSystemHealthRouter);
   router.use('/admin/feature-flags', adminGuard, adminFeatureFlagsRouter);
+
+  // ── Mode B public surface (NO auth — capped + rate-limited) ──────
+  // /public/preview costs real agent words per call; ingress-class
+  // rate limiting is the wallet guard. The catalog endpoint is the
+  // fail-open serving path for locavello.js.
+  router.use('/public', rateLimit('ingress'), publicRouter);
 
   // ── Locavello engine ──────────────────────────────────────────────
   // Everything is behind requireAuthOrApiKey: the portal uses the BFF

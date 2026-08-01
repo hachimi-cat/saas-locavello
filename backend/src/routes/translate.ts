@@ -70,6 +70,48 @@ router.post(
   }),
 );
 
+/**
+ * POST /projects/:id/crawl — queue a Mode B crawl of the project's
+ * siteUrl. Strings land in the 'site' namespace; pages in SitePage.
+ */
+router.post(
+  '/:id/crawl',
+  h(async (req, res) => {
+    const project = await ownedProject(req, pathParam(req, 'id'));
+    if (project.mode !== 'proxy' || !project.siteUrl) {
+      throw new ApiError(422, 'VALIDATION_ERROR', 'crawl needs a proxy-mode project with a siteUrl');
+    }
+    const existing = await prisma.translationJob.findFirst({
+      where: { projectId: project.id, kind: 'crawl', status: { in: ['queued', 'running'] } },
+    });
+    if (existing) return sendOk(res, req, { ...existing, alreadyQueued: true });
+    const job = await prisma.translationJob.create({
+      data: {
+        id: newId('tj'),
+        accountId: accountId(req),
+        projectId: project.id,
+        kind: 'crawl',
+        status: 'queued',
+        requestedBy: req.auth?.sub ?? null,
+      },
+    });
+    return sendCreated(res, req, job);
+  }),
+);
+
+router.get(
+  '/:id/pages',
+  h(async (req, res) => {
+    const project = await ownedProject(req, pathParam(req, 'id'));
+    const rows = await prisma.sitePage.findMany({
+      where: { projectId: project.id },
+      orderBy: { path: 'asc' },
+      take: 500,
+    });
+    return sendList(res, req, rows, null, false);
+  }),
+);
+
 router.get(
   '/:id/jobs',
   h(async (req, res) => {
