@@ -89,3 +89,265 @@ model FeatureFlagAudit {
   @@index([key, at])
   @@map("feature_flag_audits")
 }
+
+// ─── Locavello domain ────────────────────────────────────────────────
+//
+// The i18n engine. One rule shapes everything here: code owns which keys
+// exist + source text + context (flows UP via extract/push); the portal
+// owns every non-source translation + releases (flows DOWN via pull).
+// Releases are immutable content-hashed snapshots so builds are
+// reproducible and any bad copy change reverts to an exact prior state.
+
+/// A localization project — one per product (Mode A / SDK) or per site
+/// (Mode B / proxy). Owned by a Huudis workspace. Keys are counted per
+/// project for billing — never per locale-copy (that double-dips).
+model Project {
+  id           String   @id // prj_<ulid>
+  accountId    String
+  slug         String
+  name         String
+  sourceLocale String   @default("en")
+  /// 'sdk' = Mode A (catalogs committed, zero runtime dependency).
+  /// 'proxy' = Mode B (crawler + served translations; the customer
+  /// knowingly trades a runtime dependency for five-minute setup —
+  /// serving MUST fail open to the source language).
+  mode         String   @default("sdk")
+  siteUrl      String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  locales    ProjectLocale[]
+  namespaces Namespace[]
+  keys       Key[]
+  releases   Release[]
+  pages      SitePage[]
+
+  @@unique([accountId, slug])
+  @@index([accountId])
+  @@map("projects")
+}
+
+/// An enabled target locale. BCP-47 tag + explicit fallback chain link
+/// (pt-BR → pt → source). Falls back to the source locale, never to a
+/// blank string.
+model ProjectLocale {
+  id        String  @id // loc_<ulid>
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id])
+  tag       String
+  /// Next tag in the fallback chain; null falls through to the
+  /// project's sourceLocale.
+  fallback  String?
+  rtl       Boolean @default(false)
+  enabled   Boolean @default(true)
+
+  @@unique([projectId, tag])
+  @@map("project_locales")
+}
+
+/// Namespaces are the unit of lazy-loading AND of review policy.
+/// reviewPolicy 'gated' (legal, pricing) = no auto-publish, a human
+/// approves every translation, always.
+model Namespace {
+  id           String  @id // ns_<ulid>
+  projectId    String
+  project      Project @relation(fields: [projectId], references: [id])
+  name         String
+  reviewPolicy String  @default("standard") // 'standard' | 'gated'
+
+  keys Key[]
+
+  @@unique([projectId, name])
+  @@map("namespaces")
+}
+
+/// A translatable key. `name` is either a dotted path (new code) or the
+/// source text itself (retrofit mode — key === source renders
+/// byte-identically with zero translations). The context columns are
+/// the whole reason a portal beats a folder of JSON files: they are
+/// what a human translator needs in the workbench and exactly what the
+/// agent needs in its prompt.
+model Key {
+  id            String   @id // key_<ulid>
+  projectId     String
+  project       Project  @relation(fields: [projectId], references: [id])
+  namespaceId   String
+  namespace     Namespace @relation(fields: [namespaceId], references: [id])
+  name          String
+  sourceText    String
+  description   String?
+  screenshotUrl String?
+  /// Max display length for the slot (de/fi run ~30% longer than en).
+  maxLength     Int?
+  /// Declared ICU placeholder names — translations that drop or rename
+  /// one are mechanically rejected (the #1 cause of runtime crashes).
+  placeholders  Json     @default("[]")
+  /// Usage sites [{file, line}] + sibling hints from `extract`.
+  context       Json     @default("{}")
+  /// Stale — no longer seen by `extract`; kept for history, excluded
+  /// from releases and billing counts.
+  archived      Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  translations Translation[]
+
+  @@unique([projectId, namespaceId, name])
+  @@index([projectId, archived])
+  @@map("keys")
+}
+
+/// One (key, locale) translation. ICU MessageFormat, never bare
+/// interpolation. status walks missing → machine → needs_review →
+/// approved; only approved values enter a release for gated
+/// namespaces, machine+ for standard ones.
+model Translation {
+  id         String   @id // tr_<ulid>
+  keyId      String
+  key        Key      @relation(fields: [keyId], references: [id])
+  locale     String
+  value      String
+  status     String   @default("machine") // 'machine' | 'needs_review' | 'approved' | 'rejected'
+  /// Huudis sub, or 'agent:<model>' for machine passes.
+  author     String?
+  reviewedBy String?
+  /// Why a reviewer rejected it — training signal for the agent.
+  rejectedReason String?
+  wordCount  Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([keyId, locale])
+  @@index([locale, status])
+  @@map("translations")
+}
+
+/// Immutable published snapshot of (project, locale), identified by
+/// content hash. `catalog` is the frozen key→value map `pull` writes
+/// into the repo. Never updated, never deleted — rollback is "point at
+/// an earlier release", not a mutation.
+model Release {
+  id          String   @id // rel_<ulid>
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id])
+  locale      String
+  contentHash String
+  catalog     Json
+  keyCount    Int
+  createdBy   String?
+  createdAt   DateTime @default(now())
+
+  @@unique([projectId, locale, contentHash])
+  @@index([projectId, locale, createdAt])
+  @@map("releases")
+}
+
+/// Do-not-translate terms (translation null) and forced translations
+/// (locale + translation set) — enforced by `locavello check`, not just
+/// advisory. Account-wide when projectId is null.
+model GlossaryTerm {
+  id          String  @id // gls_<ulid>
+  accountId   String
+  projectId   String?
+  term        String
+  locale      String?
+  translation String?
+  note        String?
+
+  @@unique([accountId, projectId, term, locale])
+  @@index([accountId])
+  @@map("glossary_terms")
+}
+
+/// Cross-project translation memory — the compounding asset and the
+/// actual reason this beats 13 separate JSON files. Scoped to the
+/// account; exact match via sourceHash (sha256 of normalized source).
+model TmEntry {
+  id           String   @id // tm_<ulid>
+  accountId    String
+  projectId    String?
+  sourceLocale String
+  targetLocale String
+  sourceText   String
+  sourceHash   String
+  targetText   String
+  quality      String   @default("approved") // 'approved' | 'machine'
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([accountId, sourceHash, targetLocale])
+  @@index([accountId, sourceLocale, targetLocale])
+  @@map("tm_entries")
+}
+
+/// Mode B: a page discovered on a proxied site. The crawler is just
+/// another extractor — its strings land in Key/Translation like any
+/// SDK push.
+model SitePage {
+  id            String    @id // pg_<ulid>
+  projectId     String
+  project       Project   @relation(fields: [projectId], references: [id])
+  path          String
+  status        String    @default("discovered") // 'discovered' | 'crawled' | 'error'
+  keyCount      Int       @default(0)
+  lastCrawledAt DateTime?
+  lastError     String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@unique([projectId, path])
+  @@map("site_pages")
+}
+
+/// An agent-translation run (machine pass, Mode B preview, or crawl).
+/// Word costs are estimated BEFORE the run and metered after.
+model TranslationJob {
+  id          String   @id // tj_<ulid>
+  accountId   String
+  projectId   String?
+  locale      String?
+  kind        String   // 'machine_pass' | 'preview' | 'crawl'
+  status      String   @default("queued") // 'queued' | 'running' | 'done' | 'failed'
+  stats       Json     @default("{}")
+  error       String?
+  requestedBy String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([accountId, status, createdAt])
+  @@map("translation_jobs")
+}
+
+/// Developer API key (`lv_live_…`, sha256-hashed at rest). The CLI and
+/// SDKs authenticate pull/push/extract with these.
+model ApiKey {
+  id         String    @id // ak_<ulid>
+  accountId  String
+  name       String
+  keyHash    String    @unique
+  /// First characters of the plaintext, for display ("lv_live_ab…").
+  prefix     String
+  lastUsedAt DateTime?
+  revokedAt  DateTime?
+  createdBy  String?
+  createdAt  DateTime  @default(now())
+
+  @@index([accountId])
+  @@map("api_keys")
+}
+
+/// Metered agent-translation usage — the billing input. `trial` rows
+/// draw down the Free tier's one-off 1,000-word allowance; `metered`
+/// rows bill from the catentio credit wallet.
+model AgentUsage {
+  id        String   @id // au_<ulid>
+  accountId String
+  projectId String?
+  jobId     String?
+  words     Int
+  kind      String   // 'trial' | 'included' | 'metered'
+  createdAt DateTime @default(now())
+
+  @@index([accountId, createdAt])
+  @@map("agent_usage")
+}

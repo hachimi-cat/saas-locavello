@@ -122,3 +122,13 @@ export function forbidden(message = 'insufficient scope'): ApiError {
 export function unauthorized(message = 'authentication required'): ApiError {
   return new ApiError(401, 'AUTH_REQUIRED', message);
 }
+
+/**
+ * Narrow an express path param to a string (@types/express v5 types
+ * params as string | string[]; route params are never arrays here).
+ */
+export function pathParam(req: Request, name: string): string {
+  const v = req.params[name];
+  if (typeof v === 'string') return v;
+  throw new ApiError(400, 'VALIDATION_ERROR', `missing path param ${name}`, name);
+}

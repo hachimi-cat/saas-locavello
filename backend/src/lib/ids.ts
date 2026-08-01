@@ -11,7 +11,19 @@ export type IdPrefix =
   | 'evt' // outbox event
   | 'req' // request id (prefer the request-id middleware)
   | 'ffa' // feature-flag audit row (admin-portal standard)
-  | 'idem'; // idempotency fallback
+  | 'idem' // idempotency fallback
+  | 'prj' // localization project
+  | 'loc' // project locale
+  | 'ns' // namespace
+  | 'key' // translatable key
+  | 'tr' // translation
+  | 'rel' // release (immutable catalog snapshot)
+  | 'gls' // glossary term
+  | 'tm' // translation-memory entry
+  | 'pg' // Mode B site page
+  | 'tj' // translation job (agent run)
+  | 'ak' // developer API key
+  | 'au'; // agent-usage metering row
 
 export function newId(prefix: IdPrefix): string {
   return `${prefix}_${ulid().toLowerCase()}`;

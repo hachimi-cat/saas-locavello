@@ -9,6 +9,14 @@ import adminCustomersRouter from './admin-customers.js';
 import adminMetricsRouter from './admin-metrics.js';
 import adminSystemHealthRouter from './admin-system-health.js';
 import adminFeatureFlagsRouter from './admin-feature-flags.js';
+import { requireAuthOrApiKey } from '../middleware/api-key.js';
+import projectsRouter from './projects.js';
+import keysRouter from './keys.js';
+import translationsRouter from './translations.js';
+import releasesRouter from './releases.js';
+import glossaryRouter from './glossary.js';
+import tmRouter from './tm.js';
+import apiKeysRouter from './api-keys.js';
 
 /**
  * Route factory. Ported from saas-plugipay.
@@ -79,18 +87,23 @@ export default function routes(_opts: RoutesOptions = {}): ExpressRouter {
   router.use('/admin/system-health', adminGuard, adminSystemHealthRouter);
   router.use('/admin/feature-flags', adminGuard, adminFeatureFlagsRouter);
 
-  // Products mount their own routers here, e.g.:
-  //   router.use('/widgets', widgetsRouter);
-  //
-  // Admin surfaces — mount product admin routers under `/admin`,
-  // behind `adminGuard` (middleware/admin-guard.ts). The built-in
-  // admin portal proxies to them via `/api/v1/console/*`:
-  //   import { adminGuard } from '../middleware/admin-guard.js';
-  //   router.use('/admin/widgets', adminGuard, adminWidgetsRouter);
-  //
-  // if (opts.enableTestOnlyRoutes) {
-  //   router.use('/test-only', testOnlyRouter);
-  // }
+  // ── Locavello engine ──────────────────────────────────────────────
+  // Everything is behind requireAuthOrApiKey: the portal uses the BFF
+  // session cookie, the CLI/SDK use `Bearer lv_live_…` keys. Auth is
+  // scoped to the engine prefixes ONCE (not per-router) so it never
+  // shadows the /api/v1 404 fallthrough and never runs twice for the
+  // routers that share the /projects prefix.
+  router.use(
+    ['/projects', '/keys', '/translations', '/glossary', '/tm', '/api-keys'],
+    requireAuthOrApiKey,
+  );
+  router.use('/projects', projectsRouter);
+  router.use('/projects', keysRouter);
+  router.use('/', translationsRouter); // /keys/:keyId/*, /translations/:id/*, /projects/:id/review-queue
+  router.use('/projects', releasesRouter);
+  router.use('/glossary', glossaryRouter);
+  router.use('/tm', tmRouter);
+  router.use('/api-keys', apiKeysRouter);
 
   return router;
 }
