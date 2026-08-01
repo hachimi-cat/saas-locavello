@@ -6,6 +6,7 @@ import { ApiError, pathParam, conflict, notFound, sendCreated, sendList, sendOk 
 import { newId } from '../lib/ids.js';
 import { encodeCursor, parsePagination } from '../lib/cursor.js';
 import { writeOutbox } from '../lib/outbox.js';
+import { recordAudit, actorOf } from '../lib/audit.js';
 import type { Request } from 'express';
 
 const router = Router();
@@ -71,6 +72,14 @@ router.post(
         data: { projectId: created.id, slug: created.slug, mode: created.mode },
       });
       return created;
+    });
+    await recordAudit(prisma, {
+      accountId: accountId(req),
+      actor: actorOf(req),
+      action: 'project.created',
+      target: { type: 'project', id: project.id },
+      summary: `Created project "${project.name}" (${project.slug}, ${project.mode} mode)`,
+      metadata: { slug: project.slug, mode: project.mode },
     });
     return sendCreated(res, req, project);
   }),
@@ -161,6 +170,14 @@ router.patch(
     const project = await ownedProject(req, pathParam(req, 'id'));
     const body = patchProjectSchema.parse(req.body ?? {});
     const updated = await prisma.project.update({ where: { id: project.id }, data: body });
+    await recordAudit(prisma, {
+      accountId: accountId(req),
+      actor: actorOf(req),
+      action: 'project.updated',
+      target: { type: 'project', id: project.id },
+      summary: `Updated project "${updated.name}" settings`,
+      metadata: { changed: Object.keys(body) },
+    });
     return sendOk(res, req, updated);
   }),
 );
@@ -194,6 +211,14 @@ router.post(
         rtl: body.rtl,
       },
     });
+    await recordAudit(prisma, {
+      accountId: accountId(req),
+      actor: actorOf(req),
+      action: 'locale.added',
+      target: { type: 'locale', id: locale.id },
+      summary: `Added locale "${locale.tag}" to project "${project.name}"`,
+      metadata: { tag: locale.tag, projectId: project.id },
+    });
     return sendCreated(res, req, locale);
   }),
 );
@@ -214,6 +239,14 @@ router.patch(
     });
     if (!locale) throw notFound('locale not found');
     const updated = await prisma.projectLocale.update({ where: { id: locale.id }, data: body });
+    await recordAudit(prisma, {
+      accountId: accountId(req),
+      actor: actorOf(req),
+      action: 'locale.updated',
+      target: { type: 'locale', id: locale.id },
+      summary: `Updated locale "${locale.tag}" on project "${project.name}"`,
+      metadata: { tag: locale.tag, projectId: project.id, changed: Object.keys(body) },
+    });
     return sendOk(res, req, updated);
   }),
 );
@@ -245,6 +278,14 @@ router.post(
     const ns = await prisma.namespace.create({
       data: { id: newId('ns'), projectId: project.id, name: body.name, reviewPolicy: body.reviewPolicy },
     });
+    await recordAudit(prisma, {
+      accountId: accountId(req),
+      actor: actorOf(req),
+      action: 'namespace.created',
+      target: { type: 'namespace', id: ns.id },
+      summary: `Created namespace "${ns.name}" in project "${project.name}"`,
+      metadata: { name: ns.name, projectId: project.id, reviewPolicy: ns.reviewPolicy },
+    });
     return sendCreated(res, req, ns);
   }),
 );
@@ -263,6 +304,14 @@ router.patch(
     });
     if (!ns) throw notFound('namespace not found');
     const updated = await prisma.namespace.update({ where: { id: ns.id }, data: body });
+    await recordAudit(prisma, {
+      accountId: accountId(req),
+      actor: actorOf(req),
+      action: 'namespace.updated',
+      target: { type: 'namespace', id: ns.id },
+      summary: `Set namespace "${ns.name}" review policy to ${body.reviewPolicy}`,
+      metadata: { name: ns.name, projectId: project.id, reviewPolicy: body.reviewPolicy },
+    });
     return sendOk(res, req, updated);
   }),
 );

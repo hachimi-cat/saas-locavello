@@ -9,6 +9,7 @@ import { canonicalCatalogJson, catalogHash, catalogKeyName } from '../lib/catalo
 import { checkPlaceholders, estimateDisplayLength } from '../lib/icu.js';
 import { pseudoizeCatalog } from '../lib/pseudo.js';
 import { writeOutbox } from '../lib/outbox.js';
+import { recordAudit, actorOf } from '../lib/audit.js';
 import { ownedProject } from './projects.js';
 import type { Request } from 'express';
 
@@ -112,6 +113,14 @@ router.post(
         },
       });
       return created;
+    });
+    await recordAudit(prisma, {
+      accountId: accountId(req),
+      actor: actorOf(req),
+      action: 'release.published',
+      target: { type: 'release', id: release.id },
+      summary: `Published ${body.locale} release of "${project.name}" (${translated}/${keyCount} keys)`,
+      metadata: { projectId: project.id, locale: body.locale, contentHash: hash, keyCount: translated },
     });
     return sendCreated(res, req, release);
   }),

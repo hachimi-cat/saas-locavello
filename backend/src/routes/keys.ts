@@ -6,6 +6,7 @@ import { ApiError, pathParam, notFound, sendList, sendOk } from '../lib/http.js'
 import { newId } from '../lib/ids.js';
 import { encodeCursor, parsePagination } from '../lib/cursor.js';
 import { extractPlaceholders } from '../lib/icu.js';
+import { recordAudit, actorOf } from '../lib/audit.js';
 import { ownedProject } from './projects.js';
 import type { Request } from 'express';
 
@@ -128,6 +129,14 @@ router.put(
       return { created: createdCount, updated: updatedCount, archived: archivedCount };
     });
 
+    await recordAudit(prisma, {
+      accountId: accountId(req),
+      actor: actorOf(req),
+      action: 'keys.extracted',
+      target: { type: 'project', id: project.id },
+      summary: `Pushed ${body.keys.length} keys to "${project.name}" (${result.created} created, ${result.updated} updated, ${result.archived} archived)`,
+      metadata: { ...result, prune: body.prune },
+    });
     return sendOk(res, req, result);
   }),
 );

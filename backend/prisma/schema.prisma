@@ -406,3 +406,46 @@ model RosterMembership {
   @@index([accountId])
   @@map("roster_memberships")
 }
+
+// ─────────────────────────────────────────────────────────────────────
+// Developer-portal surfaces: outbound webhooks + audit trail (the
+// serront webhook-subscription + depllo audit patterns).
+// ─────────────────────────────────────────────────────────────────────
+
+/// Customer webhook endpoint — receives locavello.* outbox events,
+/// delivered by services/outbox-worker.ts with
+/// `Locavello-Signature: t=<unix>,v1=<hmac-sha256>`. The whsec_ signing
+/// secret is returned ONCE at creation and never listed again.
+model WebhookSubscription {
+  id        String   @id // whs_<ulid>
+  accountId String
+  url       String
+  secret    String
+  /// Event-type allowlist as a JSON string array; ["*"] = everything.
+  events    Json     @default("[\"*\"]")
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([accountId, active])
+  @@map("webhook_subscriptions")
+}
+
+/// Append-only workspace audit trail (never updated or deleted).
+/// Written by lib/audit.ts `recordAudit` from mutating portal routes.
+model AuditEvent {
+  id         String   @id // aud_<ulid>
+  accountId  String // Huudis workspace scope
+  actorSub   String // Huudis sub, or 'system'/'apikey:…'
+  actorLabel String? // display name/email when known
+  action     String // 'project.created' | 'release.published' | …
+  targetType String // 'project' | 'translation' | 'release' | …
+  targetId   String
+  summary    String // human-readable one-liner
+  metadata   Json     @default("{}") // never secret values
+  createdAt  DateTime @default(now())
+
+  @@index([accountId, createdAt])
+  @@index([accountId, action, createdAt])
+  @@map("audit_events")
+}

@@ -6,6 +6,7 @@ import { h } from '../lib/async-handler.js';
 import { ApiError, notFound, sendCreated, sendList, sendOk } from '../lib/http.js';
 import { pathParam } from '../lib/http.js';
 import { newId } from '../lib/ids.js';
+import { recordAudit, actorOf } from '../lib/audit.js';
 import type { Request } from 'express';
 
 const router = Router();
@@ -40,6 +41,14 @@ router.post(
         createdBy: req.auth?.sub ?? null,
       },
     });
+    await recordAudit(prisma, {
+      accountId: accountId(req),
+      actor: actorOf(req),
+      action: 'api_key.created',
+      target: { type: 'api_key', id: row.id },
+      summary: `Minted API key "${row.name}" (${row.prefix}…)`,
+      metadata: { name: row.name, prefix: row.prefix },
+    });
     return sendCreated(res, req, { ...row, keyHash: undefined, plaintext });
   }),
 );
@@ -71,6 +80,14 @@ router.delete(
     const updated = await prisma.apiKey.update({
       where: { id: row.id },
       data: { revokedAt: new Date() },
+    });
+    await recordAudit(prisma, {
+      accountId: accountId(req),
+      actor: actorOf(req),
+      action: 'api_key.revoked',
+      target: { type: 'api_key', id: row.id },
+      summary: `Revoked API key "${row.name}" (${row.prefix}…)`,
+      metadata: { name: row.name, prefix: row.prefix },
     });
     return sendOk(res, req, { id: updated.id, revokedAt: updated.revokedAt });
   }),

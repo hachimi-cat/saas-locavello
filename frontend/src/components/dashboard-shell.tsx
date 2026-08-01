@@ -12,8 +12,10 @@ import {
   LayoutDashboard,
   LifeBuoy,
   Menu,
+  ScrollText,
   Settings,
   Shield,
+  Webhook,
 } from 'lucide-react';
 import {
   Sidebar,
@@ -66,7 +68,11 @@ const SECTIONS: NavSection[] = [
   },
   {
     label: 'Developer',
-    items: [{ href: '/dashboard/developers', label: 'API keys & CLI', icon: KeyRound }],
+    items: [
+      { href: '/dashboard/developers', label: 'API keys & CLI', icon: KeyRound },
+      { href: '/dashboard/webhooks', label: 'Webhooks', icon: Webhook },
+      { href: '/dashboard/audit', label: 'Audit log', icon: ScrollText },
+    ],
   },
   {
     label: 'Account',

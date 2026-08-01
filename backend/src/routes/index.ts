@@ -18,6 +18,8 @@ import releasesRouter from './releases.js';
 import glossaryRouter from './glossary.js';
 import tmRouter from './tm.js';
 import apiKeysRouter from './api-keys.js';
+import webhookSubscriptionsRouter from './webhook-subscriptions.js';
+import auditRouter from './audit.js';
 import translateRouter from './translate.js';
 import publicRouter from './public.js';
 import billingRouter from './billing.js';
@@ -115,7 +117,17 @@ export default function routes(_opts: RoutesOptions = {}): ExpressRouter {
   // shadows the /api/v1 404 fallthrough and never runs twice for the
   // routers that share the /projects prefix.
   router.use(
-    ['/projects', '/keys', '/translations', '/glossary', '/tm', '/api-keys', '/billing'],
+    [
+      '/projects',
+      '/keys',
+      '/translations',
+      '/glossary',
+      '/tm',
+      '/api-keys',
+      '/billing',
+      '/webhook-subscriptions',
+      '/audit',
+    ],
     requireAuthOrApiKey,
   );
   router.use('/billing', billingRouter);
@@ -127,6 +139,8 @@ export default function routes(_opts: RoutesOptions = {}): ExpressRouter {
   router.use('/glossary', glossaryRouter);
   router.use('/tm', tmRouter);
   router.use('/api-keys', apiKeysRouter);
+  router.use('/webhook-subscriptions', webhookSubscriptionsRouter);
+  router.use('/audit', auditRouter);
 
   return router;
 }

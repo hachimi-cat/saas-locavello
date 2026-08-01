@@ -15,6 +15,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { adminFetch, fmtDate, fmtRelative } from '@/components/admin/ui';
+import { Input } from '@/components/ui/input';
 
 const brand = process.env.NEXT_PUBLIC_BRAND_NAME ?? 'Locavello';
 
@@ -119,15 +120,11 @@ export default function AdminCustomersPage() {
         </div>
       )}
 
-      <input
+      <Input
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder="Search email or name…"
-        style={{
-          width: '100%', maxWidth: 360, marginBottom: 16, padding: '8px 12px',
-          borderRadius: 8, border: '1px solid hsl(var(--border))',
-          background: 'hsl(var(--card))', color: 'inherit', outline: 'none',
-        }}
+        className="mb-4 max-w-[360px] bg-card"
       />
 
       {error && (

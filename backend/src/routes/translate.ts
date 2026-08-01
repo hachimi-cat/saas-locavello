@@ -6,6 +6,7 @@ import { ApiError, notFound, pathParam, sendCreated, sendList, sendOk } from '..
 import { newId } from '../lib/ids.js';
 import { countWords } from '../lib/icu.js';
 import { agentWordBudget } from '../lib/billing.js';
+import { recordAudit, actorOf } from '../lib/audit.js';
 import { ownedProject } from './projects.js';
 import type { Request } from 'express';
 
@@ -83,6 +84,14 @@ router.post(
         requestedBy: req.auth?.sub ?? null,
       },
     });
+    await recordAudit(prisma, {
+      accountId: accountId(req),
+      actor: actorOf(req),
+      action: 'job.queued',
+      target: { type: 'translation_job', id: job.id },
+      summary: `Queued a ${body.locale} machine pass for "${project.name}" (~${estimatedWords} words)`,
+      metadata: { projectId: project.id, locale: body.locale, kind: 'machine_pass', estimatedWords },
+    });
     return sendCreated(res, req, job);
   }),
 );
@@ -111,6 +120,14 @@ router.post(
         status: 'queued',
         requestedBy: req.auth?.sub ?? null,
       },
+    });
+    await recordAudit(prisma, {
+      accountId: accountId(req),
+      actor: actorOf(req),
+      action: 'job.queued',
+      target: { type: 'translation_job', id: job.id },
+      summary: `Queued a site crawl for "${project.name}"`,
+      metadata: { projectId: project.id, kind: 'crawl' },
     });
     return sendCreated(res, req, job);
   }),

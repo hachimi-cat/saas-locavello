@@ -8,6 +8,7 @@ import { encodeCursor, parsePagination } from '../lib/cursor.js';
 import { checkPlaceholders, countWords, estimateDisplayLength } from '../lib/icu.js';
 import { tmSourceHash } from '../lib/catalog.js';
 import { writeOutbox } from '../lib/outbox.js';
+import { recordAudit, actorOf } from '../lib/audit.js';
 import { ownedProject } from './projects.js';
 import type { Request } from 'express';
 
@@ -44,6 +45,14 @@ router.patch(
     const key = await ownedKey(req, pathParam(req, 'keyId'));
     const body = patchKeySchema.parse(req.body ?? {});
     const updated = await prisma.key.update({ where: { id: key.id }, data: body });
+    await recordAudit(prisma, {
+      accountId: accountId(req),
+      actor: actorOf(req),
+      action: 'key.updated',
+      target: { type: 'key', id: key.id },
+      summary: `Updated context metadata on key "${key.name}"`,
+      metadata: { name: key.name, projectId: key.project.id, changed: Object.keys(body) },
+    });
     return sendOk(res, req, updated);
   }),
 );
@@ -121,6 +130,14 @@ router.put(
       return row;
     });
 
+    await recordAudit(prisma, {
+      accountId: accountId(req),
+      actor: actorOf(req),
+      action: 'translation.updated',
+      target: { type: 'translation', id: translation.id },
+      summary: `Wrote the ${locale} translation of key "${key.name}" (${status})`,
+      metadata: { keyId: key.id, locale, status, projectId: key.project.id },
+    });
     const lengthWarning =
       key.maxLength && estimateDisplayLength(body.value) > key.maxLength
         ? { maxLength: key.maxLength, estimated: estimateDisplayLength(body.value) }
@@ -254,6 +271,14 @@ router.post(
       });
       return row;
     });
+    await recordAudit(prisma, {
+      accountId: accountId(req),
+      actor: actorOf(req),
+      action: 'translation.approved',
+      target: { type: 'translation', id: tr.id },
+      summary: `Approved the ${tr.locale} translation of key "${tr.key.name}"`,
+      metadata: { keyId: tr.keyId, locale: tr.locale, projectId: tr.key.project.id },
+    });
     return sendOk(res, req, updated);
   }),
 );
@@ -270,6 +295,14 @@ router.post(
     const updated = await prisma.translation.update({
       where: { id: tr.id },
       data: { status: 'rejected', reviewedBy: req.auth?.sub ?? null, rejectedReason: body.reason },
+    });
+    await recordAudit(prisma, {
+      accountId: accountId(req),
+      actor: actorOf(req),
+      action: 'translation.rejected',
+      target: { type: 'translation', id: tr.id },
+      summary: `Rejected the ${tr.locale} translation of key "${tr.key.name}"`,
+      metadata: { keyId: tr.keyId, locale: tr.locale, projectId: tr.key.project.id },
     });
     return sendOk(res, req, updated);
   }),

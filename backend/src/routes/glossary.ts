@@ -5,6 +5,7 @@ import { h } from '../lib/async-handler.js';
 import { ApiError, conflict, notFound, sendCreated, sendList, sendOk } from '../lib/http.js';
 import { pathParam } from '../lib/http.js';
 import { newId } from '../lib/ids.js';
+import { recordAudit, actorOf } from '../lib/audit.js';
 import type { Request } from 'express';
 
 const router = Router();
@@ -56,6 +57,14 @@ router.post(
         note: body.note ?? null,
       },
     });
+    await recordAudit(prisma, {
+      accountId: accountId(req),
+      actor: actorOf(req),
+      action: 'glossary_term.created',
+      target: { type: 'glossary_term', id: row.id },
+      summary: `Added glossary term "${row.term}"${row.locale ? ` (${row.locale})` : ' (do-not-translate)'}`,
+      metadata: { term: row.term, locale: row.locale, projectId: row.projectId },
+    });
     return sendCreated(res, req, row);
   }),
 );
@@ -82,6 +91,14 @@ router.delete(
     const row = await prisma.glossaryTerm.findUnique({ where: { id: pathParam(req, 'id') } });
     if (!row || row.accountId !== accountId(req)) throw notFound('glossary term not found');
     await prisma.glossaryTerm.delete({ where: { id: row.id } });
+    await recordAudit(prisma, {
+      accountId: accountId(req),
+      actor: actorOf(req),
+      action: 'glossary_term.deleted',
+      target: { type: 'glossary_term', id: row.id },
+      summary: `Removed glossary term "${row.term}"`,
+      metadata: { term: row.term, locale: row.locale, projectId: row.projectId },
+    });
     return sendOk(res, req, { deleted: true });
   }),
 );

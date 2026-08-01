@@ -265,3 +265,31 @@ export interface ApiKeyRow {
 export interface MintedApiKey extends ApiKeyRow {
   plaintext: string;
 }
+
+/** GET /webhook-subscriptions row — never carries the secret. */
+export interface WebhookSubscriptionRow {
+  id: string;
+  url: string;
+  events: string[];
+  active: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** POST /webhook-subscriptions — the whsec_ secret appears exactly once, here. */
+export interface CreatedWebhookSubscription extends WebhookSubscriptionRow {
+  secret: string;
+}
+
+/** GET /audit row. */
+export interface AuditEventRow {
+  id: string;
+  actorSub: string;
+  actorLabel: string | null;
+  action: string;
+  targetType: string;
+  targetId: string;
+  summary: string;
+  metadata: Record<string, unknown>;
+  createdAt: string;
+}

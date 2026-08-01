@@ -3,6 +3,15 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { ArrowRight, Globe, Loader2, RotateCcw } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 /*
  * Mode B instant preview — the hero's primary CTA.
@@ -238,7 +247,7 @@ export function HeroInstantPreview() {
               className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground"
               strokeWidth={1.5}
             />
-            <input
+            <Input
               type="text"
               inputMode="url"
               value={url}
@@ -246,26 +255,29 @@ export function HeroInstantPreview() {
               placeholder="yoursite.com"
               aria-label="Website URL to preview"
               disabled={phase === 'loading'}
-              className="w-full h-10 pl-9 pr-3 rounded-lg border border-border bg-background text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-60"
+              className="h-10 pl-9"
             />
           </div>
-          <select
+          <Select
             value={targetLocale}
-            onChange={(e) => setTargetLocale(e.target.value)}
-            aria-label="Target language"
+            onValueChange={setTargetLocale}
             disabled={phase === 'loading'}
-            className="h-10 px-3 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-60 sm:w-[190px]"
           >
-            {LANGUAGES.map((l) => (
-              <option key={l.tag} value={l.tag}>
-                {l.label}
-              </option>
-            ))}
-          </select>
-          <button
+            <SelectTrigger aria-label="Target language" className="h-10 sm:w-[190px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {LANGUAGES.map((l) => (
+                <SelectItem key={l.tag} value={l.tag}>
+                  {l.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button
             type="submit"
             disabled={phase === 'loading' || url.trim().length === 0}
-            className="inline-flex items-center justify-center gap-1.5 h-10 px-5 rounded-lg text-sm font-semibold bg-primary text-primary-foreground hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+            className="h-10 px-5 gap-1.5 font-semibold"
           >
             {phase === 'loading' ? (
               <>
@@ -278,7 +290,7 @@ export function HeroInstantPreview() {
                 <ArrowRight className="size-4" strokeWidth={1.5} />
               </>
             )}
-          </button>
+          </Button>
         </div>
         <p className="mt-2 text-[11.5px] text-muted-foreground text-left">
           Free instant preview — no account needed. We fetch the page, translate its first
