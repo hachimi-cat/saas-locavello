@@ -1,0 +1,91 @@
+// Forjio service template — minimal Prisma schema.
+//
+// Ships with only the outbox plumbing required by ADR-0006. Each product
+// adds its own domain models on top. Cross-service models (User, Account,
+// etc.) live in Huudis and are referenced by ID only — never replicated.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// Transactional outbox — ADR-0006.
+/// Every state change that other services may care about writes a row
+/// here inside the same transaction as the change itself. A polling
+/// worker reads unpublished rows and fans out to HTTP subscribers.
+model OutboxEvent {
+  id           String   @id // ULID, globally unique (evt_*)
+  type         String   // e.g. "forjio-brand.entity.verb.v1"
+  accountId    String?  // event scope; null for global events
+  aggregateId  String?  // top-level aggregate id (for indexed queries per entity)
+  occurredAt   DateTime
+  data         Json
+  metadata     Json     @default("{}")
+  createdAt    DateTime @default(now())
+  publishedAt  DateTime?
+  attempts     Int      @default(0)
+  lastError    String?
+
+  @@index([publishedAt, createdAt], name: "ix_outbox_unpublished")
+  @@index([accountId, type])
+  @@index([aggregateId, type])
+  @@map("outbox_events")
+}
+
+/// Consumer-side idempotency record — ADR-0006.
+/// When this service consumes an event, the handler inserts a row here
+/// inside its own transaction. Replay attempts hit the PK unique and
+/// exit cleanly.
+model ProcessedEvent {
+  eventId     String   @id
+  processedAt DateTime @default(now())
+
+  @@map("processed_events")
+}
+
+/// Operator feature flag — part of the mandatory admin-portal standard
+/// (see forjio/documentation/2. Technical/13-Admin-Portal-Standard.md).
+///
+/// Flipping a flag changes runtime behaviour for EVERY user of this
+/// deployment, so it is an operator control behind `adminGuard` — never a
+/// customer-portal setting.
+///
+/// `key` is the primary key on purpose: app code reads flags by key, so a
+/// rename is a migration rather than an edit, and there is no surrogate id
+/// to drift from the string the code actually uses.
+model FeatureFlag {
+  key         String   @id
+  label       String
+  description String?
+  enabled     Boolean  @default(false)
+  /// 0-100 percentage rollout. NULL means all-or-nothing — distinct from
+  /// 0, which means "on, but for nobody yet".
+  rollout     Int?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  /// Huudis user id of whoever last flipped it. Nullable because seeds and
+  /// migrations write flags with no human behind them.
+  updatedBy   String?
+
+  @@map("feature_flags")
+}
+
+/// Append-only audit of every feature-flag write. Kept separate from the
+/// flag row because `updatedBy`/`updatedAt` only ever answer "who last
+/// touched it" — during an incident the question is "what changed, when,
+/// and what was it before".
+model FeatureFlagAudit {
+  id        String   @id // ULID
+  key       String
+  actor     String?
+  at        DateTime @default(now())
+  before    Json
+  after     Json
+
+  @@index([key, at])
+  @@map("feature_flag_audits")
+}
