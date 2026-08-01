@@ -1,13 +1,13 @@
 'use client';
 
 /*
- * /dashboard/tm — cross-project translation-memory search. Every
- * approved translation across the account lands here and is reusable
- * from any project's workbench.
+ * /dashboard/tm — the account's translation memory. Browses the whole
+ * memory on load (newest first, cursor-paged) — 742 entries must never
+ * hide behind a search box — and narrows via cross-project search.
  */
 
-import { useEffect, useState } from 'react';
-import { ArrowRight, DatabaseZap, Loader2, Search } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import { ArrowRight, DatabaseZap, Loader2, Search, X } from 'lucide-react';
 import { apiRequest } from '@/lib/api';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -27,9 +27,17 @@ import { PageHeader } from '@/components/locavello/page-header';
 import { errorCode, errorMessage } from '@/components/locavello/format';
 import type { Project, TmEntry } from '@/components/locavello/types';
 
-export default function TmSearchPage() {
+const PAGE_SIZE = 50;
+
+export default function TmPage() {
   const [q, setQ] = useState('');
   const [target, setTarget] = useState('');
+  // Browse state — the default view.
+  const [entries, setEntries] = useState<TmEntry[] | null>(null);
+  const [cursor, setCursor] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  // Search state — active while `searched` is non-null.
   const [results, setResults] = useState<TmEntry[] | null>(null);
   const [searched, setSearched] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -42,6 +50,27 @@ export default function TmSearchPage() {
       .then(({ data }) => setProjects(data))
       .catch(() => setProjects([]));
   }, []);
+
+  const browse = useCallback(async (nextCursor: string | null) => {
+    if (nextCursor) setLoadingMore(true);
+    setError(null);
+    try {
+      const params = new URLSearchParams({ limit: String(PAGE_SIZE) });
+      if (nextCursor) params.set('cursor', nextCursor);
+      const res = await apiRequest<TmEntry[]>(`/tm?${params.toString()}`);
+      setEntries((prev) => (nextCursor ? [...(prev ?? []), ...res.data] : res.data));
+      setCursor(res.meta?.cursor ?? null);
+      setHasMore(Boolean(res.meta?.hasMore));
+    } catch (e) {
+      setError(e);
+    } finally {
+      setLoadingMore(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void browse(null);
+  }, [browse]);
 
   const projectName = (id: string | null) =>
     id === null ? '—' : (projects.find((p) => p.id === id)?.name ?? id);
@@ -64,11 +93,19 @@ export default function TmSearchPage() {
     }
   }
 
+  function clearSearch() {
+    setResults(null);
+    setSearched(null);
+    setQ('');
+  }
+
+  const rows = searched !== null ? results : entries;
+
   return (
     <div className="mx-auto w-full max-w-5xl">
       <PageHeader
         title="Translation memory"
-        description="Search every source/target pair your account has ever approved."
+        description="Every source/target pair your account has ever approved — browsable, searchable, reused by the workbench and the agent."
       />
 
       <form
@@ -97,16 +134,22 @@ export default function TmSearchPage() {
           {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
           Search
         </Button>
+        {searched !== null && (
+          <Button type="button" variant="outline" onClick={clearSearch}>
+            <X className="h-4 w-4" />
+            Clear
+          </Button>
+        )}
       </form>
 
       {error ? (
         <ErrorPanel
-          title="Search failed"
+          title={searched !== null ? 'Search failed' : 'Could not load the memory'}
           message={errorMessage(error)}
           code={errorCode(error)}
-          onRetry={() => void search()}
+          onRetry={() => (searched !== null ? void search() : void browse(null))}
         />
-      ) : loading ? (
+      ) : loading || rows === null ? (
         <Card>
           <CardContent className="space-y-3 p-6">
             {[0, 1, 2, 3].map((i) => (
@@ -114,81 +157,79 @@ export default function TmSearchPage() {
             ))}
           </CardContent>
         </Card>
-      ) : results === null ? (
+      ) : rows.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center gap-3 py-16 text-center">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
               <DatabaseZap className="h-6 w-6 text-primary" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold">Search your memory</h2>
+              <h2 className="text-lg font-semibold">
+                {searched !== null ? `No matches for “${searched}”` : 'Your memory is empty'}
+              </h2>
               <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">
-                Every approval feeds the memory, and the workbench suggests matches automatically.
-                Use this page to audit how a phrase has been translated before.
+                {searched !== null
+                  ? 'Try a shorter phrase, or clear the search to browse everything.'
+                  : 'Every approval feeds the memory, and the workbench suggests matches automatically.'}
               </p>
             </div>
           </CardContent>
         </Card>
-      ) : results.length === 0 ? (
-        <Card>
-          <CardContent className="py-12 text-center">
-            <p className="text-sm text-muted-foreground">
-              No memory entries match “{searched}”
-              {target.trim() ? (
-                <>
-                  {' '}
-                  for <code className="font-mono text-xs">{target.trim()}</code>
-                </>
-              ) : null}
-              . Approve a few translations and try again.
-            </p>
-          </CardContent>
-        </Card>
       ) : (
-        <Card>
-          <CardContent className="p-0">
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="min-w-56">Source → target</TableHead>
-                    <TableHead>Locales</TableHead>
-                    <TableHead>Quality</TableHead>
-                    <TableHead>Project</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {results.map((r) => (
-                    <TableRow key={r.id}>
-                      <TableCell>
-                        <div className="flex flex-col gap-1">
-                          <span className="text-sm text-muted-foreground">{r.sourceText}</span>
-                          <span className="flex items-start gap-1.5 text-sm">
-                            <ArrowRight className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
-                            {r.targetText}
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="whitespace-nowrap font-mono text-xs text-muted-foreground">
-                        {r.sourceLocale} → {r.targetLocale}
-                      </TableCell>
-                      <TableCell>
-                        {r.quality === 'approved' ? (
-                          <Badge>approved</Badge>
-                        ) : (
-                          <Badge variant="secondary">machine</Badge>
-                        )}
-                      </TableCell>
-                      <TableCell className="max-w-40 truncate text-sm text-muted-foreground">
-                        {projectName(r.projectId)}
-                      </TableCell>
+        <>
+          <Card>
+            <CardContent className="p-0">
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="min-w-56">Source → target</TableHead>
+                      <TableHead>Locales</TableHead>
+                      <TableHead>Quality</TableHead>
+                      <TableHead>Project</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {rows.map((r) => (
+                      <TableRow key={r.id}>
+                        <TableCell>
+                          <div className="flex flex-col gap-1">
+                            <span className="text-sm text-muted-foreground">{r.sourceText}</span>
+                            <span className="flex items-start gap-1.5 text-sm">
+                              <ArrowRight className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
+                              {r.targetText}
+                            </span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="whitespace-nowrap font-mono text-xs text-muted-foreground">
+                          {r.sourceLocale} → {r.targetLocale}
+                        </TableCell>
+                        <TableCell>
+                          {r.quality === 'approved' ? (
+                            <Badge>approved</Badge>
+                          ) : (
+                            <Badge variant="secondary">machine</Badge>
+                          )}
+                        </TableCell>
+                        <TableCell className="max-w-40 truncate text-sm text-muted-foreground">
+                          {projectName(r.projectId)}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
+          {searched === null && hasMore && (
+            <div className="mt-4 flex justify-center">
+              <Button variant="outline" onClick={() => void browse(cursor)} disabled={loadingMore}>
+                {loadingMore && <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />}
+                Load more
+              </Button>
             </div>
-          </CardContent>
-        </Card>
+          )}
+        </>
       )}
     </div>
   );

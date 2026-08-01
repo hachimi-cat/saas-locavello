@@ -3,6 +3,7 @@ import { prisma } from '../lib/db.js';
 import { h } from '../lib/async-handler.js';
 import { ApiError, sendList, sendOk } from '../lib/http.js';
 import { tmSourceHash } from '../lib/catalog.js';
+import { encodeCursor, parsePagination } from '../lib/cursor.js';
 import type { Request } from 'express';
 
 const router = Router();
@@ -42,6 +43,42 @@ router.get(
       take: 5,
     });
     return sendOk(res, req, { exact, fuzzy });
+  }),
+);
+
+/**
+ * GET /tm — browse the whole memory, newest-first, cursor-paged. The
+ * TM screen lists this on load (742 entries must not hide behind a
+ * search box); `target` narrows to one locale.
+ */
+router.get(
+  '/',
+  h(async (req, res) => {
+    const target = typeof req.query.target === 'string' && req.query.target ? req.query.target : undefined;
+    const { limit, cursor } = parsePagination(req.query as Record<string, unknown>);
+
+    const rows = await prisma.tmEntry.findMany({
+      where: {
+        accountId: accountId(req),
+        ...(target ? { targetLocale: target } : {}),
+        ...(cursor
+          ? {
+              OR: [
+                { createdAt: { lt: cursor.createdAt } },
+                { createdAt: cursor.createdAt, id: { lt: cursor.id } },
+              ],
+            }
+          : {}),
+      },
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+      take: limit + 1,
+    });
+    const hasMore = rows.length > limit;
+    const page = hasMore ? rows.slice(0, limit) : rows;
+    const last = page[page.length - 1];
+    const next =
+      hasMore && last ? encodeCursor({ createdAt: last.createdAt.toISOString(), id: last.id }) : null;
+    return sendList(res, req, page, next, hasMore);
   }),
 );
 
