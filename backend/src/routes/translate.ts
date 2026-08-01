@@ -5,6 +5,7 @@ import { h } from '../lib/async-handler.js';
 import { ApiError, notFound, pathParam, sendCreated, sendList, sendOk } from '../lib/http.js';
 import { newId } from '../lib/ids.js';
 import { countWords } from '../lib/icu.js';
+import { agentWordBudget } from '../lib/billing.js';
 import { ownedProject } from './projects.js';
 import type { Request } from 'express';
 
@@ -53,6 +54,22 @@ router.post(
       select: { sourceText: true },
     });
     const estimatedWords = pending.reduce((acc, k) => acc + countWords(k.sourceText), 0);
+
+    // The wallet guard — agent words spend real money, so this gate is
+    // live even during early access. TM hits don't count against it (the
+    // worker only meters actual agent batches), so the estimate is an
+    // UPPER bound; going over mid-job is impossible by more than one
+    // batch.
+    const budget = await agentWordBudget(prisma, accountId(req));
+    if (estimatedWords > budget.remaining) {
+      throw new ApiError(
+        403,
+        'UPGRADE_REQUIRED',
+        budget.tier === 'free'
+          ? `this run needs ~${estimatedWords} agent words but your free trial has ${budget.remaining} left — upgrade to Starter for 50,000 words/month`
+          : `this run needs ~${estimatedWords} agent words but your ${budget.tier} plan has ${budget.remaining} left this month`,
+      );
+    }
 
     const job = await prisma.translationJob.create({
       data: {

@@ -351,3 +351,21 @@ model AgentUsage {
   @@index([accountId, createdAt])
   @@map("agent_usage")
 }
+
+/// Workspace subscription — absence of a row IS the free tier. Written
+/// only by the Plugipay checkout webhook (idempotent on session id).
+model BillingSubscription {
+  id                        String    @id // bsub_<ulid>
+  accountId                 String    @unique
+  /// free | starter | pro | scale
+  tier                      String    @default("free")
+  /// active | past_due | canceled
+  status                    String    @default("active")
+  plugipayCheckoutSessionId String?
+  currentPeriodEnd          DateTime?
+  createdAt                 DateTime  @default(now())
+  updatedAt                 DateTime  @updatedAt
+
+  @@index([plugipayCheckoutSessionId])
+  @@map("billing_subscriptions")
+}

@@ -6,7 +6,7 @@ import { ApiError, pathParam, sendOk } from '../lib/http.js';
 import { safeFetchHtml, UnsafeUrlError } from '../lib/safe-fetch.js';
 import { extractStringsFromHtml } from '../lib/extract-html.js';
 import { dispatchTranslationRun, parseTranslationOutput, waitForRun } from '../lib/catentio.js';
-import { checkPlaceholders } from '../lib/icu.js';
+import { newId } from '../lib/ids.js';
 
 /**
  * PUBLIC Mode B surface — deliberately unauthenticated:
@@ -33,11 +33,28 @@ const previewSchema = z.object({
 
 const PREVIEW_MAX_STRINGS = 40;
 const PREVIEW_MAX_WORDS = 500;
+/** Global daily wallet guard for the anonymous hero — ~100 previews. */
+const PREVIEW_DAILY_WORD_CAP = Number(process.env.PREVIEW_DAILY_WORD_CAP ?? 50_000);
+const PREVIEW_ACCOUNT = 'public:preview';
 
 router.post(
   '/preview',
   h(async (req, res) => {
     const body = previewSchema.parse(req.body ?? {});
+
+    const dayStart = new Date();
+    dayStart.setUTCHours(0, 0, 0, 0);
+    const spent = await prisma.agentUsage.aggregate({
+      where: { accountId: PREVIEW_ACCOUNT, createdAt: { gte: dayStart } },
+      _sum: { words: true },
+    });
+    if ((spent._sum.words ?? 0) >= PREVIEW_DAILY_WORD_CAP) {
+      throw new ApiError(
+        503,
+        'PREVIEW_BUDGET_EXHAUSTED',
+        'the free preview is very popular today — sign up to translate your site, or try again tomorrow',
+      );
+    }
     let page;
     try {
       page = await safeFetchHtml(body.url.startsWith('http') ? body.url : `https://${body.url}`);
@@ -81,6 +98,10 @@ router.post(
     const pairs = items
       .map((i) => ({ original: i.source, translated: byId.get(i.id) ?? null }))
       .filter((p) => p.translated !== null);
+
+    await prisma.agentUsage.create({
+      data: { id: newId('au'), accountId: PREVIEW_ACCOUNT, words, kind: 'included' },
+    });
 
     return sendOk(res, req, {
       url: page.finalUrl,

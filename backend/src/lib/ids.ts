@@ -23,7 +23,8 @@ export type IdPrefix =
   | 'pg' // Mode B site page
   | 'tj' // translation job (agent run)
   | 'ak' // developer API key
-  | 'au'; // agent-usage metering row
+  | 'au' // agent-usage metering row
+  | 'bsub'; // billing subscription
 
 export function newId(prefix: IdPrefix): string {
   return `${prefix}_${ulid().toLowerCase()}`;

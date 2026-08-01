@@ -19,6 +19,8 @@ import tmRouter from './tm.js';
 import apiKeysRouter from './api-keys.js';
 import translateRouter from './translate.js';
 import publicRouter from './public.js';
+import billingRouter from './billing.js';
+import webhooksPlugipayRouter from './webhooks-plugipay.js';
 import { rateLimit } from '../middleware/rate-limit.js';
 
 /**
@@ -96,6 +98,9 @@ export default function routes(_opts: RoutesOptions = {}): ExpressRouter {
   // fail-open serving path for locavello.js.
   router.use('/public', rateLimit('ingress'), publicRouter);
 
+  /** Plugipay billing webhooks — signature-verified, no session. */
+  router.use('/webhooks/plugipay', webhooksPlugipayRouter);
+
   // ── Locavello engine ──────────────────────────────────────────────
   // Everything is behind requireAuthOrApiKey: the portal uses the BFF
   // session cookie, the CLI/SDK use `Bearer lv_live_…` keys. Auth is
@@ -103,9 +108,10 @@ export default function routes(_opts: RoutesOptions = {}): ExpressRouter {
   // shadows the /api/v1 404 fallthrough and never runs twice for the
   // routers that share the /projects prefix.
   router.use(
-    ['/projects', '/keys', '/translations', '/glossary', '/tm', '/api-keys'],
+    ['/projects', '/keys', '/translations', '/glossary', '/tm', '/api-keys', '/billing'],
     requireAuthOrApiKey,
   );
+  router.use('/billing', billingRouter);
   router.use('/projects', projectsRouter);
   router.use('/projects', keysRouter);
   router.use('/', translationsRouter); // /keys/:keyId/*, /translations/:id/*, /projects/:id/review-queue
