@@ -3,15 +3,16 @@
 import { useEffect, useState } from 'react';
 import {
   BookMarked,
+  Building2,
   CreditCard,
   BookOpen,
   DatabaseZap,
   FileText,
   KeyRound,
-  Languages,
   LayoutDashboard,
   LifeBuoy,
   Menu,
+  Settings,
   Shield,
 } from 'lucide-react';
 import {
@@ -21,6 +22,7 @@ import {
   type SessionUser,
   type NavSection,
 } from '@forjio/portal-ui';
+import { LocavelloMark } from '@/components/brand/logo';
 
 /*
  * Dashboard shell — the authenticated portal chrome. `@forjio/portal-ui`
@@ -47,6 +49,9 @@ const BRAND_COLOR_SOFT = 'hsl(var(--primary) / 0.15)';
 // slug (Suppuo resolves slug-or-acc); rename.sh rewrites `locavello`.
 const SUPPORT_URL = 'https://suppuo.com/portal/locavello';
 
+// Section shape mirrors the family gold standard (depllo/secronna):
+// product sections first, then Developer, then Account with
+// Workspace → Settings → Billing.
 const SECTIONS: NavSection[] = [
   {
     label: 'Overview',
@@ -60,12 +65,16 @@ const SECTIONS: NavSection[] = [
     ],
   },
   {
-    label: 'Developers',
+    label: 'Developer',
     items: [{ href: '/dashboard/developers', label: 'API keys & CLI', icon: KeyRound }],
   },
   {
-    label: 'Workspace',
-    items: [{ href: '/dashboard/billing', label: 'Billing', icon: CreditCard }],
+    label: 'Account',
+    items: [
+      { href: '/dashboard/workspaces', label: 'Workspace', icon: Building2 },
+      { href: '/dashboard/settings', label: 'Settings', icon: Settings },
+      { href: '/dashboard/billing', label: 'Billing', icon: CreditCard },
+    ],
   },
 ];
 
@@ -115,9 +124,10 @@ export function DashboardShell({
 
   useEffect(() => {
     const cookieId = readActiveWorkspaceId('cookie', BRAND_SLUG);
-    // Best-effort — the template ships no /account/workspaces endpoint;
-    // a forked product that proxies Huudis workspaces populates it.
-    fetch('/api/v1/account/workspaces', { credentials: 'include' })
+    // Real Huudis workspace list via the backend's huudis-proxy — the
+    // template's bare /account/workspaces 404s and strands the switcher
+    // on the fallback personal workspace.
+    fetch('/api/v1/huudis/account/workspaces', { credentials: 'include' })
       .then((r) => (r.ok ? r.json() : null))
       .then((b) => {
         const list = (b?.data ?? []) as PortalWorkspace[];
@@ -138,7 +148,7 @@ export function DashboardShell({
         brandName={BRAND}
         brandColor={BRAND_COLOR}
         brandColorSoft={BRAND_COLOR_SOFT}
-        brandIcon={<Languages size={20} strokeWidth={2} />}
+        brandIcon={<LocavelloMark size={20} />}
         workspacePersist="cookie"
         workspaces={workspaces}
         activeWorkspaceId={activeId}

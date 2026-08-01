@@ -7,7 +7,6 @@ import {
   CircleDollarSign,
   Code2,
   FileCode2,
-  Hexagon,
   Layers,
   Megaphone,
   ScanText,
@@ -18,6 +17,7 @@ import {
   Zap,
 } from 'lucide-react';
 import { HeroBadge, SectionEyebrow } from '@forjio/website-ui';
+import { LocavelloMark } from '@/components/brand/logo';
 import { HeroInstantPreview } from '@/components/marketing/hero-preview';
 
 /*
@@ -44,7 +44,7 @@ export default function HomePage() {
         <div className="max-w-6xl mx-auto px-4 md:px-6 pt-14 md:pt-20 pb-12 md:pb-16">
           <div className="max-w-3xl mx-auto text-center flex flex-col items-center">
             <HeroBadge
-              brandIcon={<Hexagon className="size-3 text-primary" strokeWidth={1.5} />}
+              brandIcon={<LocavelloMark size={12} className="text-primary" />}
               primary="Forjio family"
               secondary="One account across every product"
             />
@@ -565,7 +565,7 @@ export default function HomePage() {
 
               <div className="mt-8 grid grid-cols-3 gap-3">
                 {[
-                  { name: 'Locavello', icon: Hexagon, current: true, label: 'this product' },
+                  { name: 'Locavello', icon: LocavelloMark, current: true, label: 'this product' },
                   { name: 'Storlaunch', icon: Zap, label: 'storefront' },
                   { name: 'Plugipay', icon: CircleDollarSign, label: 'payments' },
                   { name: 'Fulkruma', icon: Boxes, label: 'fulfillment' },
@@ -677,7 +677,7 @@ export default function HomePage() {
         <div className="max-w-4xl mx-auto px-4 md:px-6 py-16 md:py-20 text-center">
           <div className="flex flex-col items-center">
             <div className="inline-flex items-center justify-center size-12 rounded-xl bg-primary/10 text-primary mb-6">
-              <Hexagon className="size-6" strokeWidth={2} />
+              <LocavelloMark size={24} />
             </div>
             <h2 className="text-[28px] md:text-[36px] leading-[1.1] font-semibold tracking-[-0.02em] max-w-[24ch]">
               Your next market speaks another language.

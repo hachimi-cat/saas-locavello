@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Hexagon } from 'lucide-react';
+import { LocavelloMark } from '@/components/brand/logo';
 
 export const metadata: Metadata = {
   title: 'About',
@@ -12,7 +12,7 @@ export default function AboutPage() {
     <div className="mx-auto max-w-7xl px-4 py-20 md:px-6">
       <div className="mx-auto max-w-3xl">
         <div className="flex items-center gap-3">
-          <Hexagon className="h-8 w-8 text-primary" />
+          <LocavelloMark size={32} className="text-primary" />
           <h1 className="text-4xl font-bold tracking-tight">About Locavello</h1>
         </div>
 

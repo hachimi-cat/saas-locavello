@@ -1,6 +1,6 @@
 import Script from 'next/script';
-import { Hexagon } from 'lucide-react';
 import { MarketingShell, MarketingNav, MarketingFooter } from '@forjio/website-ui';
+import { LocavelloMark } from '@/components/brand/logo';
 
 /*
  * Marketing route-group layout — the shared Forjio family chrome
@@ -64,12 +64,12 @@ export default function MarketingLayout({
   return (
     <MarketingShell>
       <MarketingNav
-        brandIcon={<Hexagon className="h-6 w-6 text-primary" />}
+        brandIcon={<LocavelloMark size={24} className="text-primary" />}
         brandName={brand}
       />
       <main className="flex-1">{children}</main>
       <MarketingFooter
-        brandIcon={<Hexagon className="h-5 w-5 text-primary" />}
+        brandIcon={<LocavelloMark size={20} className="text-primary" />}
         brandName={brand}
         brandTagline={`${brand} — part of the Forjio family.`}
         copyrightSuffix="part of the Forjio family."

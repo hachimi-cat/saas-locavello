@@ -1,6 +1,6 @@
 import { Suspense } from 'react';
 import Link from 'next/link';
-import { Hexagon } from 'lucide-react';
+import { LocavelloMark } from '@/components/brand/logo';
 import { ResetPasswordForm } from '@forjio/auth-ui';
 
 /*
@@ -20,7 +20,7 @@ export default function AdminResetPasswordPage() {
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
           <Link href="/admin/login" className="inline-flex" aria-label={`${brand} admin`}>
-            <Hexagon className="h-9 w-9 text-primary" strokeWidth={2} />
+            <LocavelloMark size={36} className="text-primary" />
           </Link>
           <h1 className="mt-5 text-2xl font-bold tracking-tight">Choose a new password</h1>
           <p className="mt-1 text-sm text-muted-foreground">
