@@ -31,8 +31,11 @@ const previewSchema = z.object({
     .default('id'),
 });
 
-const PREVIEW_MAX_STRINGS = 40;
-const PREVIEW_MAX_WORDS = 500;
+// Small batch on purpose: the preview's job is to CONVINCE fast, not
+// to be complete. 40 strings ran >2 min on the live agent; ~18 keeps
+// the round trip inside the hero's patience.
+const PREVIEW_MAX_STRINGS = 18;
+const PREVIEW_MAX_WORDS = 250;
 /** Global daily wallet guard for the anonymous hero — ~100 previews. */
 const PREVIEW_DAILY_WORD_CAP = Number(process.env.PREVIEW_DAILY_WORD_CAP ?? 50_000);
 const PREVIEW_ACCOUNT = 'public:preview';

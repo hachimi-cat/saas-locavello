@@ -16,7 +16,7 @@ import { ArrowRight, Globe, Loader2, RotateCcw } from 'lucide-react';
  *      503 PREVIEW_BUDGET_EXHAUSTED, 400 VALIDATION_ERROR.
  *   2. Poll GET /api/v1/public/preview/<previewId> every ~3s
  *      → {status:'running'} | {status:'done', pairs} |
- *        {status:'failed', error}. Give up politely after ~120s.
+ *        {status:'failed', error}. Give up politely after ~180s.
  *
  * No signup — the preview IS the conversion mechanic. Every failure
  * mode degrades to an inline error while the classic CTAs stay
@@ -52,7 +52,7 @@ const ERROR_HEADINGS: Record<string, string> = {
 };
 
 const POLL_INTERVAL_MS = 3_000;
-const POLL_DEADLINE_MS = 120_000;
+const POLL_DEADLINE_MS = 180_000;
 
 interface PreviewPair {
   original: string;

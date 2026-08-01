@@ -36,6 +36,8 @@ function looksTranslatable(text: string): boolean {
   if (/^[\d\s\p{P}\p{S}]+$/u.test(text)) return false;
   // Skip bare URLs/emails/code-ish tokens.
   if (/^(https?:\/\/|www\.|[\w.+-]+@[\w-]+\.)/i.test(text)) return false;
+  // Markup that leaked through as a text node (doctype, stray tags).
+  if (text.includes('<') || text.includes('>')) return false;
   return true;
 }
 
