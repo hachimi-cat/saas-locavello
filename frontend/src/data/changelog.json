@@ -1,11 +1,15 @@
 [
   {
     "version": "0.1.0",
-    "date": "[DATE]",
-    "title": "Initial release",
+    "date": "2026-08-01",
+    "title": "Initial launch",
     "changes": [
-      "First public release of Locavello.",
-      "Replace this entry with your real changelog — one object per release, newest first."
+      "Localization engine: projects, locales with fallback chains, namespaces with gated review policy, immutable content-hashed releases with key-level diffs.",
+      "Three-pane review workbench with placeholder chips, translation-memory suggestions, glossary hits, and a review queue.",
+      "Agent first pass on the Catentio runtime, behind a mechanical placeholder-safety gate on every write.",
+      "@forjio/locavello-cli: init, extract, pull, status, check, and pseudo — committed catalogs, generated typed keys (locavello.d.ts), and a CI gate.",
+      "@forjio/locavello-next: useT/getT/Provider with ICU MessageFormat and per-locale fallbacks — zero runtime dependency on Locavello.",
+      "Website mode: instant no-signup preview from the homepage, site crawl with per-page status, and a fail-open serving snippet with a locale switcher."
     ]
   }
 ]

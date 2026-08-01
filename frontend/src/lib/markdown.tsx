@@ -34,13 +34,18 @@ export type DocMeta = {
   href: string;
 };
 
-// Placeholder doc set. Replace these with the real pages of your
-// product — keep the `''` (index) entry first.
+// The Locavello doc set — sidebar + search are driven by this list,
+// keep the `''` (index) entry first.
 export const DOC_NAV: DocMeta[] = [
   { slug: '', title: 'Introduction', group: 'Getting started', href: '/docs' },
-  { slug: 'getting-started', title: 'Getting started', group: 'Getting started', href: '/docs/getting-started' },
-  { slug: 'api-reference', title: 'API reference', group: 'API', href: '/docs/api-reference' },
-  { slug: 'sdk', title: 'SDKs', group: 'SDKs', href: '/docs/sdk' },
+  { slug: 'quickstart-sdk', title: 'Quick start — SDK', group: 'Getting started', href: '/docs/quickstart-sdk' },
+  { slug: 'quickstart-website', title: 'Quick start — Website', group: 'Getting started', href: '/docs/quickstart-website' },
+  { slug: 'concepts', title: 'Concepts', group: 'Guides', href: '/docs/concepts' },
+  { slug: 'placeholder-safety', title: 'Placeholder safety', group: 'Guides', href: '/docs/placeholder-safety' },
+  { slug: 'review-workflow', title: 'Review workflow', group: 'Guides', href: '/docs/review-workflow' },
+  { slug: 'nextjs-adapter', title: 'Next.js adapter', group: 'Reference', href: '/docs/nextjs-adapter' },
+  { slug: 'cli-reference', title: 'CLI reference', group: 'Reference', href: '/docs/cli-reference' },
+  { slug: 'api-reference', title: 'API reference', group: 'Reference', href: '/docs/api-reference' },
 ];
 
 export function docsGroups(): Array<{ heading: string; items: DocMeta[] }> {

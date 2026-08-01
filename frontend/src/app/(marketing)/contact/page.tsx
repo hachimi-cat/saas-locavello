@@ -53,7 +53,7 @@ export default function ContactPage() {
             label="Email"
             value="support@forjio.com"
             href="mailto:support@forjio.com"
-            note="Response within 1 business day."
+            note="We aim to reply within one business day."
           />
           <ContactCard
             icon={<Phone size={18} className="text-primary" />}

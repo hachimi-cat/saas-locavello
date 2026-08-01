@@ -15,7 +15,7 @@ export default function TermsPage() {
   return (
     <div className="mx-auto max-w-3xl px-6 py-20">
       <h1 className="text-4xl font-bold tracking-tight">Terms of Service</h1>
-      <p className="mt-4 text-sm text-muted-foreground">Last updated: [DATE]</p>
+      <p className="mt-4 text-sm text-muted-foreground">Last updated: August 1, 2026</p>
 
       <div className="mt-10 space-y-8 text-sm leading-relaxed text-muted-foreground">
         <section>
@@ -48,9 +48,10 @@ export default function TermsPage() {
           <h2 className="text-lg font-semibold text-foreground">4. Service Tiers &amp; Billing</h2>
           <p className="mt-3">
             Free accounts are subject to the usage limits described on our pricing page.
-            Paid subscriptions are billed monthly in IDR (USD via PayPal for international
-            customers). You can cancel at any time — access continues until the end of the
-            current billing period.
+            Paid subscriptions are billed monthly in IDR. During the early-access period,
+            paid features are available free of charge as described on the pricing page.
+            You can cancel at any time — access continues until the end of the current
+            billing period.
           </p>
         </section>
 

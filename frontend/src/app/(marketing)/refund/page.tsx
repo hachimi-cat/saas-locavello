@@ -16,16 +16,17 @@ export default function RefundPage() {
     <div className="mx-auto max-w-3xl px-6 py-16">
       <div className="mb-10">
         <h1 className="text-3xl font-bold tracking-tight">Refund Policy</h1>
-        <p className="mt-2 text-sm text-muted-foreground">Last updated: [DATE]</p>
+        <p className="mt-2 text-sm text-muted-foreground">Last updated: August 1, 2026</p>
       </div>
 
       <div className="space-y-10 text-sm leading-relaxed text-muted-foreground">
         <section>
           <h2 className="text-lg font-semibold text-foreground">1. Subscription Fees</h2>
           <p className="mt-3">
-            Locavello sells access to the platform via monthly and annual subscription
-            plans. Subscription fees are charged in advance for the upcoming billing period
-            and are non-refundable for the current period once it has started.
+            Locavello sells access to the platform via monthly subscription plans, priced
+            in IDR. Subscription fees are charged in advance for the upcoming billing period
+            and are non-refundable for the current period once it has started. During the
+            early-access period no subscription fees are charged at all.
           </p>
           <p className="mt-3">
             You can cancel a subscription at any time from your dashboard. Cancellation stops
@@ -65,7 +66,6 @@ export default function RefundPage() {
             <li>Change of mind after the trial period. Free tiers are available — use them first.</li>
             <li>Failure to use the service — no refund for unused time within an active subscription.</li>
             <li>Plan downgrades — the new tier applies from the next renewal; no credit for the higher tier already paid.</li>
-            <li>Annual plans cancelled mid-year — cancellation stops the next renewal; the current 12-month period is not refunded.</li>
           </ul>
         </section>
 

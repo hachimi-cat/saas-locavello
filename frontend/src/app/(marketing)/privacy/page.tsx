@@ -16,15 +16,18 @@ export default function PrivacyPage() {
   return (
     <div className="mx-auto max-w-3xl px-6 py-20">
       <h1 className="text-4xl font-bold tracking-tight">Privacy Policy</h1>
-      <p className="mt-4 text-sm text-muted-foreground">Last updated: [DATE]</p>
+      <p className="mt-4 text-sm text-muted-foreground">Last updated: August 1, 2026</p>
 
       <div className="mt-10 space-y-8 text-sm leading-relaxed text-muted-foreground">
         <section>
           <h2 className="text-lg font-semibold text-foreground">1. Information We Collect</h2>
           <p className="mt-3">
             When you create an account we collect your name, email address, and hashed
-            password (identity is managed by Huudis). Describe here any additional usage
-            telemetry Locavello records, and whether it is stored permanently.
+            password (identity is managed by Huudis). To provide the service, Locavello
+            also stores the content you localize: your projects&apos; keys and source
+            strings, their translations and review history, glossary terms, translation
+            memory entries, and — for website-mode projects — the visible text extracted
+            from the pages you ask us to crawl or preview.
           </p>
         </section>
 
@@ -40,17 +43,18 @@ export default function PrivacyPage() {
         <section>
           <h2 className="text-lg font-semibold text-foreground">3. Data Retention</h2>
           <p className="mt-3">
-            State the retention window per plan. When you delete a record, associated
-            data is permanently deleted. When you delete your account, all data is
-            permanently deleted within 30 days.
+            Your strings, translations, and releases are retained for as long as your
+            account is active so your history and translation memory keep working. When
+            you delete your account, all data is permanently deleted within 30 days.
           </p>
         </section>
 
         <section>
           <h2 className="text-lg font-semibold text-foreground">4. Data Export</h2>
           <p className="mt-3">
-            You can export your data at any time via the dashboard or CLI, in CSV or JSON.
-            Your data is yours.
+            You can export your strings and translations as JSON at any time — via the
+            CLI (<code className="font-mono">locavello pull</code>) or the API. In SDK
+            mode your catalogs already live in your own repository. Your data is yours.
           </p>
         </section>
 
@@ -65,9 +69,9 @@ export default function PrivacyPage() {
         <section>
           <h2 className="text-lg font-semibold text-foreground">6. Security</h2>
           <p className="mt-3">
-            Passwords are hashed; all data is transmitted over HTTPS and encrypted at rest.
-            We follow security best practices for authentication, session management, and
-            data storage.
+            Passwords are hashed and all data is transmitted over HTTPS (TLS). API keys are
+            stored as hashes, never in plaintext. We follow industry-standard security
+            practices for authentication, session management, and data storage.
           </p>
         </section>
 
@@ -75,8 +79,10 @@ export default function PrivacyPage() {
           <h2 className="text-lg font-semibold text-foreground">7. Third-Party Services</h2>
           <p className="mt-3">
             Payments are processed through Plugipay and its payment partners. We do not
-            store your full card details. We use no third-party advertising networks,
-            analytics SDKs, or tracking pixels.
+            store your full card details. Agent translation runs on Catentio, the Forjio
+            family&apos;s agent runtime — the source strings you submit for machine
+            translation are sent there for processing. We use no third-party advertising
+            networks, analytics SDKs, or tracking pixels.
           </p>
         </section>
 

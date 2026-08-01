@@ -87,8 +87,8 @@ export const TIER_DEFS: readonly TierDef[] = [
     features: [
       '10 projects · unlimited locales · 20,000 keys each',
       'Everything in Starter',
-      'Releases with diff + rollback',
-      'Roles: owner / developer / translator / reviewer',
+      'Release history with diffs',
+      'Unlimited translator + reviewer seats',
       'Website translation on unlimited sites',
       '250,000 agent words / month',
       'Priority support',
@@ -106,8 +106,8 @@ export const TIER_DEFS: readonly TierDef[] = [
     features: [
       'Unlimited everything',
       'Negotiated agent volume',
-      'SSO + SLA',
       'Custom agent tone + glossary curation',
+      'Custom terms by agreement',
     ],
   },
 ];
