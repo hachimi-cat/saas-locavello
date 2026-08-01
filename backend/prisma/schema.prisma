@@ -369,3 +369,40 @@ model BillingSubscription {
   @@index([plugipayCheckoutSessionId])
   @@map("billing_subscriptions")
 }
+
+// ─────────────────────────────────────────────────────────────────────
+// Identity roster — thin SSO capture (admin-CRM blind-spot fix, the
+// serront ea0babd pattern). NOT an auth table: identity authority stays
+// in Huudis; these rows are a display-only cache so the CRM can resolve
+// accountId → who. Upserted at sign-in (auth-config `onAuthenticated`)
+// and on authenticated requests (middleware/auth.ts, write-throttled
+// in-process).
+// ─────────────────────────────────────────────────────────────────────
+
+model RosterIdentity {
+  id          String             @id // rst_<ulid>
+  huudisSub   String             @unique
+  email       String
+  name        String
+  createdAt   DateTime           @default(now())
+  lastSeenAt  DateTime           @default(now())
+  memberships RosterMembership[]
+
+  @@map("roster_identities")
+}
+
+/// One (user, accountId) sighting — a user acts under many workspaces
+/// and a workspace has many users. The CRM picks the earliest-created
+/// member of an accountId as its best-known contact.
+model RosterMembership {
+  id         String         @id // rmb_<ulid>
+  huudisSub  String
+  accountId  String
+  createdAt  DateTime       @default(now())
+  lastSeenAt DateTime       @default(now())
+  identity   RosterIdentity @relation(fields: [huudisSub], references: [huudisSub], onDelete: Cascade)
+
+  @@unique([huudisSub, accountId])
+  @@index([accountId])
+  @@map("roster_memberships")
+}

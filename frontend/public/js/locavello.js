@@ -108,7 +108,7 @@
     // Always fetch once (even with no chosen locale) to learn the
     // enabled locales for the switcher; use a locale that exists.
     var wanted = locale || (navigator.language || '').split('-')[0];
-    fetch(apiBase + '/api/v1/projects/' + encodeURIComponent(projectId) + '/catalog?locale=' + encodeURIComponent(wanted || 'id'), { mode: 'cors' })
+    fetch(apiBase + '/api/v1/public/projects/' + encodeURIComponent(projectId) + '/catalog?locale=' + encodeURIComponent(wanted || 'id'), { mode: 'cors' })
       .then(function (r) { if (!r.ok) throw new Error(String(r.status)); return r.json(); })
       .then(function (body) {
         var data = body && body.data;

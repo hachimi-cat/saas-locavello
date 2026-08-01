@@ -9,6 +9,7 @@ import adminCustomersRouter from './admin-customers.js';
 import adminMetricsRouter from './admin-metrics.js';
 import adminSystemHealthRouter from './admin-system-health.js';
 import adminFeatureFlagsRouter from './admin-feature-flags.js';
+import adminCrmRouter from './admin-crm.js';
 import { requireAuthOrApiKey } from '../middleware/api-key.js';
 import projectsRouter from './projects.js';
 import keysRouter from './keys.js';
@@ -91,6 +92,12 @@ export default function routes(_opts: RoutesOptions = {}): ExpressRouter {
   router.use('/admin/metrics', adminGuard, adminMetricsRouter);
   router.use('/admin/system-health', adminGuard, adminSystemHealthRouter);
   router.use('/admin/feature-flags', adminGuard, adminFeatureFlagsRouter);
+
+  /** Admin CRM — the standardized stats/customers/transactions contract
+   *  the central admin.forjio.com portal consumes s2s (adminGuard's
+   *  X-Forjio-Admin-Secret path). Customers resolve to real people via
+   *  the identity roster. */
+  router.use('/admin/crm', adminGuard, adminCrmRouter);
 
   // ── Mode B public surface (NO auth — capped + rate-limited) ──────
   // /public/preview costs real agent words per call; ingress-class

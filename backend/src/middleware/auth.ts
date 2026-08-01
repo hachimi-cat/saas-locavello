@@ -2,6 +2,7 @@ import type { Request, Response, NextFunction } from 'express';
 import { verifyAccessToken, AuthError, type ForjioClaims } from '@forjio/sdk/auth';
 import { resolveSessionForRequest, parseCookie } from '@forjio/sdk/auth-server';
 import { authConfig } from '../auth-config.js';
+import { recordIdentitySeen } from '../lib/identity-roster.js';
 import { sendErr } from '../lib/http.js';
 
 declare module 'express-serve-static-core' {
@@ -63,6 +64,17 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
       const live = await liveWorkspaceIds(bffSession.huudisAccessToken);
       if (live?.has(override)) accountId = override;
     }
+    // Identity-roster capture (admin-CRM blind-spot fix): note who is
+    // acting under the ACTIVE accountId — covers workspaces switched
+    // into post-login and sessions that predate the roster. Throttled
+    // in-process (≤1 write per sub+account per hour), fire-and-forget,
+    // never throws — zero added latency on the hot path.
+    void recordIdentitySeen({
+      huudisSub: bffSession.huudisSub,
+      email: bffSession.email,
+      name: bffSession.name,
+      accountIds: [accountId],
+    });
     req.auth = {
       sub: bffSession.huudisSub,
       accountId,

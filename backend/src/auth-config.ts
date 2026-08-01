@@ -4,6 +4,7 @@ import {
   createSessionCodec,
   type AuthServerConfig,
 } from '@forjio/sdk/auth-server';
+import { recordIdentitySeen } from './lib/identity-roster.js';
 
 /*
  * BFF auth config — this product's binding of the shared
@@ -56,6 +57,23 @@ export const authConfig: AuthServerConfig = {
       process.env.HUUDIS_CLIENT_SECRET ??
       'dev-only-fallback-session-secret',
   }),
+  // Identity-roster capture (admin-CRM blind-spot fix, serront ea0babd
+  // pattern): on every sign-in, record WHO this Huudis identity is
+  // (email + name) and which accountIds it acts under — the derived
+  // personal id plus the login-time Huudis workspace snapshot.
+  // Fire-and-forget: the helper never throws and the hook never
+  // overrides accountId or rejects, so the stateless-BFF login path is
+  // unchanged. requireAuth keeps the roster fresh for whichever
+  // workspace is actually active.
+  onAuthenticated: ({ account, accountIds, role }) => {
+    if (role !== 'merchant') return; // admin sessions aren't CRM customers
+    void recordIdentitySeen({
+      huudisSub: account.id,
+      email: account.email,
+      name: account.name,
+      accountIds: [deriveAccountId(account.id), ...accountIds],
+    });
+  },
   roles: {
     merchant: {
       cookie: 'locavello_session',

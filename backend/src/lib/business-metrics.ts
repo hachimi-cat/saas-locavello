@@ -18,6 +18,7 @@
  */
 
 import { fetchAppStats, huudisAppConfigured } from './huudis-app.js';
+import { prisma } from './db.js';
 
 export interface BusinessMetrics {
   users: { total: number; signedIn: number; workspaceMembers: number; newInWindow: number };
@@ -113,5 +114,75 @@ export async function collectBusinessMetrics(
     transactions,
     series,
     window: { from: window.from.toISOString(), to: window.to.toISOString() },
+  };
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Locavello product metrics — the localization-specific counters the
+// standard contract has no slot for. Served ADDITIVELY as `product`
+// alongside the standard payload (admin-ui reads only the fields it
+// knows; extra keys are ignored), so the mandatory shape stays valid.
+// ─────────────────────────────────────────────────────────────────────
+
+export interface LocavelloProductMetrics {
+  /** Workspaces (accountIds) with ≥1 project. */
+  workspacesWithProjects: number;
+  projects: number;
+  /** Non-archived keys across all projects. */
+  activeKeys: number;
+  translations: { approved: number; needsReview: number; machine: number; rejected: number };
+  releases: { last7d: number; last30d: number };
+  /** Metered + trial agent words (agent_usage sum). */
+  agentWords: { last7d: number; last30d: number };
+  tmEntries: number;
+}
+
+export async function collectLocavelloMetrics(
+  now: Date = new Date(),
+): Promise<LocavelloProductMetrics> {
+  const since7d = new Date(now.getTime() - 7 * 86_400_000);
+  const since30d = new Date(now.getTime() - 30 * 86_400_000);
+
+  const [
+    workspacesWithProjects,
+    projects,
+    activeKeys,
+    translationsByStatus,
+    releases7d,
+    releases30d,
+    words7d,
+    words30d,
+    tmEntries,
+  ] = await Promise.all([
+    prisma.project.groupBy({ by: ['accountId'] }).then((r) => r.length),
+    prisma.project.count(),
+    prisma.key.count({ where: { archived: false } }),
+    prisma.translation.groupBy({ by: ['status'], _count: { _all: true } }),
+    prisma.release.count({ where: { createdAt: { gte: since7d } } }),
+    prisma.release.count({ where: { createdAt: { gte: since30d } } }),
+    prisma.agentUsage.aggregate({ _sum: { words: true }, where: { createdAt: { gte: since7d } } }),
+    prisma.agentUsage.aggregate({ _sum: { words: true }, where: { createdAt: { gte: since30d } } }),
+    prisma.tmEntry.count(),
+  ]);
+
+  const byStatus: Record<string, number> = {};
+  for (const row of translationsByStatus) byStatus[row.status] = row._count._all;
+
+  return {
+    workspacesWithProjects,
+    projects,
+    activeKeys,
+    translations: {
+      approved: byStatus.approved ?? 0,
+      needsReview: byStatus.needs_review ?? 0,
+      machine: byStatus.machine ?? 0,
+      rejected: byStatus.rejected ?? 0,
+    },
+    releases: { last7d: releases7d, last30d: releases30d },
+    agentWords: {
+      last7d: words7d._sum.words ?? 0,
+      last30d: words30d._sum.words ?? 0,
+    },
+    tmEntries,
   };
 }

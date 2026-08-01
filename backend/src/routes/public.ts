@@ -5,7 +5,7 @@ import { h } from '../lib/async-handler.js';
 import { ApiError, pathParam, sendOk } from '../lib/http.js';
 import { safeFetchHtml, UnsafeUrlError } from '../lib/safe-fetch.js';
 import { extractStringsFromHtml } from '../lib/extract-html.js';
-import { dispatchTranslationRun, parseTranslationOutput, waitForRun } from '../lib/catentio.js';
+import { dispatchTranslationRun, getRun, parseTranslationOutput } from '../lib/catentio.js';
 import { newId } from '../lib/ids.js';
 
 /**
@@ -83,33 +83,101 @@ router.post(
       throw new ApiError(422, 'NO_TEXT', 'no translatable text found on that page', 'url');
     }
 
+    // Async by design: agent runs regularly take 30–90s, which is past
+    // any sane proxy timeout. POST dispatches + returns a previewId
+    // immediately; the hero polls GET /preview/:id every few seconds.
     const runId = await dispatchTranslationRun({
       sourceLocale: 'auto',
       targetLocale: body.targetLocale,
       glossary: [],
       items,
     });
-    const run = await waitForRun(runId, { timeoutMs: 60_000, intervalMs: 3_000 });
-    if (run.status !== 'succeeded' && run.status !== 'completed') {
-      throw new ApiError(503, 'PREVIEW_UNAVAILABLE', 'translation did not complete in time — try again');
-    }
-    const translated = parseTranslationOutput(run.output ?? '');
-    const byId = new Map(translated.map((t) => [t.id, t.value]));
-    const pairs = items
-      .map((i) => ({ original: i.source, translated: byId.get(i.id) ?? null }))
-      .filter((p) => p.translated !== null);
 
+    // Words are spent the moment the run dispatches — meter now.
     await prisma.agentUsage.create({
       data: { id: newId('au'), accountId: PREVIEW_ACCOUNT, words, kind: 'included' },
     });
 
-    return sendOk(res, req, {
-      url: page.finalUrl,
-      targetLocale: body.targetLocale,
-      pairs,
-      stringsOnPage: all.length,
-      previewedWords: words,
+    const job = await prisma.translationJob.create({
+      data: {
+        id: newId('tj'),
+        accountId: PREVIEW_ACCOUNT,
+        kind: 'preview',
+        status: 'running',
+        stats: {
+          url: page.finalUrl,
+          targetLocale: body.targetLocale,
+          runId,
+          stringsOnPage: all.length,
+          previewedWords: words,
+          items: items.map((i) => ({ id: i.id, source: i.source })),
+        },
+      },
     });
+
+    return sendOk(
+      res,
+      req,
+      {
+        previewId: job.id,
+        url: page.finalUrl,
+        targetLocale: body.targetLocale,
+        stringsOnPage: all.length,
+        previewedWords: words,
+      },
+      202,
+    );
+  }),
+);
+
+/**
+ * GET /preview/:id — poll a preview. previewId is an unguessable ULID;
+ * returns {status: 'running'|'done'|'failed', pairs?} and finalizes the
+ * job row on the first terminal poll.
+ */
+router.get(
+  '/preview/:id',
+  h(async (req, res) => {
+    const job = await prisma.translationJob.findUnique({ where: { id: pathParam(req, 'id') } });
+    if (!job || job.kind !== 'preview' || job.accountId !== PREVIEW_ACCOUNT) {
+      throw new ApiError(404, 'NOT_FOUND', 'preview not found');
+    }
+    const stats = job.stats as {
+      url: string;
+      targetLocale: string;
+      runId: string;
+      stringsOnPage: number;
+      previewedWords: number;
+      items: Array<{ id: string; source: string }>;
+      pairs?: Array<{ original: string; translated: string }>;
+    };
+    if (job.status === 'done') {
+      return sendOk(res, req, { status: 'done', url: stats.url, targetLocale: stats.targetLocale, pairs: stats.pairs ?? [] });
+    }
+    if (job.status === 'failed') {
+      return sendOk(res, req, { status: 'failed', error: job.error });
+    }
+    const run = await getRun(stats.runId);
+    if (['succeeded', 'completed'].includes(run.status)) {
+      const translated = parseTranslationOutput(run.output ?? '');
+      const byId = new Map(translated.map((t) => [t.id, t.value]));
+      const pairs = stats.items
+        .map((i) => ({ original: i.source, translated: byId.get(i.id) }))
+        .filter((p): p is { original: string; translated: string } => p.translated != null);
+      await prisma.translationJob.update({
+        where: { id: job.id },
+        data: { status: 'done', stats: { ...stats, items: [], pairs } },
+      });
+      return sendOk(res, req, { status: 'done', url: stats.url, targetLocale: stats.targetLocale, pairs });
+    }
+    if (['failed', 'error', 'cancelled'].includes(run.status)) {
+      await prisma.translationJob.update({
+        where: { id: job.id },
+        data: { status: 'failed', error: run.error ?? run.status },
+      });
+      return sendOk(res, req, { status: 'failed', error: run.error ?? run.status });
+    }
+    return sendOk(res, req, { status: 'running' });
   }),
 );
 

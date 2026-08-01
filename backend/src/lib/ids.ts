@@ -24,7 +24,9 @@ export type IdPrefix =
   | 'tj' // translation job (agent run)
   | 'ak' // developer API key
   | 'au' // agent-usage metering row
-  | 'bsub'; // billing subscription
+  | 'bsub' // billing subscription
+  | 'rst' // roster identity (SSO display cache — admin CRM)
+  | 'rmb'; // roster membership (identity ↔ accountId sighting)
 
 export function newId(prefix: IdPrefix): string {
   return `${prefix}_${ulid().toLowerCase()}`;
