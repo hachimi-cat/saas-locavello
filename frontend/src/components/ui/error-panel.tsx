@@ -3,10 +3,12 @@
 /**
  * Reusable error panel. Ported from saas-plugipay.
  *
- * Template uses inline styles + CSS custom properties (vs plugipay's
- * Tailwind). Products that add Tailwind can drop-in the plugipay
- * version — this file is intentionally styling-library-agnostic.
+ * Tokenized for the family theme (destructive CSS vars) so it renders
+ * correctly on the dark dashboard — the original template version used
+ * hard-coded light-red hexes. Export shape is unchanged.
  */
+
+import { TriangleAlert } from 'lucide-react';
 
 export interface ErrorPanelProps {
   title?: string;
@@ -19,54 +21,21 @@ export function ErrorPanel({ title, message, code, onRetry }: ErrorPanelProps) {
   return (
     <div
       role="alert"
-      style={{
-        borderRadius: 12,
-        border: '1px solid #fecaca',
-        background: '#fef2f2',
-        color: '#991b1b',
-        padding: 24,
-        display: 'flex',
-        alignItems: 'flex-start',
-        gap: 16,
-      }}
+      className="flex items-start gap-4 rounded-xl border border-destructive/30 bg-destructive/10 p-6 text-destructive"
     >
-      <span aria-hidden style={{ fontSize: 20, lineHeight: 1, marginTop: 2 }}>
-        ⚠
-      </span>
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <h3 style={{ fontSize: 14, fontWeight: 600, margin: 0 }}>
-          {title ?? 'Something went wrong'}
-        </h3>
-        <p style={{ fontSize: 14, margin: '4px 0 0', lineHeight: 1.5 }}>
+      <TriangleAlert aria-hidden className="mt-0.5 h-5 w-5 shrink-0" />
+      <div className="min-w-0 flex-1">
+        <h3 className="text-sm font-semibold">{title ?? 'Something went wrong'}</h3>
+        <p className="mt-1 text-sm leading-relaxed text-destructive/90">
           {message ?? 'The request failed. Try again in a moment.'}
         </p>
-        {code && (
-          <p
-            style={{
-              fontSize: 11,
-              fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, monospace',
-              opacity: 0.75,
-              margin: '8px 0 0',
-            }}
-          >
-            code: {code}
-          </p>
-        )}
+        {code && <p className="mt-2 font-mono text-[11px] opacity-75">code: {code}</p>}
         {onRetry && (
-          <div style={{ marginTop: 16 }}>
+          <div className="mt-4">
             <button
               type="button"
               onClick={onRetry}
-              style={{
-                padding: '6px 12px',
-                borderRadius: 6,
-                border: '1px solid #fca5a5',
-                background: '#fff',
-                color: '#991b1b',
-                fontSize: 13,
-                fontWeight: 500,
-                cursor: 'pointer',
-              }}
+              className="rounded-md border border-destructive/40 bg-transparent px-3 py-1.5 text-sm font-medium text-destructive transition-colors hover:bg-destructive/15"
             >
               Retry
             </button>

@@ -2,9 +2,12 @@
 
 import { useEffect, useState } from 'react';
 import {
+  BookMarked,
   BookOpen,
+  DatabaseZap,
   FileText,
-  Hexagon,
+  KeyRound,
+  Languages,
   LayoutDashboard,
   LifeBuoy,
   Menu,
@@ -46,10 +49,19 @@ const SUPPORT_URL = 'https://suppuo.com/portal/locavello';
 const SECTIONS: NavSection[] = [
   {
     label: 'Overview',
-    items: [{ href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard }],
+    items: [{ href: '/dashboard', label: 'Projects', icon: LayoutDashboard }],
   },
-  // Products add their own sections here, e.g.:
-  // { label: 'Billing', items: [{ href: '/dashboard/billing', label: 'Billing', icon: CreditCard }] },
+  {
+    label: 'Localization',
+    items: [
+      { href: '/dashboard/glossary', label: 'Glossary', icon: BookMarked },
+      { href: '/dashboard/tm', label: 'Translation memory', icon: DatabaseZap },
+    ],
+  },
+  {
+    label: 'Developers',
+    items: [{ href: '/dashboard/developers', label: 'API keys & CLI', icon: KeyRound }],
+  },
 ];
 
 // Profile-dropdown footer links (portal-ui Sidebar `dropdownLinks`).
@@ -121,7 +133,7 @@ export function DashboardShell({
         brandName={BRAND}
         brandColor={BRAND_COLOR}
         brandColorSoft={BRAND_COLOR_SOFT}
-        brandIcon={<Hexagon size={20} strokeWidth={2} />}
+        brandIcon={<Languages size={20} strokeWidth={2} />}
         workspacePersist="cookie"
         workspaces={workspaces}
         activeWorkspaceId={activeId}
