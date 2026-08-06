@@ -27,6 +27,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
+import { PageHeader } from '@/components/locavello/page-header';
 import { api, ApiRequestError } from '@/lib/api';
 
 /*
@@ -99,13 +100,10 @@ export default function SettingsPage() {
 
   return (
     <div className="mx-auto w-full max-w-5xl space-y-6">
-      <header>
-        <h1 className="text-2xl font-semibold">Settings</h1>
-        <p className="text-sm text-muted-foreground">
-          Your profile and security, synced with your Huudis identity across every Forjio
-          product.
-        </p>
-      </header>
+      <PageHeader
+        title="Settings"
+        description="Your profile and security, synced with your Huudis identity across every Forjio product."
+      />
 
       {loading ? (
         <div className="space-y-4">

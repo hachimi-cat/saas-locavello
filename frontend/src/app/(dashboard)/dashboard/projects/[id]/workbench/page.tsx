@@ -31,6 +31,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
 import { ErrorPanel } from '@/components/ui/error-panel';
 import { cn } from '@/lib/utils';
+import { PageHeader } from '@/components/locavello/page-header';
 import { StatusDot, TranslationStatusBadge } from '@/components/locavello/status-badge';
 import { queueMachinePass } from '@/components/locavello/jobs';
 import { TmSuggestionsPanel } from '@/components/locavello/tm-suggestions';
@@ -498,33 +499,33 @@ function WorkbenchInner() {
 
   return (
     <div className="mx-auto w-full max-w-7xl">
-      <header className="mb-4 flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <Link
-            href={`/dashboard/projects/${project.id}`}
-            className="mb-1 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-          >
-            <ArrowLeft className="h-3.5 w-3.5" /> {project.name}
-          </Link>
-          <h1 className="text-2xl font-semibold tracking-tight">Workbench</h1>
-        </div>
-        {locale && activeLocaleRow && activeLocaleRow.missing > 0 ? (
-          <Button
-            size="sm"
-            variant="outline"
-            disabled={queueingPass}
-            title={`Queue an agent pass over the ${activeLocaleRow.missing} untranslated keys — the word estimate is shown before it runs`}
-            onClick={() => void machineTranslateLocale()}
-          >
-            {queueingPass ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Bot className="h-4 w-4" />
-            )}
-            Machine translate {locale} ({activeLocaleRow.missing} missing)
-          </Button>
-        ) : null}
-      </header>
+      <Link
+        href={`/dashboard/projects/${project.id}`}
+        className="mb-1 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+      >
+        <ArrowLeft className="h-3.5 w-3.5" /> {project.name}
+      </Link>
+      <PageHeader
+        title="Workbench"
+        actions={
+          locale && activeLocaleRow && activeLocaleRow.missing > 0 ? (
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={queueingPass}
+              title={`Queue an agent pass over the ${activeLocaleRow.missing} untranslated keys — the word estimate is shown before it runs`}
+              onClick={() => void machineTranslateLocale()}
+            >
+              {queueingPass ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Bot className="h-4 w-4" />
+              )}
+              Machine translate {locale} ({activeLocaleRow.missing} missing)
+            </Button>
+          ) : null
+        }
+      />
 
       {project.locales.length === 0 ? (
         <Card className="mb-4">

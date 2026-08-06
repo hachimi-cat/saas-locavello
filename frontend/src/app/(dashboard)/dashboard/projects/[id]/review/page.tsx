@@ -35,6 +35,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
 import { ErrorPanel } from '@/components/ui/error-panel';
+import { PageHeader } from '@/components/locavello/page-header';
 import { TranslationStatusBadge } from '@/components/locavello/status-badge';
 import { errorCode, errorMessage } from '@/components/locavello/format';
 import type { ProjectDetail, ReviewRow } from '@/components/locavello/types';
@@ -223,37 +224,35 @@ export default function ReviewQueuePage() {
 
   return (
     <div className="mx-auto w-full max-w-5xl">
-      <header className="mb-6 flex flex-wrap items-end justify-between gap-4">
-        <div>
-          {project ? (
-            <Link
-              href={`/dashboard/projects/${project.id}`}
-              className="mb-1 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-            >
-              <ArrowLeft className="h-3.5 w-3.5" /> {project.name}
-            </Link>
-          ) : null}
-          <h1 className="text-2xl font-semibold tracking-tight">Review queue</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Machine output and flagged edits, oldest first. Approvals feed the translation memory.
-          </p>
-        </div>
-        {project && project.locales.length > 0 ? (
-          <Select value={locale} onValueChange={setLocale}>
-            <SelectTrigger className="w-40">
-              <SelectValue placeholder="Locale" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All locales</SelectItem>
-              {project.locales.map((l) => (
-                <SelectItem key={l.tag} value={l.tag}>
-                  {l.tag}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        ) : null}
-      </header>
+      {project ? (
+        <Link
+          href={`/dashboard/projects/${project.id}`}
+          className="mb-1 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" /> {project.name}
+        </Link>
+      ) : null}
+      <PageHeader
+        title="Review queue"
+        description="Machine output and flagged edits, oldest first. Approvals feed the translation memory."
+        actions={
+          project && project.locales.length > 0 ? (
+            <Select value={locale} onValueChange={setLocale}>
+              <SelectTrigger className="w-40">
+                <SelectValue placeholder="Locale" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All locales</SelectItem>
+                {project.locales.map((l) => (
+                  <SelectItem key={l.tag} value={l.tag}>
+                    {l.tag}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ) : null
+        }
+      />
 
       {error ? (
         <ErrorPanel

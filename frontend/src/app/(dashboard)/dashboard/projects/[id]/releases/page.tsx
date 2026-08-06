@@ -32,6 +32,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { ErrorPanel } from '@/components/ui/error-panel';
+import { PageHeader } from '@/components/locavello/page-header';
 import { errorCode, errorMessage, formatDate, shortHash } from '@/components/locavello/format';
 import type {
   ProjectDetail,
@@ -263,19 +264,21 @@ export default function ReleasesPage() {
 
   return (
     <div className="mx-auto w-full max-w-5xl">
-      <header className="mb-6">
-        <Link
-          href={`/dashboard/projects/${project.id}`}
-          className="mb-1 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft className="h-3.5 w-3.5" /> {project.name}
-        </Link>
-        <h1 className="text-2xl font-semibold tracking-tight">Releases</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          A release freezes a locale&apos;s catalog. <code className="font-mono text-xs">locavello pull</code>{' '}
-          ships the latest one; gated namespaces only ever release approved translations.
-        </p>
-      </header>
+      <Link
+        href={`/dashboard/projects/${project.id}`}
+        className="mb-1 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+      >
+        <ArrowLeft className="h-3.5 w-3.5" /> {project.name}
+      </Link>
+      <PageHeader
+        title="Releases"
+        description={
+          <>
+            A release freezes a locale&apos;s catalog. <code className="font-mono text-xs">locavello pull</code>{' '}
+            ships the latest one; gated namespaces only ever release approved translations.
+          </>
+        }
+      />
 
       <div className="space-y-6">
         {/* Publish */}

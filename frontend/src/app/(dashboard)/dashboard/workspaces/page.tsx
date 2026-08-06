@@ -19,6 +19,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
+import { PageHeader } from '@/components/locavello/page-header';
 import { api, ApiRequestError } from '@/lib/api';
 
 /*
@@ -112,16 +113,11 @@ export default function WorkspacesPage() {
 
   return (
     <div className="mx-auto w-full max-w-5xl space-y-6">
-      <header className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold">Workspaces</h1>
-          <p className="text-sm text-muted-foreground">
-            Each workspace has its own projects, translations, usage, and billing. Workspaces live
-            in Huudis and work across the whole Forjio family.
-          </p>
-        </div>
-        <CreateWorkspaceDialog onCreated={load} />
-      </header>
+      <PageHeader
+        title="Workspaces"
+        description="Each workspace has its own projects, translations, usage, and billing. Workspaces live in Huudis and work across the whole Forjio family."
+        actions={<CreateWorkspaceDialog onCreated={load} />}
+      />
 
       {loadError && (
         <div className="rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm">
