@@ -1,5 +1,6 @@
 'use client';
 
+import { AssistantSection } from '@/components/catentio/assistant-section';
 import { useCallback, useEffect, useState } from 'react';
 import {
   AlertTriangle,
@@ -104,6 +105,10 @@ export default function SettingsPage() {
         title="Settings"
         description="Your profile and security, synced with your Huudis identity across every Forjio product."
       />
+
+      {/* Assistant — renders only when the catentio pilot flag is on for
+          this user, so the page is unchanged for everyone else. */}
+      <AssistantSection />
 
       {loading ? (
         <div className="space-y-4">

@@ -19,6 +19,9 @@ const config: Config = {
     // without this glob the stat cards, health rows and flag table are
     // generated as bare markup with none of their classes.
     './node_modules/@forjio/admin-ui/dist/**/*.{js,cjs}',
+    // agent-ui ships the docked chat (the embedded catentio layer).
+    // Without this glob the composer and message list render unstyled.
+    './node_modules/@forjio/agent-ui/dist/**/*.{js,cjs}',
   ],
   theme: {
     extend: {

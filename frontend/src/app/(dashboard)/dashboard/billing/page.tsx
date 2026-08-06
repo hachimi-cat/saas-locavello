@@ -1,5 +1,6 @@
 'use client';
 
+import { CreditsSection } from '@/components/catentio/credits-section';
 import { useCallback, useEffect, useState } from 'react';
 import { Bot, Check, CreditCard, FolderOpen } from 'lucide-react';
 import { toast } from 'sonner';
@@ -189,6 +190,10 @@ export default function BillingPage() {
           );
         })}
       </div>
+      {/* Agent credits — renders only when the catentio pilot flag is on
+          for this user, so the page is unchanged for everyone else. The
+          sidebar chip links here (#credits). */}
+      <CreditsSection />
     </div>
   );
 }

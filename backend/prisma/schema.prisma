@@ -70,6 +70,10 @@ model FeatureFlag {
   /// Huudis user id of whoever last flipped it. Nullable because seeds and
   /// migrations write flags with no human behind them.
   updatedBy   String?
+  /// Subjects the flag is ON for regardless of `enabled` — Huudis user
+  /// ids and/or email addresses. This is how a pilot ships: off for the
+  /// world, on for the named few.
+  allowlist   String[] @default([])
 
   @@map("feature_flags")
 }
@@ -448,4 +452,19 @@ model AuditEvent {
   @@index([accountId, createdAt])
   @@index([accountId, action, createdAt])
   @@map("audit_events")
+}
+
+/// Per-workspace settings for the embedded catentio assistant. Absent
+/// row = auto-apply ON, matching every other product in the family
+/// (review mode is the opt-in, not the default).
+model AssistantSettings {
+  accountId String   @id
+  /// May the assistant apply changes itself (true) or does it propose
+  /// them as review cards (false)? Mirrored into the delegation
+  /// token's write scope on every chat dispatch.
+  autoApply Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("assistant_settings")
 }

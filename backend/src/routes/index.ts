@@ -25,6 +25,7 @@ import publicRouter from './public.js';
 import billingRouter from './billing.js';
 import webhooksPlugipayRouter from './webhooks-plugipay.js';
 import { rateLimit } from '../middleware/rate-limit.js';
+import catentioRouter from './catentio.js';
 
 /**
  * Route factory. Ported from saas-plugipay.
@@ -136,6 +137,10 @@ export default function routes(_opts: RoutesOptions = {}): ExpressRouter {
   router.use('/', translationsRouter); // /keys/:keyId/*, /translations/:id/*, /projects/:id/review-queue
   router.use('/projects', releasesRouter);
   router.use('/projects', translateRouter); // /:id/translate, /:id/jobs, /jobs/:jobId
+  // The embedded catentio assistant's BFF (distinct from lib/catentio.ts,
+  // which dispatches the locavello-translator agent as the translation
+  // provider). Delegated agent runs are refused here by name.
+  router.use('/catentio', catentioRouter);
   router.use('/glossary', glossaryRouter);
   router.use('/tm', tmRouter);
   router.use('/api-keys', apiKeysRouter);

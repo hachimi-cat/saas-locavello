@@ -31,6 +31,8 @@
     --input: 215 19% 35%;
     --ring: 38 92% 50%;
     --radius: 0.5rem;
+    /* The docked assistant composer surface. */
+    --agent-composer-bg: hsl(215 28% 17%);
   }
 }
 

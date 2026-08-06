@@ -26,6 +26,9 @@ export interface FeatureFlagRow {
   description: string | null;
   enabled: boolean;
   rollout: number | null;
+  /** Subjects the flag is ON for regardless of `enabled` — usr_ ids
+   *  and/or email addresses. */
+  allowlist: string[];
   updatedAt: string;
   updatedBy: string | null;
 }
@@ -50,6 +53,7 @@ function toRow(f: {
   description: string | null;
   enabled: boolean;
   rollout: number | null;
+  allowlist: string[];
   updatedAt: Date;
   updatedBy: string | null;
 }): FeatureFlagRow {
@@ -59,6 +63,7 @@ function toRow(f: {
     description: f.description,
     enabled: f.enabled,
     rollout: f.rollout,
+    allowlist: f.allowlist ?? [],
     updatedAt: f.updatedAt.toISOString(),
     updatedBy: f.updatedBy,
   };
@@ -102,12 +107,26 @@ export async function listFeatureFlags(): Promise<FeatureFlagRow[]> {
  * An unknown key is FALSE, never an error. A missing flag is the safest
  * possible answer and a typo in app code must not take a request down.
  */
+/** Case-insensitive membership — the allowlist carries usr_ ids AND
+ *  email addresses, and an address typed with different case must not
+ *  silently miss. */
+function matchesAllowlist(flag: FeatureFlagRow, subjectId: string): boolean {
+  const needle = subjectId.toLowerCase();
+  return (flag.allowlist ?? []).some((e: string) => e.toLowerCase() === needle);
+}
+
 export async function isEnabled(
   key: string,
   subjectId?: string | null,
 ): Promise<boolean> {
   const flag = (await cached()).get(key);
-  if (!flag || !flag.enabled) return false;
+  if (!flag) return false;
+  // The allowlist is checked BEFORE `enabled`, because the whole point is
+  // a feature that is off for the world and on for the pilot. An
+  // allowlist that only applied once the flag was already on would do
+  // nothing at all.
+  if (subjectId && matchesAllowlist(flag, subjectId)) return true;
+  if (!flag.enabled) return false;
   if (flag.rollout == null) return true;
   if (flag.rollout <= 0) return false;
   if (flag.rollout >= 100) return true;
@@ -185,6 +204,9 @@ export async function ensureFeatureFlag(def: {
   label: string;
   description?: string | null;
   defaultEnabled?: boolean;
+  /** Seeded on CREATE only, like `enabled` — a redeploy must never put
+   *  back somebody an operator deliberately removed from a pilot. */
+  defaultAllowlist?: string[];
 }): Promise<void> {
   await prisma.featureFlag.upsert({
     where: { key: def.key },
@@ -193,6 +215,7 @@ export async function ensureFeatureFlag(def: {
       label: def.label,
       description: def.description ?? null,
       enabled: def.defaultEnabled ?? false,
+      allowlist: def.defaultAllowlist ?? [],
     },
     update: { label: def.label, description: def.description ?? null },
   });

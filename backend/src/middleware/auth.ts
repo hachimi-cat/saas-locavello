@@ -4,6 +4,40 @@ import { resolveSessionForRequest, parseCookie } from '@forjio/sdk/auth-server';
 import { authConfig } from '../auth-config.js';
 import { recordIdentitySeen } from '../lib/identity-roster.js';
 import { sendErr } from '../lib/http.js';
+import {
+  DELEGATION_DENIED_PATHS as EMBED_DENIED_PATHS,
+  getDelegationSecret,
+  verifyDelegationToken,
+} from '@forjio/catentio-embed';
+import { LOCAVELLO_DELEGATION_PREFIX } from '../lib/catentio-profile.js';
+
+/**
+ * Allowlist-first: an embedded agent run may reach these prefixes and
+ * NOTHING else, whatever the method. These are exactly the resources in
+ * the product profile. Translation writes pass a mechanical placeholder-safety gate; routing a second, chattier writer around the side of it is exactly the shortcut this must not take.
+ */
+const DELEGATION_ALLOWED_PATHS = ['/api/v1/glossary'];
+
+/**
+ * Denied BEFORE the allowlist is consulted, so a future allowlist entry
+ * can never re-open one of them — the same deny-beats-allow ordering
+ * that makes the runtime's native-tool deny work. The package's floor
+ * is INHERITED rather than copied, so a later addition there lands here
+ * for free.
+ */
+const DELEGATION_DENIED_PATHS = [
+  ...EMBED_DENIED_PATHS,
+  '/api/v1/projects',
+  '/api/v1/keys',
+  '/api/v1/translations',
+  '/api/v1/tm',
+  '/api/v1/public',
+  '/api/v1/webhooks',
+  '/api/v1/webhook-subscriptions',
+  '/api/v1/audit',
+  '/api/v1/admin',
+  '/api/v1/huudis',
+];
 
 declare module 'express-serve-static-core' {
   interface Request {
@@ -78,6 +112,10 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
     req.auth = {
       sub: bffSession.huudisSub,
       accountId,
+      // email/name ride along for the catentio flag allowlist (which
+      // matches on either the usr_ id or the address) and for display.
+      email: bffSession.email,
+      name: bffSession.name,
       scope: '',
       iss: issuer,
       aud: audience,
@@ -88,6 +126,66 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
   }
 
   // Path 1 — Huudis-issued Bearer JWT.
+  // Path 3 — catentio delegation (`Authorization: Delegation <token>`):
+  // an embedded agent run acting for a signed-in member (see
+  // routes/catentio.ts; token minted there via @forjio/catentio-embed).
+  // Checked before the Bearer requirement below because a delegation
+  // header is not a Bearer header.
+  //
+  // Review mode mints the token WITHOUT the write bit, and refusing
+  // non-GET here is what makes the review step un-promptable: the agent
+  // cannot talk its way past an auth layer that never reads what it said.
+  const delegationHeader = req.headers.authorization;
+  if (delegationHeader?.startsWith('Delegation ')) {
+    // requireAuth runs inside mounted routers, where req.path alone is
+    // router-relative — match on baseUrl+path or every rule is a no-op.
+    const fullPath = `${req.baseUrl || ''}${req.path || ''}`;
+    const denied = DELEGATION_DENIED_PATHS.some(
+      (pth) => fullPath === pth || fullPath.startsWith(`${pth}/`),
+    );
+    const allowed =
+      !denied &&
+      DELEGATION_ALLOWED_PATHS.some((pth) => fullPath === pth || fullPath.startsWith(`${pth}/`));
+    if (!allowed) {
+      return sendErr(res, req, 403, 'FORBIDDEN', 'This resource is not available to delegated agents');
+    }
+    let delegationSecret: string;
+    try {
+      delegationSecret = getDelegationSecret();
+    } catch {
+      return sendErr(res, req, 401, 'INVALID_TOKEN', 'Invalid or expired delegation token');
+    }
+    const claims = verifyDelegationToken(
+      delegationHeader.slice('Delegation '.length),
+      delegationSecret,
+      { prefix: LOCAVELLO_DELEGATION_PREFIX },
+    );
+    if (!claims) {
+      return sendErr(res, req, 401, 'INVALID_TOKEN', 'Invalid or expired delegation token');
+    }
+    if (!claims.writes && req.method !== 'GET' && req.method !== 'HEAD') {
+      return sendErr(
+        res,
+        req,
+        403,
+        'FORBIDDEN',
+        'This assistant proposes changes for your approval — it cannot write directly',
+      );
+    }
+    req.auth = {
+      sub: claims.sub,
+      accountId: claims.workspaceId,
+      email: claims.email,
+      name: claims.name,
+      scope: '',
+      iss: issuer,
+      aud: audience,
+      exp: claims.exp,
+      iat: claims.iat,
+    } as unknown as ForjioClaims;
+    return next();
+  }
+
   const token = req.headers.authorization?.replace(/^Bearer /i, '');
   if (!token) {
     return sendErr(res, req, 401, 'AUTH_REQUIRED', 'Missing Authorization header');
