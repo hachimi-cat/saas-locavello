@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useMemo, useState } from 'react';
-import { Languages } from 'lucide-react';
+import { LocavelloMark } from '@/components/brand/logo';
 import { DockedChat, createBffChatAdapters, type ChatAction } from '@forjio/agent-ui';
 import { catentioHttp } from '@/lib/catentio-http';
 import { applyChatAction } from '@/components/catentio/chat-actions';
@@ -66,7 +66,7 @@ export function CatentioDockedChat() {
         onOpenChange={setOpen}
         title="Locavello Assistant"
         avatarUrl="/apple-touch-icon.png"
-        brandIcon={<Languages />}
+        brandIcon={<LocavelloMark />}
         onApplyAction={onApplyAction}
       />
     </div>
