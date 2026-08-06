@@ -238,7 +238,7 @@ export default function ReviewQueuePage() {
         actions={
           project && project.locales.length > 0 ? (
             <Select value={locale} onValueChange={setLocale}>
-              <SelectTrigger className="w-40">
+              <SelectTrigger className="w-full sm:w-40">
                 <SelectValue placeholder="Locale" />
               </SelectTrigger>
               <SelectContent>
