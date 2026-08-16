@@ -85,6 +85,72 @@ router.get(
   }),
 );
 
+/**
+ * Every field is optional here — this is a partial edit, and the agentic
+ * sheet sends only what changed.
+ *
+ * `.strict()` because the catentio profile declares exactly these five
+ * keys as editable; an undeclared key arriving means the profile and this
+ * route have drifted, and silently dropping it is how an agent comes to
+ * believe it wrote something it did not.
+ */
+const patchTermSchema = termSchema.partial().strict();
+
+router.patch(
+  '/:id',
+  h(async (req, res) => {
+    const row = await prisma.glossaryTerm.findUnique({ where: { id: pathParam(req, 'id') } });
+    if (!row || row.accountId !== accountId(req)) throw notFound('glossary term not found');
+    const body = patchTermSchema.parse(req.body ?? {});
+
+    if (body.projectId) {
+      const project = await prisma.project.findUnique({ where: { id: body.projectId } });
+      if (!project || project.accountId !== accountId(req)) throw notFound('project not found');
+    }
+
+    // Validate the RESULT, not the patch. `translation` and `locale` are
+    // separately optional, so either one alone can create the invalid
+    // pair: setting a translation on a row whose locale is null, or
+    // nulling the locale of a row that already carries a translation.
+    // Checking only `body` passes both.
+    const next = {
+      term: body.term ?? row.term,
+      projectId: body.projectId === undefined ? row.projectId : (body.projectId ?? null),
+      locale: body.locale === undefined ? row.locale : (body.locale ?? null),
+      translation: body.translation === undefined ? row.translation : (body.translation ?? null),
+      note: body.note === undefined ? row.note : (body.note ?? null),
+    };
+    if (next.translation && !next.locale) {
+      throw new ApiError(422, 'VALIDATION_ERROR', 'a forced translation needs a locale', 'locale');
+    }
+
+    // Same uniqueness rule POST enforces (account + project + term +
+    // locale), excluding this row — without the exclusion, saving a term
+    // without changing its scope conflicts with itself.
+    const clash = await prisma.glossaryTerm.findFirst({
+      where: {
+        accountId: accountId(req),
+        projectId: next.projectId,
+        term: next.term,
+        locale: next.locale,
+        id: { not: row.id },
+      },
+    });
+    if (clash) throw conflict(`glossary term "${next.term}" already exists for this scope`);
+
+    const updated = await prisma.glossaryTerm.update({ where: { id: row.id }, data: next });
+    await recordAudit(prisma, {
+      accountId: accountId(req),
+      actor: actorOf(req),
+      action: 'glossary_term.updated',
+      target: { type: 'glossary_term', id: updated.id },
+      summary: `Updated glossary term "${updated.term}"${updated.locale ? ` (${updated.locale})` : ' (do-not-translate)'}`,
+      metadata: { changed: Object.keys(body), term: updated.term, locale: updated.locale, projectId: updated.projectId },
+    });
+    return sendOk(res, req, updated);
+  }),
+);
+
 router.delete(
   '/:id',
   h(async (req, res) => {
