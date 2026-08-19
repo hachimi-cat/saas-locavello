@@ -14,6 +14,20 @@ const brand = process.env.NEXT_PUBLIC_BRAND_NAME ?? 'Locavello';
 export const metadata: Metadata = {
   title: { default: brand, template: `%s | ${brand}` },
   description: `${brand} — part of the Forjio commerce suite.`,
+  // The apple-touch icon, rendered from src/app/icon.svg (the navy tile
+  // with the amber Languages glyph). Until 2026-08-19 locavello never
+  // shipped this file, and the docked assistant's avatar
+  // (`/apple-touch-icon.png`, copied from linksnap) was a broken image
+  // on every reply. The `icon:` entry must ride along: in Next 15.5 an
+  // explicit metadata.icons REPLACES the app/icon.svg file-convention
+  // link instead of merging (serront proved it with two builds,
+  // 2026-08-19 — with only `apple:` here the tab-favicon link vanished
+  // from every prerendered page). The file convention still BUILDS the
+  // /icon.svg route; this entry re-declares the link to it.
+  icons: {
+    icon: [{ url: '/icon.svg', type: 'image/svg+xml', sizes: 'any' }],
+    apple: '/apple-touch-icon.png',
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

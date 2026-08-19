@@ -48,15 +48,19 @@ export function CatentioDockedChat() {
   if (!enabled) return null;
 
   // Insets mirror <main>'s padding so the dock lines up with the page
-  // content. Expanded: full SCREEN on mobile (fixed inset-0 over
-  // everything), full column height on desktop at the same content
-  // width (the linksnap layout decisions, 2026-08-05).
+  // content (linksnap's layout decision, 2026-08-05). locavello's shell
+  // pads `p-4 md:p-6` (dashboard-shell.tsx), so the step is at `md:`
+  // here — copying linksnap's `sm:` verbatim left the dock 8px inside
+  // the content between 640 and 767px (the same defect ripllo fixed in
+  // its Phase 5, e919d93). Expanded: full SCREEN below md (fixed
+  // inset-0 over everything), full column height above it at the same
+  // content width.
   return (
     <div
       className={
         open
-          ? 'fixed inset-0 z-50 flex flex-col sm:absolute sm:inset-x-6 sm:bottom-6 sm:top-6 sm:z-40 sm:mx-auto sm:max-w-4xl'
-          : 'absolute inset-x-4 bottom-4 z-40 mx-auto flex max-w-4xl flex-col sm:inset-x-6 sm:bottom-6'
+          ? 'fixed inset-0 z-50 flex flex-col md:absolute md:inset-x-6 md:bottom-6 md:top-6 md:z-40 md:mx-auto md:max-w-4xl'
+          : 'absolute inset-x-4 bottom-4 z-40 mx-auto flex max-w-4xl flex-col md:inset-x-6 md:bottom-6'
       }
     >
       <DockedChat
@@ -65,8 +69,23 @@ export function CatentioDockedChat() {
         open={open}
         onOpenChange={setOpen}
         title="Locavello Assistant"
+        // The assistant's bubble avatar. Served from public/ — until
+        // 2026-08-19 this pointed at a file locavello never shipped
+        // (the value was copied from linksnap, which ships one), and
+        // every reply carried the browser's broken-image glyph.
         avatarUrl="/apple-touch-icon.png"
         brandIcon={<LocavelloMark />}
+        // Starter prompts on a new session (bang, 2026-08-08: a greeting
+        // and three ways in). Phrased as the merchant talking, not as
+        // menu items, and drawn from what the agent can actually finish
+        // here — the GLOSSARY is the one writable surface (the live
+        // agent prompt and catentio-profile.ts both refuse translations,
+        // keys, releases and jobs). Clicking SENDS.
+        suggestions={[
+          'Add our brand names to the glossary as do-not-translate',
+          'Force our preferred French translation for a term',
+          'Show me our glossary terms and what each one enforces',
+        ]}
         onApplyAction={onApplyAction}
       />
     </div>
