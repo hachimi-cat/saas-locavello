@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { marked } from 'marked';
 import matter from 'gray-matter';
+import { REFERENCE_NAV } from './docs-reference.generated';
 
 /*
  * Docs loader — reads markdown from the repo-root `copy/docs/` directory
@@ -46,6 +47,8 @@ export const DOC_NAV: DocMeta[] = [
   { slug: 'nextjs-adapter', title: 'Next.js adapter', group: 'Reference', href: '/docs/nextjs-adapter' },
   { slug: 'cli-reference', title: 'CLI reference', group: 'Reference', href: '/docs/cli-reference' },
   { slug: 'api-reference', title: 'API reference', group: 'Reference', href: '/docs/api-reference' },
+  // Every route, generated from the API spec (scripts/apigen.sh)
+  ...REFERENCE_NAV,
 ];
 
 export function docsGroups(): Array<{ heading: string; items: DocMeta[] }> {

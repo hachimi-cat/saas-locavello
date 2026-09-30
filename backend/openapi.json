@@ -1,0 +1,2551 @@
+{
+ "openapi": "3.1.0",
+ "info": {
+  "title": "locavello",
+  "version": "0.0.1"
+ },
+ "paths": {
+  "/api/v1/admin/crm/customers": {
+   "get": {
+    "operationId": "getAdminCrmCustomers",
+    "summary": "List customers",
+    "tags": [
+     "admin"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": "src/routes/admin-crm.ts:59",
+     "guards": [
+      "adminGuard"
+     ]
+    }
+   }
+  },
+  "/api/v1/admin/crm/stats": {
+   "get": {
+    "operationId": "getAdminCrmStats",
+    "summary": "List stats",
+    "tags": [
+     "admin"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": "src/routes/admin-crm.ts:28",
+     "guards": [
+      "adminGuard"
+     ]
+    }
+   }
+  },
+  "/api/v1/admin/crm/transactions": {
+   "get": {
+    "operationId": "getAdminCrmTransactions",
+    "summary": "List transactions",
+    "tags": [
+     "admin"
+    ],
+    "parameters": [
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {}
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/admin-crm.ts:135",
+     "guards": [
+      "adminGuard"
+     ]
+    }
+   }
+  },
+  "/api/v1/admin/customers": {
+   "get": {
+    "operationId": "getAdminCustomers",
+    "summary": "List customers",
+    "tags": [
+     "admin"
+    ],
+    "parameters": [
+     {
+      "name": "cursor",
+      "in": "query",
+      "required": false,
+      "schema": {}
+     },
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {}
+     },
+     {
+      "name": "q",
+      "in": "query",
+      "required": false,
+      "schema": {}
+     },
+     {
+      "name": "status",
+      "in": "query",
+      "required": false,
+      "schema": {}
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/admin-customers.ts:21",
+     "guards": [
+      "adminGuard"
+     ]
+    }
+   }
+  },
+  "/api/v1/admin/feature-flags": {
+   "get": {
+    "operationId": "getAdminFeatureFlags",
+    "summary": "List feature flags",
+    "tags": [
+     "admin"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": "src/routes/admin-feature-flags.ts:25",
+     "guards": [
+      "adminGuard"
+     ]
+    }
+   }
+  },
+  "/api/v1/admin/feature-flags/{key}": {
+   "patch": {
+    "operationId": "patchAdminFeatureFlagsKey",
+    "summary": "Update a feature flag",
+    "tags": [
+     "admin"
+    ],
+    "parameters": [
+     {
+      "name": "key",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/admin-feature-flags.ts:33",
+     "guards": [
+      "adminGuard"
+     ],
+     "body": "read-unknown"
+    },
+    "requestBody": {
+     "required": false,
+     "content": {
+      "application/json": {
+       "schema": {
+        "type": "object",
+        "properties": {}
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/v1/admin/metrics": {
+   "get": {
+    "operationId": "getAdminMetrics",
+    "summary": "List metrics",
+    "tags": [
+     "admin"
+    ],
+    "parameters": [
+     {
+      "name": "days",
+      "in": "query",
+      "required": false,
+      "schema": {}
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/admin-metrics.ts:67",
+     "guards": [
+      "adminGuard"
+     ]
+    }
+   }
+  },
+  "/api/v1/admin/system-health": {
+   "get": {
+    "operationId": "getAdminSystemHealth",
+    "summary": "List system health",
+    "tags": [
+     "admin"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": "src/routes/admin-system-health.ts:73",
+     "guards": [
+      "adminGuard"
+     ]
+    }
+   }
+  },
+  "/api/v1/api-keys": {
+   "post": {
+    "operationId": "postApiKeys",
+    "summary": "Mint `lv_live_…`.",
+    "description": "POST /api-keys — mint `lv_live_…`. The plaintext is returned ONCE and\nstored only as a sha256 hash; the prefix column powers \"lv_live_ab…\"\ndisplay.",
+    "tags": [
+     "api-keys"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": "src/routes/api-keys.ts:29",
+     "guards": [
+      "adminGuard",
+      "requireAuthOrApiKey"
+     ],
+     "body": "validated",
+     "bodySchema": "createSchema"
+    },
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "type": "object",
+        "properties": {
+         "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+         }
+        },
+        "required": [
+         "name"
+        ],
+        "additionalProperties": false
+       }
+      }
+     }
+    }
+   },
+   "get": {
+    "operationId": "getApiKeys",
+    "summary": "List api keys",
+    "tags": [
+     "api-keys"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": "src/routes/api-keys.ts:56",
+     "guards": [
+      "adminGuard",
+      "requireAuthOrApiKey"
+     ]
+    }
+   }
+  },
+  "/api/v1/api-keys/{id}": {
+   "delete": {
+    "operationId": "deleteApiKeysId",
+    "summary": "Delete an api key",
+    "tags": [
+     "api-keys"
+    ],
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/api-keys.ts:75",
+     "guards": [
+      "adminGuard",
+      "requireAuthOrApiKey"
+     ]
+    }
+   }
+  },
+  "/api/v1/audit": {
+   "get": {
+    "operationId": "getAudit",
+    "summary": "List audit",
+    "tags": [
+     "audit"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": "src/routes/audit.ts:46",
+     "guards": [
+      "adminGuard",
+      "requireAuthOrApiKey"
+     ]
+    }
+   }
+  },
+  "/api/v1/auth/huudis/callback": {
+   "get": {
+    "operationId": "getAuthHuudisCallback",
+    "summary": "List callback",
+    "tags": [
+     "auth"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": null,
+     "guards": []
+    }
+   }
+  },
+  "/api/v1/auth/huudis/start": {
+   "get": {
+    "operationId": "getAuthHuudisStart",
+    "summary": "List start",
+    "tags": [
+     "auth"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": null,
+     "guards": []
+    }
+   }
+  },
+  "/api/v1/auth/login": {
+   "post": {
+    "operationId": "postAuthLogin",
+    "summary": "Create a login",
+    "tags": [
+     "auth"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": null,
+     "guards": [],
+     "body": "unknown"
+    }
+   }
+  },
+  "/api/v1/auth/logout": {
+   "post": {
+    "operationId": "postAuthLogout",
+    "summary": "Create a logout",
+    "tags": [
+     "auth"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": null,
+     "guards": [],
+     "body": "unknown"
+    }
+   }
+  },
+  "/api/v1/auth/me": {
+   "get": {
+    "operationId": "getAuthMe",
+    "summary": "List me",
+    "tags": [
+     "auth"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": null,
+     "guards": []
+    }
+   }
+  },
+  "/api/v1/auth/password-reset/complete": {
+   "post": {
+    "operationId": "postAuthPasswordResetComplete",
+    "summary": "Create a complete",
+    "tags": [
+     "auth"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": null,
+     "guards": [],
+     "body": "unknown"
+    }
+   }
+  },
+  "/api/v1/auth/password-reset/request": {
+   "post": {
+    "operationId": "postAuthPasswordResetRequest",
+    "summary": "Create a request",
+    "tags": [
+     "auth"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": null,
+     "guards": [],
+     "body": "unknown"
+    }
+   }
+  },
+  "/api/v1/auth/signup": {
+   "post": {
+    "operationId": "postAuthSignup",
+    "summary": "Create a signup",
+    "tags": [
+     "auth"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": null,
+     "guards": [],
+     "body": "unknown"
+    }
+   }
+  },
+  "/api/v1/billing": {
+   "get": {
+    "operationId": "getBilling",
+    "summary": "List billing",
+    "tags": [
+     "billing"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": "src/routes/billing.ts:29",
+     "guards": [
+      "adminGuard",
+      "requireAuthOrApiKey"
+     ]
+    }
+   }
+  },
+  "/api/v1/billing/checkout": {
+   "post": {
+    "operationId": "postBillingCheckout",
+    "summary": "Create a checkout",
+    "tags": [
+     "billing"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": "src/routes/billing.ts:61",
+     "guards": [
+      "adminGuard",
+      "requireAuthOrApiKey"
+     ],
+     "body": "validated",
+     "bodySchema": "checkoutBody"
+    },
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "type": "object",
+        "properties": {
+         "tier": {
+          "type": "string",
+          "enum": [
+           "free",
+           "starter",
+           "pro",
+           "scale"
+          ]
+         }
+        },
+        "required": [
+         "tier"
+        ],
+        "additionalProperties": false
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/v1/catentio/chat": {
+   "post": {
+    "operationId": "postCatentioChat",
+    "summary": "Create a chat",
+    "tags": [
+     "catentio"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": null,
+     "guards": [
+      "adminGuard",
+      "requireAuthOrApiKey"
+     ],
+     "body": "unknown"
+    }
+   }
+  },
+  "/api/v1/catentio/chat/attachments": {
+   "post": {
+    "operationId": "postCatentioChatAttachments",
+    "summary": "Create an attachment",
+    "tags": [
+     "catentio"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": null,
+     "guards": [
+      "adminGuard",
+      "requireAuthOrApiKey"
+     ],
+     "body": "unknown"
+    }
+   }
+  },
+  "/api/v1/catentio/chat/media": {
+   "get": {
+    "operationId": "getCatentioChatMedia",
+    "summary": "List media",
+    "tags": [
+     "catentio"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": null,
+     "guards": [
+      "adminGuard",
+      "requireAuthOrApiKey"
+     ]
+    }
+   }
+  },
+  "/api/v1/catentio/chat/runs/{runId}": {
+   "get": {
+    "operationId": "getCatentioChatRunsRunId",
+    "summary": "Get a run",
+    "tags": [
+     "catentio"
+    ],
+    "parameters": [
+     {
+      "name": "runId",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "x-forjio": {
+     "source": null,
+     "guards": [
+      "adminGuard",
+      "requireAuthOrApiKey"
+     ]
+    }
+   }
+  },
+  "/api/v1/catentio/chat/sessions": {
+   "get": {
+    "operationId": "getCatentioChatSessions",
+    "summary": "List sessions",
+    "tags": [
+     "catentio"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": null,
+     "guards": [
+      "adminGuard",
+      "requireAuthOrApiKey"
+     ]
+    }
+   }
+  },
+  "/api/v1/catentio/chat/sessions/{id}": {
+   "get": {
+    "operationId": "getCatentioChatSessionsId",
+    "summary": "Get a session",
+    "tags": [
+     "catentio"
+    ],
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "x-forjio": {
+     "source": null,
+     "guards": [
+      "adminGuard",
+      "requireAuthOrApiKey"
+     ]
+    }
+   },
+   "put": {
+    "operationId": "putCatentioChatSessionsId",
+    "summary": "Replace a session",
+    "tags": [
+     "catentio"
+    ],
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "x-forjio": {
+     "source": null,
+     "guards": [
+      "adminGuard",
+      "requireAuthOrApiKey"
+     ],
+     "body": "unknown"
+    }
+   },
+   "delete": {
+    "operationId": "deleteCatentioChatSessionsId",
+    "summary": "Delete a session",
+    "tags": [
+     "catentio"
+    ],
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "x-forjio": {
+     "source": null,
+     "guards": [
+      "adminGuard",
+      "requireAuthOrApiKey"
+     ]
+    }
+   }
+  },
+  "/api/v1/catentio/credits": {
+   "get": {
+    "operationId": "getCatentioCredits",
+    "summary": "List credits",
+    "tags": [
+     "catentio"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": null,
+     "guards": [
+      "adminGuard",
+      "requireAuthOrApiKey"
+     ]
+    }
+   }
+  },
+  "/api/v1/catentio/credits/topup": {
+   "post": {
+    "operationId": "postCatentioCreditsTopup",
+    "summary": "Create a topup",
+    "tags": [
+     "catentio"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": null,
+     "guards": [
+      "adminGuard",
+      "requireAuthOrApiKey"
+     ],
+     "body": "unknown"
+    }
+   }
+  },
+  "/api/v1/catentio/plan": {
+   "post": {
+    "operationId": "postCatentioPlan",
+    "summary": "Create a plan",
+    "tags": [
+     "catentio"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": null,
+     "guards": [
+      "adminGuard",
+      "requireAuthOrApiKey"
+     ],
+     "body": "unknown"
+    }
+   }
+  },
+  "/api/v1/catentio/runs/{runId}/media/{filename}": {
+   "get": {
+    "operationId": "getCatentioRunsRunIdMediaFilename",
+    "summary": "Get a media",
+    "tags": [
+     "catentio"
+    ],
+    "parameters": [
+     {
+      "name": "runId",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "filename",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "x-forjio": {
+     "source": null,
+     "guards": [
+      "adminGuard",
+      "requireAuthOrApiKey"
+     ]
+    }
+   }
+  },
+  "/api/v1/catentio/settings": {
+   "get": {
+    "operationId": "getCatentioSettings",
+    "summary": "List settings",
+    "tags": [
+     "catentio"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": null,
+     "guards": [
+      "adminGuard",
+      "requireAuthOrApiKey"
+     ]
+    }
+   },
+   "patch": {
+    "operationId": "patchCatentioSettings",
+    "summary": "Update settings",
+    "tags": [
+     "catentio"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": null,
+     "guards": [
+      "adminGuard",
+      "requireAuthOrApiKey"
+     ],
+     "body": "unknown"
+    }
+   }
+  },
+  "/api/v1/catentio/status": {
+   "get": {
+    "operationId": "getCatentioStatus",
+    "summary": "List status",
+    "tags": [
+     "catentio"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": null,
+     "guards": [
+      "adminGuard",
+      "requireAuthOrApiKey"
+     ]
+    }
+   }
+  },
+  "/api/v1/glossary": {
+   "post": {
+    "operationId": "postGlossary",
+    "summary": "Create a glossary",
+    "tags": [
+     "glossary"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": "src/routes/glossary.ts:29",
+     "guards": [
+      "adminGuard",
+      "requireAuthOrApiKey"
+     ],
+     "body": "validated",
+     "bodySchema": "termSchema"
+    },
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "type": "object",
+        "properties": {
+         "term": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+         },
+         "projectId": {
+          "type": "string",
+          "nullable": true
+         },
+         "locale": {
+          "type": "string",
+          "nullable": true
+         },
+         "translation": {
+          "type": "string",
+          "maxLength": 500,
+          "nullable": true
+         },
+         "note": {
+          "type": "string",
+          "maxLength": 1000,
+          "nullable": true
+         }
+        },
+        "required": [
+         "term"
+        ],
+        "additionalProperties": false
+       }
+      }
+     }
+    }
+   },
+   "get": {
+    "operationId": "getGlossary",
+    "summary": "List glossary",
+    "tags": [
+     "glossary"
+    ],
+    "parameters": [
+     {
+      "name": "projectId",
+      "in": "query",
+      "required": false,
+      "schema": {}
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/glossary.ts:72",
+     "guards": [
+      "adminGuard",
+      "requireAuthOrApiKey"
+     ]
+    }
+   }
+  },
+  "/api/v1/glossary/{id}": {
+   "patch": {
+    "operationId": "patchGlossaryId",
+    "summary": "Update a glossary",
+    "tags": [
+     "glossary"
+    ],
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/glossary.ts:99",
+     "guards": [
+      "adminGuard",
+      "requireAuthOrApiKey"
+     ],
+     "body": "validated",
+     "bodySchema": "patchTermSchema"
+    },
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "type": "object",
+        "properties": {
+         "term": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+         },
+         "projectId": {
+          "type": "string",
+          "nullable": true
+         },
+         "locale": {
+          "type": "string",
+          "nullable": true
+         },
+         "translation": {
+          "type": "string",
+          "maxLength": 500,
+          "nullable": true
+         },
+         "note": {
+          "type": "string",
+          "maxLength": 1000,
+          "nullable": true
+         }
+        },
+        "additionalProperties": false
+       }
+      }
+     }
+    }
+   },
+   "delete": {
+    "operationId": "deleteGlossaryId",
+    "summary": "Delete a glossary",
+    "tags": [
+     "glossary"
+    ],
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/glossary.ts:154",
+     "guards": [
+      "adminGuard",
+      "requireAuthOrApiKey"
+     ]
+    }
+   }
+  },
+  "/api/v1/health": {
+   "get": {
+    "operationId": "getHealth",
+    "summary": "No auth, returns service name + status + dependency checks.",
+    "description": "GET /api/v1/health — no auth, returns service name + status +\n dependency checks. Every Forjio service exposes the same shape\n so uptime monitors are uniform.",
+    "tags": [
+     "health"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": "src/routes/index.ts:66",
+     "guards": []
+    }
+   }
+  },
+  "/api/v1/huudis*": {
+   "get": {
+    "operationId": "getHuudis",
+    "summary": "List huudis*",
+    "tags": [
+     "huudis*"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": null,
+     "guards": []
+    }
+   },
+   "post": {
+    "operationId": "postHuudis",
+    "summary": "Create a huudis*",
+    "tags": [
+     "huudis*"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": null,
+     "guards": [],
+     "body": "unknown"
+    }
+   },
+   "patch": {
+    "operationId": "patchHuudis",
+    "summary": "Update huudis*",
+    "tags": [
+     "huudis*"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": null,
+     "guards": [],
+     "body": "unknown"
+    }
+   },
+   "delete": {
+    "operationId": "deleteHuudis",
+    "summary": "Delete huudis*",
+    "tags": [
+     "huudis*"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": null,
+     "guards": []
+    }
+   }
+  },
+  "/api/v1/keys/{keyId}": {
+   "patch": {
+    "operationId": "patchKeysKeyId",
+    "summary": "Context metadata edits from the workbench.",
+    "description": "PATCH /keys/:keyId — context metadata edits from the workbench.",
+    "tags": [
+     "keys"
+    ],
+    "parameters": [
+     {
+      "name": "keyId",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/translations.ts:42",
+     "guards": [
+      "adminGuard",
+      "requireAuthOrApiKey"
+     ],
+     "body": "validated",
+     "bodySchema": "patchKeySchema"
+    },
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "type": "object",
+        "properties": {
+         "description": {
+          "type": "string",
+          "maxLength": 2000,
+          "nullable": true
+         },
+         "maxLength": {
+          "type": "integer",
+          "exclusiveMinimum": true,
+          "minimum": 0,
+          "nullable": true
+         },
+         "screenshotUrl": {
+          "type": "string",
+          "format": "uri",
+          "maxLength": 1000,
+          "nullable": true
+         }
+        },
+        "additionalProperties": false
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/v1/keys/{keyId}/translations/{locale}": {
+   "put": {
+    "operationId": "putKeysKeyIdTranslationsLocale",
+    "summary": "Write a translation.",
+    "description": "PUT /keys/:keyId/translations/:locale — write a translation. The\nplaceholder-safety gate is enforced HERE, mechanically, on every\nwrite: a translation that drops or renames an ICU placeholder never\nenters the database.",
+    "tags": [
+     "keys"
+    ],
+    "parameters": [
+     {
+      "name": "keyId",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "locale",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/translations.ts:76",
+     "guards": [
+      "adminGuard",
+      "requireAuthOrApiKey"
+     ],
+     "body": "validated",
+     "bodySchema": "setTranslationSchema"
+    },
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "type": "object",
+        "properties": {
+         "value": {
+          "type": "string",
+          "maxLength": 20000
+         },
+         "status": {
+          "type": "string",
+          "enum": [
+           "machine",
+           "needs_review",
+           "approved"
+          ],
+          "default": "needs_review"
+         },
+         "author": {
+          "type": "string",
+          "maxLength": 200
+         }
+        },
+        "required": [
+         "value"
+        ],
+        "additionalProperties": false
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/v1/projects": {
+   "post": {
+    "operationId": "postProjects",
+    "summary": "Create a project",
+    "tags": [
+     "projects"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": "src/routes/projects.ts:41",
+     "guards": [
+      "adminGuard",
+      "requireAuthOrApiKey"
+     ],
+     "body": "validated",
+     "bodySchema": "createProjectSchema"
+    },
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "type": "object",
+        "properties": {
+         "slug": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{1,63}$"
+         },
+         "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+         },
+         "sourceLocale": {
+          "type": "string",
+          "pattern": "^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$",
+          "default": "en"
+         },
+         "mode": {
+          "type": "string",
+          "enum": [
+           "sdk",
+           "proxy"
+          ],
+          "default": "sdk"
+         },
+         "siteUrl": {
+          "type": "string",
+          "format": "uri",
+          "maxLength": 500
+         }
+        },
+        "required": [
+         "slug",
+         "name"
+        ],
+        "additionalProperties": false
+       }
+      }
+     }
+    }
+   },
+   "get": {
+    "operationId": "getProjects",
+    "summary": "List projects",
+    "tags": [
+     "projects"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": "src/routes/projects.ts:88",
+     "guards": [
+      "adminGuard",
+      "requireAuthOrApiKey"
+     ]
+    }
+   }
+  },
+  "/api/v1/projects/{id}": {
+   "get": {
+    "operationId": "getProjectsId",
+    "summary": "Get a project",
+    "tags": [
+     "projects"
+    ],
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/projects.ts:145",
+     "guards": [
+      "adminGuard",
+      "requireAuthOrApiKey"
+     ]
+    }
+   },
+   "patch": {
+    "operationId": "patchProjectsId",
+    "summary": "Update a project",
+    "tags": [
+     "projects"
+    ],
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/projects.ts:167",
+     "guards": [
+      "adminGuard",
+      "requireAuthOrApiKey"
+     ],
+     "body": "validated",
+     "bodySchema": "patchProjectSchema"
+    },
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "type": "object",
+        "properties": {
+         "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+         },
+         "siteUrl": {
+          "type": "string",
+          "format": "uri",
+          "maxLength": 500,
+          "nullable": true
+         }
+        },
+        "additionalProperties": false
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/v1/projects/{id}/check": {
+   "get": {
+    "operationId": "getProjectsIdCheck",
+    "summary": "The CI gate report.",
+    "description": "GET /projects/:id/check — the CI gate report. Non-empty `errors`\nshould fail the build. Everything here is mechanical: missing keys\nper enabled locale, placeholder mismatches, length overflows, and\nglossary violations (do-not-translate terms that got translated\naway).",
+    "tags": [
+     "projects"
+    ],
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/releases.ts:254",
+     "guards": [
+      "adminGuard",
+      "requireAuthOrApiKey"
+     ]
+    }
+   }
+  },
+  "/api/v1/projects/{id}/crawl": {
+   "post": {
+    "operationId": "postProjectsIdCrawl",
+    "summary": "Queue a Mode B crawl of the project's siteUrl.",
+    "description": "POST /projects/:id/crawl — queue a Mode B crawl of the project's\nsiteUrl. Strings land in the 'site' namespace; pages in SitePage.",
+    "tags": [
+     "projects"
+    ],
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/translate.ts:103",
+     "guards": [
+      "adminGuard",
+      "requireAuthOrApiKey"
+     ],
+     "body": "none"
+    }
+   }
+  },
+  "/api/v1/projects/{id}/jobs": {
+   "get": {
+    "operationId": "getProjectsIdJobs",
+    "summary": "List jobs",
+    "tags": [
+     "projects"
+    ],
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/translate.ts:149",
+     "guards": [
+      "adminGuard",
+      "requireAuthOrApiKey"
+     ]
+    }
+   }
+  },
+  "/api/v1/projects/{id}/keys": {
+   "put": {
+    "operationId": "putProjectsIdKeys",
+    "summary": "The extract/push endpoint.",
+    "description": "PUT /projects/:id/keys — the extract/push endpoint. Bulk-upserts keys\nwith source text + context; declared ICU placeholders are derived from\nthe source text server-side so the placeholder-safety gate can never\ndisagree with the source of truth.",
+    "tags": [
+     "projects"
+    ],
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/keys.ts:46",
+     "guards": [
+      "adminGuard",
+      "requireAuthOrApiKey"
+     ],
+     "body": "validated",
+     "bodySchema": "upsertSchema"
+    },
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "type": "object",
+        "properties": {
+         "keys": {
+          "type": "array",
+          "items": {
+           "type": "object",
+           "properties": {
+            "namespace": {
+             "type": "string",
+             "default": "default"
+            },
+            "name": {
+             "type": "string",
+             "minLength": 1,
+             "maxLength": 2000
+            },
+            "sourceText": {
+             "type": "string",
+             "maxLength": 10000
+            },
+            "description": {
+             "type": "string",
+             "maxLength": 2000,
+             "nullable": true
+            },
+            "maxLength": {
+             "type": "integer",
+             "exclusiveMinimum": true,
+             "minimum": 0,
+             "nullable": true
+            },
+            "context": {
+             "type": "object",
+             "additionalProperties": {}
+            }
+           },
+           "required": [
+            "name",
+            "sourceText"
+           ],
+           "additionalProperties": false
+          },
+          "minItems": 1,
+          "maxItems": 2000
+         },
+         "prune": {
+          "type": "boolean",
+          "default": false
+         }
+        },
+        "required": [
+         "keys"
+        ],
+        "additionalProperties": false
+       }
+      }
+     }
+    }
+   },
+   "get": {
+    "operationId": "getProjectsIdKeys",
+    "summary": "The workbench list.",
+    "description": "GET /projects/:id/keys — the workbench list. Filters: namespace,\nq (substring on name/sourceText), locale+status (translation state\nfor a locale, status=missing means no row).",
+    "tags": [
+     "projects"
+    ],
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "archived",
+      "in": "query",
+      "required": false,
+      "schema": {}
+     },
+     {
+      "name": "locale",
+      "in": "query",
+      "required": false,
+      "schema": {}
+     },
+     {
+      "name": "namespace",
+      "in": "query",
+      "required": false,
+      "schema": {}
+     },
+     {
+      "name": "q",
+      "in": "query",
+      "required": false,
+      "schema": {}
+     },
+     {
+      "name": "status",
+      "in": "query",
+      "required": false,
+      "schema": {}
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/keys.ts:149",
+     "guards": [
+      "adminGuard",
+      "requireAuthOrApiKey"
+     ]
+    }
+   }
+  },
+  "/api/v1/projects/{id}/locales": {
+   "post": {
+    "operationId": "postProjectsIdLocales",
+    "summary": "Locales a project",
+    "tags": [
+     "projects"
+    ],
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/projects.ts:193",
+     "guards": [
+      "adminGuard",
+      "requireAuthOrApiKey"
+     ],
+     "body": "validated",
+     "bodySchema": "addLocaleSchema"
+    },
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "type": "object",
+        "properties": {
+         "tag": {
+          "type": "string",
+          "pattern": "^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$"
+         },
+         "fallback": {
+          "type": "string",
+          "pattern": "^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$",
+          "nullable": true
+         },
+         "rtl": {
+          "type": "boolean",
+          "default": false
+         }
+        },
+        "required": [
+         "tag"
+        ],
+        "additionalProperties": false
+       }
+      }
+     }
+    }
+   },
+   "get": {
+    "operationId": "getProjectsIdLocales",
+    "summary": "List locales",
+    "tags": [
+     "projects"
+    ],
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/projects.ts:254",
+     "guards": [
+      "adminGuard",
+      "requireAuthOrApiKey"
+     ]
+    }
+   }
+  },
+  "/api/v1/projects/{id}/locales/{tag}": {
+   "patch": {
+    "operationId": "patchProjectsIdLocalesTag",
+    "summary": "Update a locale",
+    "tags": [
+     "projects"
+    ],
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "tag",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/projects.ts:232",
+     "guards": [
+      "adminGuard",
+      "requireAuthOrApiKey"
+     ],
+     "body": "validated",
+     "bodySchema": "patchLocaleSchema"
+    },
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "type": "object",
+        "properties": {
+         "fallback": {
+          "type": "string",
+          "pattern": "^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$",
+          "nullable": true
+         },
+         "rtl": {
+          "type": "boolean"
+         },
+         "enabled": {
+          "type": "boolean"
+         }
+        },
+        "additionalProperties": false
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/v1/projects/{id}/namespaces": {
+   "post": {
+    "operationId": "postProjectsIdNamespaces",
+    "summary": "Namespaces a project",
+    "tags": [
+     "projects"
+    ],
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/projects.ts:269",
+     "guards": [
+      "adminGuard",
+      "requireAuthOrApiKey"
+     ],
+     "body": "validated",
+     "bodySchema": "addNamespaceSchema"
+    },
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "type": "object",
+        "properties": {
+         "name": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$"
+         },
+         "reviewPolicy": {
+          "type": "string",
+          "enum": [
+           "standard",
+           "gated"
+          ],
+          "default": "standard"
+         }
+        },
+        "required": [
+         "name"
+        ],
+        "additionalProperties": false
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/v1/projects/{id}/namespaces/{name}": {
+   "patch": {
+    "operationId": "patchProjectsIdNamespacesName",
+    "summary": "Update a namespace",
+    "tags": [
+     "projects"
+    ],
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "name",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/projects.ts:297",
+     "guards": [
+      "adminGuard",
+      "requireAuthOrApiKey"
+     ],
+     "body": "validated",
+     "bodySchema": "patchNamespaceSchema"
+    },
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "type": "object",
+        "properties": {
+         "reviewPolicy": {
+          "type": "string",
+          "enum": [
+           "standard",
+           "gated"
+          ]
+         }
+        },
+        "required": [
+         "reviewPolicy"
+        ],
+        "additionalProperties": false
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/v1/projects/{id}/pages": {
+   "get": {
+    "operationId": "getProjectsIdPages",
+    "summary": "List pages",
+    "tags": [
+     "projects"
+    ],
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/translate.ts:136",
+     "guards": [
+      "adminGuard",
+      "requireAuthOrApiKey"
+     ]
+    }
+   }
+  },
+  "/api/v1/projects/{id}/pull": {
+   "get": {
+    "operationId": "getProjectsIdPull",
+    "summary": "The CI endpoint.",
+    "description": "GET /projects/:id/pull — the CI endpoint. Returns, per enabled\nlocale, the latest release's catalog (or a draft build when no\nrelease exists yet and ?draft=true). Also returns the source-locale\nkey list so the CLI can emit locavello.d.ts. `en-XA` (pseudo) is\nsynthesized on the fly from source text — no account cost.",
+    "tags": [
+     "projects"
+    ],
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "draft",
+      "in": "query",
+      "required": false,
+      "schema": {}
+     },
+     {
+      "name": "pseudo",
+      "in": "query",
+      "required": false,
+      "schema": {}
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/releases.ts:189",
+     "guards": [
+      "adminGuard",
+      "requireAuthOrApiKey"
+     ]
+    }
+   }
+  },
+  "/api/v1/projects/{id}/releases": {
+   "post": {
+    "operationId": "postProjectsIdReleases",
+    "summary": "Publish.",
+    "description": "POST /projects/:id/releases — publish. Idempotent on content: same\ncatalog → the existing release is returned, no new row.",
+    "tags": [
+     "projects"
+    ],
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/releases.ts:67",
+     "guards": [
+      "adminGuard",
+      "requireAuthOrApiKey"
+     ],
+     "body": "validated",
+     "bodySchema": "publishSchema"
+    },
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "type": "object",
+        "properties": {
+         "locale": {
+          "type": "string",
+          "minLength": 2
+         }
+        },
+        "required": [
+         "locale"
+        ],
+        "additionalProperties": false
+       }
+      }
+     }
+    }
+   },
+   "get": {
+    "operationId": "getProjectsIdReleases",
+    "summary": "List releases",
+    "tags": [
+     "projects"
+    ],
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "locale",
+      "in": "query",
+      "required": false,
+      "schema": {}
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/releases.ts:129",
+     "guards": [
+      "adminGuard",
+      "requireAuthOrApiKey"
+     ]
+    }
+   }
+  },
+  "/api/v1/projects/{id}/review-queue": {
+   "get": {
+    "operationId": "getProjectsIdReviewQueue",
+    "summary": "Everything machine-produced or flagged, with the key context the reviewer needs, oldest first.",
+    "description": "GET /projects/:id/review-queue — everything machine-produced or\nflagged, with the key context the reviewer needs, oldest first.",
+    "tags": [
+     "projects"
+    ],
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "locale",
+      "in": "query",
+      "required": false,
+      "schema": {}
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/translations.ts:192",
+     "guards": [
+      "adminGuard",
+      "requireAuthOrApiKey"
+     ]
+    }
+   }
+  },
+  "/api/v1/projects/{id}/translate": {
+   "post": {
+    "operationId": "postProjectsIdTranslate",
+    "summary": "Queue a machine first pass for a locale.",
+    "description": "POST /projects/:id/translate — queue a machine first pass for a\nlocale. Returns the job immediately with an upfront word ESTIMATE\n(untranslated source words) so the cost is visible before the run —\nthe worker refines stats as it goes.",
+    "tags": [
+     "projects"
+    ],
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/translate.ts:31",
+     "guards": [
+      "adminGuard",
+      "requireAuthOrApiKey"
+     ],
+     "body": "validated",
+     "bodySchema": "translateSchema"
+    },
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "type": "object",
+        "properties": {
+         "locale": {
+          "type": "string",
+          "minLength": 2
+         }
+        },
+        "required": [
+         "locale"
+        ],
+        "additionalProperties": false
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/v1/projects/jobs/{jobId}": {
+   "get": {
+    "operationId": "getProjectsJobsJobId",
+    "summary": "Get a job",
+    "tags": [
+     "projects"
+    ],
+    "parameters": [
+     {
+      "name": "jobId",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/translate.ts:162",
+     "guards": [
+      "adminGuard",
+      "requireAuthOrApiKey"
+     ]
+    }
+   }
+  },
+  "/api/v1/projects/releases/{a}/diff/{b}": {
+   "get": {
+    "operationId": "getProjectsReleasesADiffB",
+    "summary": "Key-level diff between two releases.",
+    "description": "GET /releases/:a/diff/:b — key-level diff between two releases.",
+    "tags": [
+     "projects"
+    ],
+    "parameters": [
+     {
+      "name": "a",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "b",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/releases.ts:327",
+     "guards": [
+      "adminGuard",
+      "requireAuthOrApiKey"
+     ]
+    }
+   }
+  },
+  "/api/v1/projects/releases/{releaseId}": {
+   "get": {
+    "operationId": "getProjectsReleasesReleaseId",
+    "summary": "The frozen catalog (Mode B serving + diffs read this).",
+    "description": "GET /releases/:id — the frozen catalog (Mode B serving + diffs read this).",
+    "tags": [
+     "projects"
+    ],
+    "parameters": [
+     {
+      "name": "releaseId",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/releases.ts:169",
+     "guards": [
+      "adminGuard",
+      "requireAuthOrApiKey"
+     ]
+    }
+   }
+  },
+  "/api/v1/public/preview": {
+   "post": {
+    "operationId": "postPublicPreview",
+    "summary": "Create a preview",
+    "tags": [
+     "public"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": "src/routes/public.ts:43",
+     "guards": [
+      "adminGuard"
+     ],
+     "body": "validated",
+     "bodySchema": "previewSchema"
+    },
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "type": "object",
+        "properties": {
+         "url": {
+          "type": "string",
+          "minLength": 4,
+          "maxLength": 2000
+         },
+         "targetLocale": {
+          "type": "string",
+          "pattern": "^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$",
+          "default": "id"
+         }
+        },
+        "required": [
+         "url"
+        ],
+        "additionalProperties": false
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/v1/public/preview/{id}": {
+   "get": {
+    "operationId": "getPublicPreviewId",
+    "summary": "Poll a preview.",
+    "description": "GET /preview/:id — poll a preview. previewId is an unguessable ULID;\nreturns {status: 'running'|'done'|'failed', pairs?} and finalizes the\njob row on the first terminal poll.",
+    "tags": [
+     "public"
+    ],
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/public.ts:141",
+     "guards": [
+      "adminGuard"
+     ]
+    }
+   }
+  },
+  "/api/v1/public/projects/{id}/catalog": {
+   "get": {
+    "operationId": "getPublicProjectsIdCatalog",
+    "summary": "What locavello.js consumes.",
+    "description": "GET /projects/:id/catalog?locale=xx — what locavello.js consumes.\nServes the latest published release for the locale (plus its\nfallback chain, pre-flattened so the client does zero logic).",
+    "tags": [
+     "public"
+    ],
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "locale",
+      "in": "query",
+      "required": false,
+      "schema": {}
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/public.ts:192",
+     "guards": [
+      "adminGuard"
+     ]
+    }
+   },
+   "options": {
+    "operationId": "optionsPublicProjectsIdCatalog",
+    "summary": "Catalog a project",
+    "tags": [
+     "public"
+    ],
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "x-forjio": {
+     "source": null,
+     "guards": [
+      "adminGuard"
+     ]
+    }
+   }
+  },
+  "/api/v1/tm": {
+   "get": {
+    "operationId": "getTm",
+    "summary": "Browse the whole memory, newest-first, cursor-paged.",
+    "description": "GET /tm — browse the whole memory, newest-first, cursor-paged. The\nTM screen lists this on load (742 entries must not hide behind a\nsearch box); `target` narrows to one locale.",
+    "tags": [
+     "tm"
+    ],
+    "parameters": [
+     {
+      "name": "target",
+      "in": "query",
+      "required": false,
+      "schema": {}
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/tm.ts:54",
+     "guards": [
+      "adminGuard",
+      "requireAuthOrApiKey"
+     ]
+    }
+   }
+  },
+  "/api/v1/tm/search": {
+   "get": {
+    "operationId": "getTmSearch",
+    "summary": "The TM screen's cross-project search.",
+    "description": "GET /tm/search?q=&target= — the TM screen's cross-project search.",
+    "tags": [
+     "tm"
+    ],
+    "parameters": [
+     {
+      "name": "q",
+      "in": "query",
+      "required": false,
+      "schema": {}
+     },
+     {
+      "name": "target",
+      "in": "query",
+      "required": false,
+      "schema": {}
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/tm.ts:86",
+     "guards": [
+      "adminGuard",
+      "requireAuthOrApiKey"
+     ]
+    }
+   }
+  },
+  "/api/v1/tm/suggest": {
+   "get": {
+    "operationId": "getTmSuggest",
+    "summary": "Workbench + agent suggestions.",
+    "description": "GET /tm/suggest?text=&target= — workbench + agent suggestions.\nExact match first (sourceHash), then substring candidates. The\ncross-project reuse this enables is the compounding asset the whole\nproduct is built around.",
+    "tags": [
+     "tm"
+    ],
+    "parameters": [
+     {
+      "name": "target",
+      "in": "query",
+      "required": false,
+      "schema": {}
+     },
+     {
+      "name": "text",
+      "in": "query",
+      "required": false,
+      "schema": {}
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/tm.ts:23",
+     "guards": [
+      "adminGuard",
+      "requireAuthOrApiKey"
+     ]
+    }
+   }
+  },
+  "/api/v1/translations/{id}/approve": {
+   "post": {
+    "operationId": "postTranslationsIdApprove",
+    "summary": "Approve a translation",
+    "tags": [
+     "translations"
+    ],
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/translations.ts:256",
+     "guards": [
+      "adminGuard",
+      "requireAuthOrApiKey"
+     ],
+     "body": "none"
+    }
+   }
+  },
+  "/api/v1/translations/{id}/reject": {
+   "post": {
+    "operationId": "postTranslationsIdReject",
+    "summary": "Reject a translation",
+    "tags": [
+     "translations"
+    ],
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/translations.ts:290",
+     "guards": [
+      "adminGuard",
+      "requireAuthOrApiKey"
+     ],
+     "body": "validated",
+     "bodySchema": "rejectSchema"
+    },
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "type": "object",
+        "properties": {
+         "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+         }
+        },
+        "required": [
+         "reason"
+        ],
+        "additionalProperties": false
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/v1/webhook-subscriptions": {
+   "get": {
+    "operationId": "getWebhookSubscriptions",
+    "summary": "List webhook subscriptions",
+    "tags": [
+     "webhook-subscriptions"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": "src/routes/webhook-subscriptions.ts:47",
+     "guards": [
+      "adminGuard",
+      "requireAuthOrApiKey",
+      "rateLimit"
+     ]
+    }
+   },
+   "post": {
+    "operationId": "postWebhookSubscriptions",
+    "summary": "Create a webhook subscription",
+    "tags": [
+     "webhook-subscriptions"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": "src/routes/webhook-subscriptions.ts:65",
+     "guards": [
+      "adminGuard",
+      "requireAuthOrApiKey",
+      "rateLimit"
+     ],
+     "body": "validated",
+     "bodySchema": "createBody"
+    },
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "type": "object",
+        "properties": {
+         "url": {
+          "type": "string",
+          "format": "uri",
+          "maxLength": 2000,
+          "pattern": "^http"
+         },
+         "events": {
+          "type": "array",
+          "items": {
+           "type": "string"
+          },
+          "minItems": 1,
+          "maxItems": 20
+         }
+        },
+        "required": [
+         "url"
+        ],
+        "additionalProperties": false
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/v1/webhook-subscriptions/{id}": {
+   "patch": {
+    "operationId": "patchWebhookSubscriptionsId",
+    "summary": "Update a webhook subscription",
+    "tags": [
+     "webhook-subscriptions"
+    ],
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/webhook-subscriptions.ts:98",
+     "guards": [
+      "adminGuard",
+      "requireAuthOrApiKey",
+      "rateLimit"
+     ],
+     "body": "validated",
+     "bodySchema": "patchBody"
+    },
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "type": "object",
+        "properties": {
+         "active": {
+          "type": "boolean"
+         }
+        },
+        "required": [
+         "active"
+        ],
+        "additionalProperties": false
+       }
+      }
+     }
+    }
+   },
+   "delete": {
+    "operationId": "deleteWebhookSubscriptionsId",
+    "summary": "Delete a webhook subscription",
+    "tags": [
+     "webhook-subscriptions"
+    ],
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/webhook-subscriptions.ts:124",
+     "guards": [
+      "adminGuard",
+      "requireAuthOrApiKey",
+      "rateLimit"
+     ]
+    }
+   }
+  },
+  "/api/v1/webhooks/plugipay": {
+   "post": {
+    "operationId": "postWebhooksPlugipay",
+    "summary": "Create a plugipay",
+    "tags": [
+     "webhooks"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": "src/routes/webhooks-plugipay.ts:27",
+     "guards": [
+      "adminGuard"
+     ],
+     "body": "none"
+    }
+   }
+  }
+ },
+ "x-apigen": {
+  "routes": 85,
+  "matched": 57,
+  "bodies": {
+   "validated": 19,
+   "fieldsOnly": 0,
+   "takesBody": 20
+  }
+ }
+}

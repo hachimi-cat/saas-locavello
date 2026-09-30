@@ -649,6 +649,10 @@ class LocavelloClient:
         self.api_keys = _ApiKeys(self)
         self.billing = _Billing(self)
         self.public = _Public(self)
+        # Every feature route, one method each (generated from the API spec).
+        from .api_generated import GeneratedApi
+
+        self.api = GeneratedApi(self)
 
     def request(
         self,
@@ -726,6 +730,28 @@ class LocavelloClient:
                 "has_more": bool(m.get("hasMore", False)),
             }
         return envelope.get("data") if isinstance(envelope, dict) else envelope
+
+    def _apigen_request(
+        self,
+        method: str,
+        path: str,
+        *,
+        query: Optional[Dict[str, Any]] = None,
+        body: Any = None,
+    ) -> Any:
+        """The call behind ``client.api.*`` (api_generated.py): the same key, envelope and
+        retries as every other call; the public surface (``/api/v1/public/*``) goes without a
+        key, like ``client.public``. Booleans go on the wire as ``true``/``false``."""
+        flat = {
+            k: ("true" if v else "false") if isinstance(v, bool) else v
+            for k, v in (query or {}).items()
+        }
+        return self.request(
+            method,
+            path + _qs(flat),
+            body=body,
+            no_auth=path.startswith("/api/v1/public/"),
+        )
 
     def _backoff(self, attempt: int) -> None:
         time.sleep(self._retry_base_ms * (2**attempt) / 1000.0)

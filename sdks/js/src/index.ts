@@ -14,6 +14,10 @@
  * exponential backoff); writes never retry.
  */
 
+import { GeneratedApi } from './api.generated.js';
+
+export { GeneratedApi } from './api.generated.js';
+
 // ─── Envelope + error ─────────────────────────────────────────────────
 
 export interface ApiEnvelope<T> {
@@ -518,6 +522,25 @@ export class LocavelloClient {
   async request<T>(args: FetchArgs): Promise<T> {
     const envelope = await this.requestEnvelope<T>(args);
     return envelope.data as T;
+  }
+
+  /** Every feature route, one method each (generated from the API spec: api.generated.ts). */
+  readonly api: GeneratedApi = new GeneratedApi(this);
+
+  /** The call behind `client.api.*`: the same key, envelope and retries as every other
+   *  call; the public surface (`/api/v1/public/*`) goes without a key, like `public.*`. */
+  async apigenRequest(method: string, path: string, query: Record<string, unknown> | undefined, body: unknown): Promise<unknown> {
+    const qs = query
+      ? new URLSearchParams(
+          Object.entries(query).map(([k, v]): [string, string] => [k, typeof v === 'string' ? v : JSON.stringify(v)]),
+        ).toString()
+      : '';
+    return this.request<unknown>({
+      method: method as FetchArgs['method'],
+      path: qs ? `${path}?${qs}` : path,
+      body,
+      noAuth: path.startsWith('/api/v1/public/'),
+    });
   }
 
   /** List call — array in `data`, cursor/hasMore in `meta`. */

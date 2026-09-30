@@ -3,4 +3,4 @@ from .client import LocavelloClient, paginate
 from .errors import LocavelloError
 
 __all__ = ["LocavelloClient", "LocavelloError", "paginate"]
-__version__ = "0.1.0"
+__version__ = "0.1.1"
