@@ -14,7 +14,7 @@ const brand = process.env.LOCAVELLO ?? 'locavello';
 const program = new Command()
   .name(brand)
   .description(`CLI for ${brand} — extract, push, pull, and gate your app's translations.`)
-  .version('0.1.1');
+  .version('0.1.2');
 
 program.addCommand(auth);
 program.addCommand(init);

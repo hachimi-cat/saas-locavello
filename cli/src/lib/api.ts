@@ -1,11 +1,13 @@
 import { fail } from './fail.js';
+import { refreshIfSessionToken, storedBearer } from './credentials.js';
 
 /**
  * Envelope-aware HTTP client for the Locavello engine API.
  *
  * Base URL is `<apiUrl>/api/v1`; auth is `Authorization: Bearer
- * lv_live_…`. Every response uses the Forjio envelope `{ data, error,
- * meta }` — on non-2xx we print `error.code: error.message` and exit 1.
+ * lv_live_…` (or the Huudis session from `locavello auth login`). Every
+ * response uses the Forjio envelope `{ data, error, meta }` — on non-2xx
+ * we print `error.code: error.message` and exit 1.
  */
 
 export interface ApiEnvelope<T> {
@@ -19,11 +21,16 @@ export interface ApiClient {
   apiKey: string;
 }
 
-/** Resolve the API key: `--api-key` flag beats `LOCAVELLO_API_KEY` env. */
+/**
+ * Resolve the bearer: the `--api-key` flag, then `LOCAVELLO_API_KEY`, then
+ * what `locavello auth login` saved (an API key, or a Huudis session).
+ */
 export function resolveApiKey(flag?: string): string {
-  const key = flag ?? process.env.LOCAVELLO_API_KEY;
+  const key = flag || process.env.LOCAVELLO_API_KEY || storedBearer()?.token;
   if (!key) {
-    return fail('No API key. Set the LOCAVELLO_API_KEY env var or pass --api-key <lv_live_…>.');
+    return fail(
+      'Not signed in. Run `locavello auth login --api-key <lv_live_…>` (or `locavello auth login` with your Huudis account), set LOCAVELLO_API_KEY, or pass --api-key <lv_live_…>.',
+    );
   }
   return key;
 }
@@ -35,12 +42,18 @@ export async function apiRequest<T>(
   body?: unknown,
 ): Promise<T> {
   const url = `${client.apiUrl.replace(/\/+$/, '')}/api/v1${pathname}`;
+  let bearer: string;
+  try {
+    bearer = await refreshIfSessionToken(client.apiKey);
+  } catch (e) {
+    return fail((e as Error).message);
+  }
   let res: Response;
   try {
     res = await fetch(url, {
       method,
       headers: {
-        Authorization: `Bearer ${client.apiKey}`,
+        Authorization: `Bearer ${bearer}`,
         ...(body !== undefined ? { 'Content-Type': 'application/json' } : {}),
       },
       ...(body !== undefined ? { body: JSON.stringify(body) } : {}),

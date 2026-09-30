@@ -46,9 +46,31 @@ walking up from the current directory:
 ### Authentication
 
 The API key is deliberately **not** part of `locavello.json`, so it can
-never land in a repo. Resolution order: the `--api-key` flag beats the
-`LOCAVELLO_API_KEY` environment variable. Commands that need the engine
-fail with a clear message when neither is set.
+never land in a repo. Sign in once per machine instead:
+
+```bash
+locavello auth login --api-key - < ./locavello-key.txt   # save an lv_live_ key (read from stdin)
+locavello auth login                                     # or: your Huudis account, in the browser
+locavello auth whoami
+```
+
+| Command | What it does |
+|---|---|
+| `locavello auth login --api-key <key>` | Save an `lv_live_` API key (Dashboard → Developers) — for your machine, servers and CI. Pass `-` as the key to read it from stdin, so it stays out of your shell history. |
+| `locavello auth login` | Sign in with your Huudis account instead: the CLI prints a code and opens the browser (device flow); approve it there. `--no-browser` only prints the link. |
+| `locavello auth whoami` | Show what the CLI is signed in as: which key, or the Huudis user. |
+| `locavello auth logout` | Delete the saved key or session. |
+
+Each `auth` command takes `--json`. `auth login` saves to
+`~/.locavello/session.json` (readable only by you; a Huudis session
+refreshes itself). `--issuer <url>` (or `LOCAVELLO_HUUDIS_ISSUER`) and
+`--client-id <id>` (or `LOCAVELLO_CLI_CLIENT_ID`, default
+`locavello-cli`) point the sign-in at another Huudis or OIDC client.
+
+Resolution order: the `--api-key` flag, then the `LOCAVELLO_API_KEY`
+environment variable (handy in CI), then what `locavello auth login`
+saved. Commands that need the engine fail with a clear message when
+none is set.
 
 ---
 

@@ -1,6 +1,6 @@
 {
   "name": "@forjio/locavello-cli",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "CLI for Locavello (part of the Forjio commerce suite).",
   "type": "module",
   "main": "dist/index.js",
