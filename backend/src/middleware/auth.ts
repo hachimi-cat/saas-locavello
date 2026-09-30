@@ -47,6 +47,13 @@ declare module 'express-serve-static-core' {
 
 const issuer = process.env.HUUDIS_ISSUER ?? 'https://huudis.com';
 const audience = process.env.HUUDIS_AUDIENCE ?? process.env.FORJIO_SERVICE ?? 'locavello';
+/** `locavello auth login` signs in through the CLI's own public OIDC client
+ *  (`locavello-cli`, device flow), and Huudis stamps `aud` with the client a token
+ *  was minted for — so CLI tokens carry aud=locavello-cli. Accepted next to the
+ *  primary audience. HUUDIS_CLI_AUDIENCE overrides that client id; set it
+ *  to an empty value to refuse CLI tokens. */
+const cliAudience = process.env.HUUDIS_CLI_AUDIENCE ?? `${audience}-cli`;
+const acceptedAudiences = cliAudience ? [audience, cliAudience] : [audience];
 
 /** Product-route auth. Two paths:
  *
@@ -191,7 +198,10 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
     return sendErr(res, req, 401, 'AUTH_REQUIRED', 'Missing Authorization header');
   }
   try {
-    req.auth = await verifyAccessToken(token, { issuer, audience });
+    // @forjio/sdk types `audience` as a string before 0.12.2 but hands it straight
+    // to jose's jwtVerify, which takes string | string[]. Drop the cast once the
+    // backend is on @forjio/sdk ^0.12.2.
+    req.auth = await verifyAccessToken(token, { issuer, audience: acceptedAudiences as unknown as string });
     next();
   } catch (e) {
     const authErr = e instanceof AuthError ? e : new AuthError('INVALID_TOKEN', 'verification failed');
