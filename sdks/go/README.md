@@ -5,7 +5,8 @@ localization platform REST API — projects, keys, translations, review,
 releases, agent jobs, glossary, translation memory, and the public
 Mode B preview/catalog surface.
 
-Current version: **v0.1.0**.
+Current version: **v0.2.0** — adds `Client.API`, every feature route
+generated from the API spec.
 
 ```bash
 go get github.com/hachimi-cat/locavello-go
@@ -93,6 +94,20 @@ fmt.Println(cat.Catalog["default:hero.title"])
 | `APIKeys` | `Create` (plaintext shown once), `List`, `Revoke` |
 | `Billing` | `Get` (subscription + usage + tier table), `Checkout(tier)` → hosted checkout URL |
 | `Public` | `Preview`, `PreviewResult`, `Catalog` (no API key, no Authorization header) |
+| `API` | Every feature route, one method each — generated from the API spec (`api_generated.go`) |
+
+`c.API.<Area><Action>(ctx, pathParams…, *<Area><Action>Args)` covers every
+route of the API with the same key, envelope and retries as the resources
+above (the `/api/v1/public/*` routes without a key), and returns the
+response's `data` as `json.RawMessage`. Required fields are plain values,
+optional ones pointers (`locavello.Ptr`), slices or maps; `Body` passes the
+whole JSON body.
+
+```go
+data, err := c.API.GlossaryCreate(ctx, &locavello.GlossaryCreateArgs{
+	Term: "checkout", Locale: locavello.Ptr("id"),
+})
+```
 
 List endpoints return `Page[T]{Data, Cursor, HasMore}` read from the
 envelope's `meta`; `Paginate` loops `cursor`/`hasMore` and collects
