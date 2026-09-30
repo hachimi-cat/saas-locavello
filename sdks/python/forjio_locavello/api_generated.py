@@ -39,9 +39,9 @@ class GeneratedApi:
         """List api keys (GET /api/v1/api-keys)."""
         return self._call("GET", f"/api/v1/api-keys", {}, None)
 
-    def audit_list(self) -> Any:
+    def audit_list(self, *, action: Optional[Any] = None, actor: Optional[Any] = None, q: Optional[Any] = None) -> Any:
         """List audit (GET /api/v1/audit)."""
-        return self._call("GET", f"/api/v1/audit", {}, None)
+        return self._call("GET", f"/api/v1/audit", {"action": action, "actor": actor, "q": q}, None)
 
     def billing_checkout(self, *, tier: Optional[str] = None, json_body: Optional[Dict[str, Any]] = None) -> Any:
         """Create a checkout (POST /api/v1/billing/checkout).
@@ -324,7 +324,7 @@ class GeneratedApi:
         return self._call("POST", f"/api/v1/public/preview", {}, payload)
 
     def public_preview(self, id_: str) -> Any:
-        """Poll a preview. (GET /api/v1/public/preview/{id})."""
+        """Poll a preview. previewId is an unguessable ULID; returns {status: 'running'|'done'|'failed', pairs?} and finalizes the job row on the first terminal poll. (GET /api/v1/public/preview/{id})."""
         return self._call("GET", f"/api/v1/public/preview/{_q(id_)}", {}, None)
 
     def public_projects_catalog(self, id_: str, *, locale: Optional[Any] = None) -> Any:

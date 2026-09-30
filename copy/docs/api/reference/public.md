@@ -9,7 +9,7 @@ Generated from Locavello's own code: every route in this area, what it takes and
 | Method | Path | What it does |
 |---|---|---|
 | `POST` | `/api/v1/public/preview` | [Create a preview](#create-a-preview) |
-| `GET` | `/api/v1/public/preview/{id}` | [Poll a preview.](#poll-a-preview) |
+| `GET` | `/api/v1/public/preview/{id}` | [Poll a preview. previewId is an unguessable ULID; returns {status: 'running'\|'done'\|'failed', pairs?} and finalizes the job row on the first terminal poll.](#poll-a-preview-previewid-is-an-unguessable-ulid-returns-status-runningdonefailed-pairs-and-finalizes-the-job-row-on-the-first-terminal-poll) |
 | `GET` | `/api/v1/public/projects/{id}/catalog` | [What locavello.js consumes.](#what-locavellojs-consumes) |
 
 ## Create a preview
@@ -34,7 +34,7 @@ curl -X POST "https://locavello.forjio.com/api/v1/public/preview" \
   -d '{"url":"…","targetLocale":"id"}'
 ```
 
-## Poll a preview.
+## Poll a preview. previewId is an unguessable ULID; returns {status: 'running'\|'done'\|'failed', pairs?} and finalizes the job row on the first terminal poll.
 
 ```
 GET /api/v1/public/preview/{id}

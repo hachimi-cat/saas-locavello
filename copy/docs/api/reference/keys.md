@@ -39,7 +39,7 @@ PATCH /keys/:keyId — context metadata edits from the workbench.
 curl -X PATCH "https://locavello.forjio.com/api/v1/keys/:keyId" \
   -H "Authorization: Bearer lv_live_<your API key>" \
   -H "Content-Type: application/json" \
-  -d '{"description":"…","maxLength":0,"screenshotUrl":"…"}'
+  -d '{"description":"…","maxLength":1,"screenshotUrl":"…"}'
 ```
 
 ## Write a translation.

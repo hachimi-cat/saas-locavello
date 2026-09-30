@@ -59,7 +59,23 @@ export const API_ROUTES: Array<{ area: string; routes: Route[] }> = [
     "path": "/api/v1/audit",
     "summary": "List audit",
     "pathParams": [],
-    "query": [],
+    "query": [
+     {
+      "name": "action",
+      "kind": "string",
+      "required": false
+     },
+     {
+      "name": "actor",
+      "kind": "string",
+      "required": false
+     },
+     {
+      "name": "q",
+      "kind": "string",
+      "required": false
+     }
+    ],
     "body": null
    }
   ]
@@ -721,7 +737,7 @@ export const API_ROUTES: Array<{ area: string; routes: Route[] }> = [
     "name": "preview",
     "method": "GET",
     "path": "/api/v1/public/preview/{id}",
-    "summary": "Poll a preview.",
+    "summary": "Poll a preview. previewId is an unguessable ULID; returns {status: 'running'|'done'|'failed', pairs?} and finalizes the job row on the first terminal poll.",
     "pathParams": [
      "id"
     ],

@@ -16,6 +16,14 @@ Generated from Locavello's own code: every route in this area, what it takes and
 GET /api/v1/audit
 ```
 
+### Query parameters
+
+| Name | Type | Required | Notes |
+|---|---|---|---|
+| `action` | any | no |  |
+| `actor` | any | no |  |
+| `q` | any | no |  |
+
 ### Example
 
 ```bash

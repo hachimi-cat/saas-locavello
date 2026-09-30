@@ -204,10 +204,7 @@
     "parameters": [],
     "x-forjio": {
      "source": "src/routes/api-keys.ts:29",
-     "guards": [
-      "adminGuard",
-      "requireAuthOrApiKey"
-     ],
+     "guards": [],
      "body": "validated",
      "bodySchema": "createSchema"
     },
@@ -242,10 +239,7 @@
     "parameters": [],
     "x-forjio": {
      "source": "src/routes/api-keys.ts:56",
-     "guards": [
-      "adminGuard",
-      "requireAuthOrApiKey"
-     ]
+     "guards": []
     }
    }
   },
@@ -268,10 +262,7 @@
     ],
     "x-forjio": {
      "source": "src/routes/api-keys.ts:75",
-     "guards": [
-      "adminGuard",
-      "requireAuthOrApiKey"
-     ]
+     "guards": []
     }
    }
   },
@@ -282,13 +273,29 @@
     "tags": [
      "audit"
     ],
-    "parameters": [],
+    "parameters": [
+     {
+      "name": "action",
+      "in": "query",
+      "required": false,
+      "schema": {}
+     },
+     {
+      "name": "actor",
+      "in": "query",
+      "required": false,
+      "schema": {}
+     },
+     {
+      "name": "q",
+      "in": "query",
+      "required": false,
+      "schema": {}
+     }
+    ],
     "x-forjio": {
      "source": "src/routes/audit.ts:46",
-     "guards": [
-      "adminGuard",
-      "requireAuthOrApiKey"
-     ]
+     "guards": []
     }
    }
   },
@@ -419,10 +426,7 @@
     "parameters": [],
     "x-forjio": {
      "source": "src/routes/billing.ts:29",
-     "guards": [
-      "adminGuard",
-      "requireAuthOrApiKey"
-     ]
+     "guards": []
     }
    }
   },
@@ -436,10 +440,7 @@
     "parameters": [],
     "x-forjio": {
      "source": "src/routes/billing.ts:61",
-     "guards": [
-      "adminGuard",
-      "requireAuthOrApiKey"
-     ],
+     "guards": [],
      "body": "validated",
      "bodySchema": "checkoutBody"
     },
@@ -480,10 +481,7 @@
     "parameters": [],
     "x-forjio": {
      "source": null,
-     "guards": [
-      "adminGuard",
-      "requireAuthOrApiKey"
-     ],
+     "guards": [],
      "body": "unknown"
     }
    }
@@ -498,10 +496,7 @@
     "parameters": [],
     "x-forjio": {
      "source": null,
-     "guards": [
-      "adminGuard",
-      "requireAuthOrApiKey"
-     ],
+     "guards": [],
      "body": "unknown"
     }
    }
@@ -516,10 +511,7 @@
     "parameters": [],
     "x-forjio": {
      "source": null,
-     "guards": [
-      "adminGuard",
-      "requireAuthOrApiKey"
-     ]
+     "guards": []
     }
    }
   },
@@ -542,10 +534,7 @@
     ],
     "x-forjio": {
      "source": null,
-     "guards": [
-      "adminGuard",
-      "requireAuthOrApiKey"
-     ]
+     "guards": []
     }
    }
   },
@@ -559,10 +548,7 @@
     "parameters": [],
     "x-forjio": {
      "source": null,
-     "guards": [
-      "adminGuard",
-      "requireAuthOrApiKey"
-     ]
+     "guards": []
     }
    }
   },
@@ -585,10 +571,7 @@
     ],
     "x-forjio": {
      "source": null,
-     "guards": [
-      "adminGuard",
-      "requireAuthOrApiKey"
-     ]
+     "guards": []
     }
    },
    "put": {
@@ -609,10 +592,7 @@
     ],
     "x-forjio": {
      "source": null,
-     "guards": [
-      "adminGuard",
-      "requireAuthOrApiKey"
-     ],
+     "guards": [],
      "body": "unknown"
     }
    },
@@ -634,10 +614,7 @@
     ],
     "x-forjio": {
      "source": null,
-     "guards": [
-      "adminGuard",
-      "requireAuthOrApiKey"
-     ]
+     "guards": []
     }
    }
   },
@@ -651,10 +628,7 @@
     "parameters": [],
     "x-forjio": {
      "source": null,
-     "guards": [
-      "adminGuard",
-      "requireAuthOrApiKey"
-     ]
+     "guards": []
     }
    }
   },
@@ -668,10 +642,7 @@
     "parameters": [],
     "x-forjio": {
      "source": null,
-     "guards": [
-      "adminGuard",
-      "requireAuthOrApiKey"
-     ],
+     "guards": [],
      "body": "unknown"
     }
    }
@@ -686,10 +657,7 @@
     "parameters": [],
     "x-forjio": {
      "source": null,
-     "guards": [
-      "adminGuard",
-      "requireAuthOrApiKey"
-     ],
+     "guards": [],
      "body": "unknown"
     }
    }
@@ -721,10 +689,7 @@
     ],
     "x-forjio": {
      "source": null,
-     "guards": [
-      "adminGuard",
-      "requireAuthOrApiKey"
-     ]
+     "guards": []
     }
    }
   },
@@ -738,10 +703,7 @@
     "parameters": [],
     "x-forjio": {
      "source": null,
-     "guards": [
-      "adminGuard",
-      "requireAuthOrApiKey"
-     ]
+     "guards": []
     }
    },
    "patch": {
@@ -753,10 +715,7 @@
     "parameters": [],
     "x-forjio": {
      "source": null,
-     "guards": [
-      "adminGuard",
-      "requireAuthOrApiKey"
-     ],
+     "guards": [],
      "body": "unknown"
     }
    }
@@ -771,10 +730,7 @@
     "parameters": [],
     "x-forjio": {
      "source": null,
-     "guards": [
-      "adminGuard",
-      "requireAuthOrApiKey"
-     ]
+     "guards": []
     }
    }
   },
@@ -788,10 +744,7 @@
     "parameters": [],
     "x-forjio": {
      "source": "src/routes/glossary.ts:29",
-     "guards": [
-      "adminGuard",
-      "requireAuthOrApiKey"
-     ],
+     "guards": [],
      "body": "validated",
      "bodySchema": "termSchema"
     },
@@ -851,10 +804,7 @@
     ],
     "x-forjio": {
      "source": "src/routes/glossary.ts:72",
-     "guards": [
-      "adminGuard",
-      "requireAuthOrApiKey"
-     ]
+     "guards": []
     }
    }
   },
@@ -877,10 +827,7 @@
     ],
     "x-forjio": {
      "source": "src/routes/glossary.ts:99",
-     "guards": [
-      "adminGuard",
-      "requireAuthOrApiKey"
-     ],
+     "guards": [],
      "body": "validated",
      "bodySchema": "patchTermSchema"
     },
@@ -939,10 +886,7 @@
     ],
     "x-forjio": {
      "source": "src/routes/glossary.ts:154",
-     "guards": [
-      "adminGuard",
-      "requireAuthOrApiKey"
-     ]
+     "guards": []
     }
    }
   },
@@ -1033,10 +977,7 @@
     ],
     "x-forjio": {
      "source": "src/routes/translations.ts:42",
-     "guards": [
-      "adminGuard",
-      "requireAuthOrApiKey"
-     ],
+     "guards": [],
      "body": "validated",
      "bodySchema": "patchKeySchema"
     },
@@ -1100,10 +1041,7 @@
     ],
     "x-forjio": {
      "source": "src/routes/translations.ts:76",
-     "guards": [
-      "adminGuard",
-      "requireAuthOrApiKey"
-     ],
+     "guards": [],
      "body": "validated",
      "bodySchema": "setTranslationSchema"
     },
@@ -1152,10 +1090,7 @@
     "parameters": [],
     "x-forjio": {
      "source": "src/routes/projects.ts:41",
-     "guards": [
-      "adminGuard",
-      "requireAuthOrApiKey"
-     ],
+     "guards": [],
      "body": "validated",
      "bodySchema": "createProjectSchema"
     },
@@ -1213,10 +1148,7 @@
     "parameters": [],
     "x-forjio": {
      "source": "src/routes/projects.ts:88",
-     "guards": [
-      "adminGuard",
-      "requireAuthOrApiKey"
-     ]
+     "guards": []
     }
    }
   },
@@ -1239,10 +1171,7 @@
     ],
     "x-forjio": {
      "source": "src/routes/projects.ts:145",
-     "guards": [
-      "adminGuard",
-      "requireAuthOrApiKey"
-     ]
+     "guards": []
     }
    },
    "patch": {
@@ -1263,10 +1192,7 @@
     ],
     "x-forjio": {
      "source": "src/routes/projects.ts:167",
-     "guards": [
-      "adminGuard",
-      "requireAuthOrApiKey"
-     ],
+     "guards": [],
      "body": "validated",
      "bodySchema": "patchProjectSchema"
     },
@@ -1316,10 +1242,7 @@
     ],
     "x-forjio": {
      "source": "src/routes/releases.ts:254",
-     "guards": [
-      "adminGuard",
-      "requireAuthOrApiKey"
-     ]
+     "guards": []
     }
    }
   },
@@ -1343,10 +1266,7 @@
     ],
     "x-forjio": {
      "source": "src/routes/translate.ts:103",
-     "guards": [
-      "adminGuard",
-      "requireAuthOrApiKey"
-     ],
+     "guards": [],
      "body": "none"
     }
    }
@@ -1370,10 +1290,7 @@
     ],
     "x-forjio": {
      "source": "src/routes/translate.ts:149",
-     "guards": [
-      "adminGuard",
-      "requireAuthOrApiKey"
-     ]
+     "guards": []
     }
    }
   },
@@ -1397,10 +1314,7 @@
     ],
     "x-forjio": {
      "source": "src/routes/keys.ts:46",
-     "guards": [
-      "adminGuard",
-      "requireAuthOrApiKey"
-     ],
+     "guards": [],
      "body": "validated",
      "bodySchema": "upsertSchema"
     },
@@ -1517,10 +1431,7 @@
     ],
     "x-forjio": {
      "source": "src/routes/keys.ts:149",
-     "guards": [
-      "adminGuard",
-      "requireAuthOrApiKey"
-     ]
+     "guards": []
     }
    }
   },
@@ -1543,10 +1454,7 @@
     ],
     "x-forjio": {
      "source": "src/routes/projects.ts:193",
-     "guards": [
-      "adminGuard",
-      "requireAuthOrApiKey"
-     ],
+     "guards": [],
      "body": "validated",
      "bodySchema": "addLocaleSchema"
     },
@@ -1598,10 +1506,7 @@
     ],
     "x-forjio": {
      "source": "src/routes/projects.ts:254",
-     "guards": [
-      "adminGuard",
-      "requireAuthOrApiKey"
-     ]
+     "guards": []
     }
    }
   },
@@ -1632,10 +1537,7 @@
     ],
     "x-forjio": {
      "source": "src/routes/projects.ts:232",
-     "guards": [
-      "adminGuard",
-      "requireAuthOrApiKey"
-     ],
+     "guards": [],
      "body": "validated",
      "bodySchema": "patchLocaleSchema"
     },
@@ -1684,10 +1586,7 @@
     ],
     "x-forjio": {
      "source": "src/routes/projects.ts:269",
-     "guards": [
-      "adminGuard",
-      "requireAuthOrApiKey"
-     ],
+     "guards": [],
      "body": "validated",
      "bodySchema": "addNamespaceSchema"
     },
@@ -1748,10 +1647,7 @@
     ],
     "x-forjio": {
      "source": "src/routes/projects.ts:297",
-     "guards": [
-      "adminGuard",
-      "requireAuthOrApiKey"
-     ],
+     "guards": [],
      "body": "validated",
      "bodySchema": "patchNamespaceSchema"
     },
@@ -1799,10 +1695,7 @@
     ],
     "x-forjio": {
      "source": "src/routes/translate.ts:136",
-     "guards": [
-      "adminGuard",
-      "requireAuthOrApiKey"
-     ]
+     "guards": []
     }
    }
   },
@@ -1838,10 +1731,7 @@
     ],
     "x-forjio": {
      "source": "src/routes/releases.ts:189",
-     "guards": [
-      "adminGuard",
-      "requireAuthOrApiKey"
-     ]
+     "guards": []
     }
    }
   },
@@ -1865,10 +1755,7 @@
     ],
     "x-forjio": {
      "source": "src/routes/releases.ts:67",
-     "guards": [
-      "adminGuard",
-      "requireAuthOrApiKey"
-     ],
+     "guards": [],
      "body": "validated",
      "bodySchema": "publishSchema"
     },
@@ -1917,10 +1804,7 @@
     ],
     "x-forjio": {
      "source": "src/routes/releases.ts:129",
-     "guards": [
-      "adminGuard",
-      "requireAuthOrApiKey"
-     ]
+     "guards": []
     }
    }
   },
@@ -1950,10 +1834,7 @@
     ],
     "x-forjio": {
      "source": "src/routes/translations.ts:192",
-     "guards": [
-      "adminGuard",
-      "requireAuthOrApiKey"
-     ]
+     "guards": []
     }
    }
   },
@@ -1977,10 +1858,7 @@
     ],
     "x-forjio": {
      "source": "src/routes/translate.ts:31",
-     "guards": [
-      "adminGuard",
-      "requireAuthOrApiKey"
-     ],
+     "guards": [],
      "body": "validated",
      "bodySchema": "translateSchema"
     },
@@ -2025,10 +1903,7 @@
     ],
     "x-forjio": {
      "source": "src/routes/translate.ts:162",
-     "guards": [
-      "adminGuard",
-      "requireAuthOrApiKey"
-     ]
+     "guards": []
     }
    }
   },
@@ -2060,10 +1935,7 @@
     ],
     "x-forjio": {
      "source": "src/routes/releases.ts:327",
-     "guards": [
-      "adminGuard",
-      "requireAuthOrApiKey"
-     ]
+     "guards": []
     }
    }
   },
@@ -2087,10 +1959,7 @@
     ],
     "x-forjio": {
      "source": "src/routes/releases.ts:169",
-     "guards": [
-      "adminGuard",
-      "requireAuthOrApiKey"
-     ]
+     "guards": []
     }
    }
   },
@@ -2104,9 +1973,7 @@
     "parameters": [],
     "x-forjio": {
      "source": "src/routes/public.ts:43",
-     "guards": [
-      "adminGuard"
-     ],
+     "guards": [],
      "body": "validated",
      "bodySchema": "previewSchema"
     },
@@ -2141,7 +2008,7 @@
   "/api/v1/public/preview/{id}": {
    "get": {
     "operationId": "getPublicPreviewId",
-    "summary": "Poll a preview.",
+    "summary": "Poll a preview. previewId is an unguessable ULID; returns {status: 'running'|'done'|'failed', pairs?} and finalizes the job row on the first terminal poll.",
     "description": "GET /preview/:id — poll a preview. previewId is an unguessable ULID;\nreturns {status: 'running'|'done'|'failed', pairs?} and finalizes the\njob row on the first terminal poll.",
     "tags": [
      "public"
@@ -2158,9 +2025,7 @@
     ],
     "x-forjio": {
      "source": "src/routes/public.ts:141",
-     "guards": [
-      "adminGuard"
-     ]
+     "guards": []
     }
    }
   },
@@ -2190,9 +2055,7 @@
     ],
     "x-forjio": {
      "source": "src/routes/public.ts:192",
-     "guards": [
-      "adminGuard"
-     ]
+     "guards": []
     }
    },
    "options": {
@@ -2213,9 +2076,7 @@
     ],
     "x-forjio": {
      "source": null,
-     "guards": [
-      "adminGuard"
-     ]
+     "guards": []
     }
    }
   },
@@ -2237,10 +2098,7 @@
     ],
     "x-forjio": {
      "source": "src/routes/tm.ts:54",
-     "guards": [
-      "adminGuard",
-      "requireAuthOrApiKey"
-     ]
+     "guards": []
     }
    }
   },
@@ -2268,10 +2126,7 @@
     ],
     "x-forjio": {
      "source": "src/routes/tm.ts:86",
-     "guards": [
-      "adminGuard",
-      "requireAuthOrApiKey"
-     ]
+     "guards": []
     }
    }
   },
@@ -2299,10 +2154,7 @@
     ],
     "x-forjio": {
      "source": "src/routes/tm.ts:23",
-     "guards": [
-      "adminGuard",
-      "requireAuthOrApiKey"
-     ]
+     "guards": []
     }
    }
   },
@@ -2325,10 +2177,7 @@
     ],
     "x-forjio": {
      "source": "src/routes/translations.ts:256",
-     "guards": [
-      "adminGuard",
-      "requireAuthOrApiKey"
-     ],
+     "guards": [],
      "body": "none"
     }
    }
@@ -2352,10 +2201,7 @@
     ],
     "x-forjio": {
      "source": "src/routes/translations.ts:290",
-     "guards": [
-      "adminGuard",
-      "requireAuthOrApiKey"
-     ],
+     "guards": [],
      "body": "validated",
      "bodySchema": "rejectSchema"
     },
@@ -2393,8 +2239,6 @@
     "x-forjio": {
      "source": "src/routes/webhook-subscriptions.ts:47",
      "guards": [
-      "adminGuard",
-      "requireAuthOrApiKey",
       "rateLimit"
      ]
     }
@@ -2409,8 +2253,6 @@
     "x-forjio": {
      "source": "src/routes/webhook-subscriptions.ts:65",
      "guards": [
-      "adminGuard",
-      "requireAuthOrApiKey",
       "rateLimit"
      ],
      "body": "validated",
@@ -2468,8 +2310,6 @@
     "x-forjio": {
      "source": "src/routes/webhook-subscriptions.ts:98",
      "guards": [
-      "adminGuard",
-      "requireAuthOrApiKey",
       "rateLimit"
      ],
      "body": "validated",
@@ -2514,8 +2354,6 @@
     "x-forjio": {
      "source": "src/routes/webhook-subscriptions.ts:124",
      "guards": [
-      "adminGuard",
-      "requireAuthOrApiKey",
       "rateLimit"
      ]
     }
@@ -2531,9 +2369,7 @@
     "parameters": [],
     "x-forjio": {
      "source": "src/routes/webhooks-plugipay.ts:27",
-     "guards": [
-      "adminGuard"
-     ],
+     "guards": [],
      "body": "none"
     }
    }

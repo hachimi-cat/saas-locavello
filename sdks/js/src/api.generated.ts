@@ -34,8 +34,13 @@ export class GeneratedApi {
   }
 
   /** List audit (GET /api/v1/audit) */
-  auditList(): Promise<unknown> {
-    return this.call("GET", `/api/v1/audit`, {}, undefined);
+  auditList(input?: { "action"?: unknown; "actor"?: unknown; "q"?: unknown }): Promise<unknown> {
+    const all: Record<string, unknown> = { ...(input ?? {}) };
+    const query: Record<string, unknown> = {};
+    query["action"] = all["action"]; delete all["action"];
+    query["actor"] = all["actor"]; delete all["actor"];
+    query["q"] = all["q"]; delete all["q"];
+    return this.call("GET", `/api/v1/audit`, query, undefined);
   }
 
   /** Create a checkout (POST /api/v1/billing/checkout) */
@@ -248,7 +253,7 @@ export class GeneratedApi {
     return this.call("POST", `/api/v1/public/preview`, query, all);
   }
 
-  /** Poll a preview. (GET /api/v1/public/preview/{id}) */
+  /** Poll a preview. previewId is an unguessable ULID; returns {status: 'running'|'done'|'failed', pairs?} and finalizes the job row on the first terminal poll. (GET /api/v1/public/preview/{id}) */
   publicPreview(id: string): Promise<unknown> {
     return this.call("GET", `/api/v1/public/preview/${encodeURIComponent(id)}`, {}, undefined);
   }
