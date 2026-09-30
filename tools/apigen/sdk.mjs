@@ -11,8 +11,14 @@
 // lines per SDK: its sign-in and envelope), so the generated surface signs requests exactly
 // like the rest of that SDK. `--check` exits 1 when the file is stale (a text comparison:
 // no Go toolchain is needed, the go output is written gofmt-clean).
+//
+// A file upload (a multipart form body) takes its file fields as bytes / a Blob / a FormFile
+// and its other fields as values, and goes through the client's form hook instead:
+// `_apigen_request(..., form=, files=)` (python), `apigenRequest` with a FormData body
+// (node), `apigenForm` (go). That code is only generated for a spec that has such a route,
+// so every other product's output is unchanged.
 import fs from 'node:fs';
-import { isFeature } from './common.mjs';
+import { isFeature, bodyFields, formBody, isFileField } from './common.mjs';
 
 const args = Object.fromEntries(
   process.argv.slice(2).reduce((acc, a, i, all) => (a.startsWith('--') ? [...acc, [a.slice(2), all[i + 1] ?? true]] : acc), []),
@@ -62,9 +68,10 @@ for (const [p, item] of Object.entries(spec.paths ?? {})) {
       area, action, verb, method: method.toUpperCase(), path: p, summary: op.summary ?? '',
       pathParams: (op.parameters ?? []).filter((x) => x.in === 'path'),
       query: (op.parameters ?? []).filter((x) => x.in === 'query'),
-      body: body && body.properties ? body : null,
+      body: body ? bodyFields(body) ?? { properties: {}, required: [] } : null,
       bodySchema: body ?? null,
       bodyRequired: !!op.requestBody?.required,
+      form: formBody(op),
     });
   }
 }
@@ -78,6 +85,7 @@ for (const r of routes) {
   r.fullName = n;
 }
 routes.sort((a, b) => a.fullName.localeCompare(b.fullName));
+const HAS_FORM = routes.some((r) => r.form);
 
 function python() {
   const out = [
@@ -103,6 +111,15 @@ function python() {
     '        query = {k: v for k, v in query.items() if v is not None}',
     '        return self._client._apigen_request(method, path, query=query or None, body=body)',
   ];
+  if (HAS_FORM) {
+    out.push(
+      '',
+      '    # A file upload: the form fields and the files, sent by the client as multipart/form-data.',
+      '    def _call_form(self, method: str, path: str, query: Dict[str, Any], form: Dict[str, Any], files: Dict[str, Any]) -> Any:',
+      '        query = {k: v for k, v in query.items() if v is not None}',
+      '        return self._client._apigen_request(method, path, query=query or None, form=form, files=files)',
+    );
+  }
   for (const r of routes) {
     const params = [];
     const doc = [`${r.summary || r.fullName} (${r.method} ${r.path}).`];
@@ -113,12 +130,20 @@ function python() {
       const req = new Set(r.body.required ?? []);
       for (const [name, s] of Object.entries(r.body.properties)) kw.push({ name, py: pyName(name), type: pyType(s), required: req.has(name), where: 'body', schema: s });
     }
+    if (r.form) {
+      const req = new Set(r.form.required ?? []);
+      for (const [name, s] of Object.entries(r.form.properties)) {
+        const file = isFileField(s);
+        kw.push({ name, py: pyName(name), type: file ? 'Any' : pyType(s), required: req.has(name), where: file ? 'file' : 'form', schema: s });
+      }
+    }
     const sig = ['self', ...params];
     if (kw.length || r.body) sig.push('*');
-    for (const k of kw) sig.push(k.required && k.where === 'query' ? `${k.py}: ${k.type}` : `${k.py}: Optional[${k.type}] = None`);
+    for (const k of kw) sig.push(k.required && (k.where === 'query' || k.where === 'file') ? `${k.py}: ${k.type}` : `${k.py}: Optional[${k.type}] = None`);
     if (r.body) sig.push('json_body: Optional[Dict[str, Any]] = None');
     if (kw.some((k) => k.where === 'body')) doc.push('', 'Body fields are keyword arguments; `json_body=` passes the whole body (fields override it).');
-    for (const k of kw.filter((x) => x.where === 'body' && x.schema?.enum)) doc.push(`${k.py}: one of ${k.schema.enum.join(', ')}`);
+    if (r.form) doc.push('', 'Sent as multipart/form-data. A file is bytes, a binary file object, or a', '(filename, content[, content_type]) tuple; the other fields are keyword arguments.');
+    for (const k of kw.filter((x) => (x.where === 'body' || x.where === 'form') && x.schema?.enum)) doc.push(`${k.py}: one of ${k.schema.enum.join(', ')}`);
     let path = r.path;
     for (const p of r.pathParams) path = path.replace(`{${p.name}}`, `{_q(${pyName(p.name)})}`);
     out.push('', `    def ${pyName(r.fullName)}(${sig.join(', ')}) -> Any:`, `        """${doc.join('\n        ').replace(/"""/g, "'''")}"""`);
@@ -127,6 +152,17 @@ function python() {
       out.push('        payload: Dict[str, Any] = dict(json_body or {})');
       for (const k of kw.filter((x) => x.where === 'body')) out.push(`        if ${k.py} is not None:`, `            payload["${k.name}"] = ${k.py}`);
       for (const k of kw.filter((x) => x.where === 'body' && x.required)) out.push(`        if "${k.name}" not in payload:`, `            raise ValueError("${pyName(r.fullName)} needs ${k.py}")`);
+    }
+    if (r.form) {
+      // `_form` / `_files`: pyName never starts a name with "_", so no field can shadow them
+      out.push('        _form: Dict[str, Any] = {}', '        _files: Dict[str, Any] = {}');
+      for (const k of kw.filter((x) => x.where === 'form' || x.where === 'file')) {
+        if (k.where === 'file' && k.required) out.push(`        _files["${k.name}"] = ${k.py}`);
+        else out.push(`        if ${k.py} is not None:`, `            ${k.where === 'file' ? '_files' : '_form'}["${k.name}"] = ${k.py}`);
+      }
+      for (const k of kw.filter((x) => x.where === 'form' && x.required)) out.push(`        if "${k.name}" not in _form:`, `            raise ValueError("${pyName(r.fullName)} needs ${k.py}")`);
+      out.push(`        return self._call_form("${r.method}", f"${path}", {${q}}, _form, _files)`);
+      continue;
     }
     out.push(`        return self._call("${r.method}", f"${path}", {${q}}, ${r.body ? 'payload' : 'None'})`);
   }
@@ -154,12 +190,31 @@ function node() {
     '    return this.client.apigenRequest(method, path, Object.keys(q).length ? q : undefined, body);',
     '  }',
   ];
+  if (HAS_FORM) {
+    out.push(
+      '',
+      "  /** A file upload's body: a FormData with each file (a Blob; a File keeps its name) and",
+      "   *  the other fields as text. The client's apigenRequest sends a FormData as it is. */",
+      '  private form(fields: Record<string, unknown>): FormData {',
+      '    const form = new FormData();',
+      '    for (const [k, v] of Object.entries(fields)) {',
+      '      if (v === undefined || v === null) continue;',
+      "      form.append(k, v instanceof Blob ? v : typeof v === 'string' ? v : JSON.stringify(v));",
+      '    }',
+      '    return form;',
+      '  }',
+    );
+  }
   for (const r of routes) {
     const params = r.pathParams.map((p) => `${camel(p.name) || 'id'}: string`);
     const fields = [];
     for (const q of r.query) fields.push(`${JSON.stringify(q.name)}${q.required ? '' : '?'}: ${tsType(q.schema)}`);
     const req = new Set(r.body?.required ?? []);
     for (const [name, s] of Object.entries(r.body?.properties ?? {})) fields.push(`${JSON.stringify(name)}${req.has(name) ? '' : '?'}: ${tsType(s)}`);
+    // a body route takes any other field too, sent in the body (as python's json_body)
+    if (r.body) fields.push('[field: string]: unknown');
+    for (const name of r.form?.required ?? []) req.add(name);
+    for (const [name, s] of Object.entries(r.form?.properties ?? {})) fields.push(`${JSON.stringify(name)}${req.has(name) ? '' : '?'}: ${isFileField(s) ? 'Blob' : tsType(s)}`);
     const hasInput = fields.length > 0;
     const allOptional = !r.query.some((q) => q.required) && ![...req].length;
     if (hasInput) params.push(`input${allOptional ? '?' : ''}: { ${fields.join('; ')} }`);
@@ -171,7 +226,7 @@ function node() {
       out.push('    const all: Record<string, unknown> = { ...(input ?? {}) };');
       out.push(`    const query: Record<string, unknown> = {};`);
       for (const n of qNames) out.push(`    query[${JSON.stringify(n)}] = all[${JSON.stringify(n)}]; delete all[${JSON.stringify(n)}];`);
-      out.push(`    return this.call(${JSON.stringify(r.method)}, \`${path}\`, query, ${r.body ? 'all' : 'undefined'});`);
+      out.push(`    return this.call(${JSON.stringify(r.method)}, \`${path}\`, query, ${r.body ? 'all' : r.form ? 'this.form(all)' : 'undefined'});`);
     } else out.push(`    return this.call(${JSON.stringify(r.method)}, \`${path}\`, {}, undefined);`);
     out.push('  }');
   }
@@ -188,7 +243,7 @@ function node() {
 const GO_INITIALISMS = new Set(['acl', 'api', 'ascii', 'cpu', 'css', 'dns', 'eof', 'guid', 'html', 'http', 'https', 'id', 'ip', 'json', 'lhs', 'qps', 'ram', 'rhs', 'rpc', 'sla', 'smtp', 'sql', 'ssh', 'tcp', 'tls', 'ttl', 'udp', 'ui', 'uid', 'uuid', 'uri', 'url', 'utf8', 'vm', 'xml', 'xmpp', 'xsrf', 'xss']);
 const GO_KEYWORDS = new Set(['break', 'case', 'chan', 'const', 'continue', 'default', 'defer', 'else', 'fallthrough', 'for', 'func', 'go', 'goto', 'if', 'import', 'interface', 'map', 'package', 'range', 'return', 'select', 'struct', 'switch', 'type', 'var']);
 // names a method body uses (receiver, locals, packages) or predeclared identifiers
-const GO_TAKEN = new Set([...GO_KEYWORDS, 'a', 'p', 'q', 'ctx', 'path', 'payload', 'ok', 'context', 'json', 'fmt', 'url', 'strconv', 'nil', 'true', 'false', 'iota', 'string', 'int', 'bool', 'any', 'error', 'byte', 'rune', 'float64', 'len', 'cap', 'new', 'make', 'append', 'copy', 'delete', 'panic', 'print', 'println', 'recover', 'close', 'min', 'max', 'clear']);
+const GO_TAKEN = new Set([...GO_KEYWORDS, 'a', 'p', 'q', 'ctx', 'path', 'payload', 'form', 'files', 'ok', 'context', 'json', 'fmt', 'url', 'strconv', 'nil', 'true', 'false', 'iota', 'string', 'int', 'bool', 'any', 'error', 'byte', 'rune', 'float64', 'len', 'cap', 'new', 'make', 'append', 'copy', 'delete', 'panic', 'print', 'println', 'recover', 'close', 'min', 'max', 'clear']);
 const goWord = (w) =>
   GO_INITIALISMS.has(w) ? w.toUpperCase()
     : w.endsWith('s') && GO_INITIALISMS.has(w.slice(0, -1)) ? `${w.slice(0, -1).toUpperCase()}s` // IDs, URLs
@@ -202,30 +257,6 @@ function goArg(s) {
 }
 const goStr = (s) => JSON.stringify(s); // a JSON string is a valid Go string literal for these names
 const goLine = (s) => String(s ?? '').replace(/\s+/g, ' ').trim();
-
-// the body's fields; an anyOf / oneOf body (one of several shapes) offers every variant's
-// fields, each optional
-function bodyFields(schema) {
-  if (!schema) return null;
-  if (schema.properties) return { properties: schema.properties, required: schema.required ?? [] };
-  const variants = schema.anyOf ?? schema.oneOf;
-  if (variants) {
-    const properties = {};
-    for (const v of variants.map(bodyFields).filter(Boolean)) {
-      for (const [k, s] of Object.entries(v.properties)) {
-        const prev = properties[k];
-        if (prev?.enum && s.enum) properties[k] = { ...prev, enum: [...new Set([...prev.enum, ...s.enum])] };
-        else if (!prev) properties[k] = s;
-      }
-    }
-    return Object.keys(properties).length ? { properties, required: [] } : null;
-  }
-  if (schema.allOf) {
-    const parts = schema.allOf.map(bodyFields).filter(Boolean);
-    return parts.length ? { properties: Object.assign({}, ...parts.map((x) => x.properties)), required: parts.flatMap((x) => x.required) } : null;
-  }
-  return null;
-}
 
 // a Go type for a schema, and whether it is a scalar (optional → pointer)
 function goType(schema) {
@@ -261,6 +292,7 @@ function go() {
     '\t"context"',
     '\t"encoding/json"',
     '\t"fmt"',
+    ...(HAS_FORM ? ['\t"io"'] : []),
     '\t"net/url"',
     '\t"strconv"',
     ')',
@@ -271,6 +303,12 @@ function go() {
     '// or the JSON body. It returns the envelope\'s data, as JSON.',
     'type apigenTransport interface {',
     '\tapigenRequest(ctx context.Context, method, path string, query url.Values, body map[string]any) (json.RawMessage, error)',
+    ...(HAS_FORM
+      ? [
+        '\t// apigenForm sends a file upload: the form fields and the files as multipart/form-data.',
+        '\tapigenForm(ctx context.Context, method, path string, query url.Values, form map[string]string, files map[string]FormFile) (json.RawMessage, error)',
+      ]
+      : []),
     '}',
     '',
     `// GeneratedAPI has all ${routes.length} feature routes of the ${BRAND} API, one method each`,
@@ -283,6 +321,16 @@ function go() {
     '// Ptr returns a pointer to v, for the optional fields of the *Args structs.',
     'func Ptr[T any](v T) *T { return &v }',
   ];
+  if (HAS_FORM) {
+    out.push(
+      '',
+      '// FormFile is a file for an upload: the file name it is sent under, and its content.',
+      'type FormFile struct {',
+      '\tName    string',
+      '\tContent io.Reader',
+      '}',
+    );
+  }
   for (const r of routes) {
     let name = goPascal(r.fullName);
     for (let i = 2; taken.has(name); i++) name = `${goPascal(r.fullName)}${i}`;
@@ -311,6 +359,13 @@ function go() {
       const req = new Set(body.required);
       for (const [n, s] of Object.entries(body.properties)) fields.push({ wire: n, where: 'body', required: req.has(n), schema: s, ...goType(s), go: field(n, 'body') });
     }
+    if (r.form) {
+      const req = new Set(r.form.required ?? []);
+      for (const [n, s] of Object.entries(r.form.properties)) {
+        const file = isFileField(s);
+        fields.push({ wire: n, where: file ? 'file' : 'form', required: req.has(n), schema: s, ...(file ? { t: 'FormFile', scalar: true } : goType(s)), go: field(n, 'body') });
+      }
+    }
     const hasArgs = fields.length > 0 || hasBody;
     const argsType = `${name}Args`;
 
@@ -332,11 +387,14 @@ function go() {
       fields.forEach((f, i) => {
         const optional = !f.required;
         const t = optional && f.scalar ? `*${f.t}` : f.t;
-        const notes = [`${goStr(f.wire)} in the ${f.where === 'query' ? 'query' : 'body'}${f.required ? ', required' : ''}.`];
+        const notes = [`${goStr(f.wire)} in the ${f.where === 'query' ? 'query' : f.where === 'body' ? 'body' : 'form'}${f.required ? ', required' : ''}.`];
+        if (f.where === 'file') notes.push('The file to upload.');
         if (f.schema?.enum) notes.push(`One of: ${f.schema.enum.map((v) => goLine(v)).join(', ')}.`);
         const desc = goLine(f.schema?.description);
         if (desc) notes.push(desc);
-        const tag = f.where === 'query' ? `query:${goStr(f.wire)}` : `json:${goStr(f.required ? f.wire : `${f.wire},omitempty`)}`;
+        const tag = f.where === 'query' ? `query:${goStr(f.wire)}`
+          : f.where === 'form' || f.where === 'file' ? `form:${goStr(f.wire)}`
+            : `json:${goStr(f.required ? f.wire : `${f.wire},omitempty`)}`;
         if (i) out.push('');
         out.push(`\t// ${f.go} is ${notes.join(' ')}`, `\t${f.go} ${t} \`${tag}\``);
       });
@@ -379,9 +437,24 @@ function go() {
         out.push(`\tif _, ok := payload[${goStr(f.wire)}]; !ok {`, `\t\treturn nil, apigenMissing(${goStr(name)}, ${goStr(f.go)})`, '\t}');
       }
     }
+    if (r.form) {
+      out.push('\tform := map[string]string{}', '\tfiles := map[string]FormFile{}');
+      for (const f of fields.filter((x) => x.where === 'form' || x.where === 'file')) {
+        const key = goStr(f.wire);
+        const into = f.where === 'file' ? 'files' : 'form';
+        const val = (v) => (f.where === 'file' || f.t === 'string' ? v : `apigenQueryValue(${v})`);
+        if (!f.required) out.push(`\tif p.${f.go} != nil {`, `\t\t${into}[${key}] = ${val(`${f.scalar ? '*' : ''}p.${f.go}`)}`, '\t}');
+        else {
+          const unset = f.where === 'file' ? `p.${f.go}.Content == nil` : f.t === 'string' ? `p.${f.go} == ""` : !f.scalar ? `p.${f.go} == nil` : null;
+          if (unset) out.push(`\tif ${unset} {`, `\t\treturn nil, apigenMissing(${goStr(name)}, ${goStr(f.go)})`, '\t}');
+          out.push(`\t${into}[${key}] = ${val(`p.${f.go}`)}`);
+        }
+      }
+    }
     // a path with parameters is built first: gofmt would pack the `+` inside the call
     if (parts.length > 1) out.push(`\tpath := ${parts.join(' + ')}`);
-    out.push(`\treturn a.c.apigenRequest(ctx, ${goStr(r.method)}, ${parts.length > 1 ? 'path' : parts[0]}, ${qf.length ? 'q' : 'nil'}, ${hasBody ? 'payload' : 'nil'})`, '}');
+    if (r.form) out.push(`\treturn a.c.apigenForm(ctx, ${goStr(r.method)}, ${parts.length > 1 ? 'path' : parts[0]}, ${qf.length ? 'q' : 'nil'}, form, files)`, '}');
+    else out.push(`\treturn a.c.apigenRequest(ctx, ${goStr(r.method)}, ${parts.length > 1 ? 'path' : parts[0]}, ${qf.length ? 'q' : 'nil'}, ${hasBody ? 'payload' : 'nil'})`, '}');
   }
   out.push(
     '',

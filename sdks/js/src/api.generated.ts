@@ -17,7 +17,7 @@ export class GeneratedApi {
   }
 
   /** Mint `lv_live_…`. (POST /api/v1/api-keys) */
-  apiKeysCreate(input: { "name": string }): Promise<unknown> {
+  apiKeysCreate(input: { "name": string; [field: string]: unknown }): Promise<unknown> {
     const all: Record<string, unknown> = { ...(input ?? {}) };
     const query: Record<string, unknown> = {};
     return this.call("POST", `/api/v1/api-keys`, query, all);
@@ -44,7 +44,7 @@ export class GeneratedApi {
   }
 
   /** Create a checkout (POST /api/v1/billing/checkout) */
-  billingCheckout(input: { "tier": "free" | "starter" | "pro" | "scale" }): Promise<unknown> {
+  billingCheckout(input: { "tier": "free" | "starter" | "pro" | "scale"; [field: string]: unknown }): Promise<unknown> {
     const all: Record<string, unknown> = { ...(input ?? {}) };
     const query: Record<string, unknown> = {};
     return this.call("POST", `/api/v1/billing/checkout`, query, all);
@@ -56,7 +56,7 @@ export class GeneratedApi {
   }
 
   /** Create a glossary (POST /api/v1/glossary) */
-  glossaryCreate(input: { "term": string; "projectId"?: string; "locale"?: string; "translation"?: string; "note"?: string }): Promise<unknown> {
+  glossaryCreate(input: { "term": string; "projectId"?: string; "locale"?: string; "translation"?: string; "note"?: string; [field: string]: unknown }): Promise<unknown> {
     const all: Record<string, unknown> = { ...(input ?? {}) };
     const query: Record<string, unknown> = {};
     return this.call("POST", `/api/v1/glossary`, query, all);
@@ -76,21 +76,21 @@ export class GeneratedApi {
   }
 
   /** Update a glossary (PATCH /api/v1/glossary/{id}) */
-  glossaryUpdate(id: string, input?: { "term"?: string; "projectId"?: string; "locale"?: string; "translation"?: string; "note"?: string }): Promise<unknown> {
+  glossaryUpdate(id: string, input?: { "term"?: string; "projectId"?: string; "locale"?: string; "translation"?: string; "note"?: string; [field: string]: unknown }): Promise<unknown> {
     const all: Record<string, unknown> = { ...(input ?? {}) };
     const query: Record<string, unknown> = {};
     return this.call("PATCH", `/api/v1/glossary/${encodeURIComponent(id)}`, query, all);
   }
 
   /** Write a translation. (PUT /api/v1/keys/{keyId}/translations/{locale}) */
-  keysTranslations(keyId: string, locale: string, input: { "value": string; "status"?: "machine" | "needs_review" | "approved"; "author"?: string }): Promise<unknown> {
+  keysTranslations(keyId: string, locale: string, input: { "value": string; "status"?: "machine" | "needs_review" | "approved"; "author"?: string; [field: string]: unknown }): Promise<unknown> {
     const all: Record<string, unknown> = { ...(input ?? {}) };
     const query: Record<string, unknown> = {};
     return this.call("PUT", `/api/v1/keys/${encodeURIComponent(keyId)}/translations/${encodeURIComponent(locale)}`, query, all);
   }
 
   /** Context metadata edits from the workbench. (PATCH /api/v1/keys/{keyId}) */
-  keysUpdate(keyId: string, input?: { "description"?: string; "maxLength"?: number; "screenshotUrl"?: string }): Promise<unknown> {
+  keysUpdate(keyId: string, input?: { "description"?: string; "maxLength"?: number; "screenshotUrl"?: string; [field: string]: unknown }): Promise<unknown> {
     const all: Record<string, unknown> = { ...(input ?? {}) };
     const query: Record<string, unknown> = {};
     return this.call("PATCH", `/api/v1/keys/${encodeURIComponent(keyId)}`, query, all);
@@ -107,28 +107,28 @@ export class GeneratedApi {
   }
 
   /** Create a project (POST /api/v1/projects) */
-  projectsCreate(input: { "slug": string; "name": string; "sourceLocale"?: string; "mode"?: "sdk" | "proxy"; "siteUrl"?: string }): Promise<unknown> {
+  projectsCreate(input: { "slug": string; "name": string; "sourceLocale"?: string; "mode"?: "sdk" | "proxy"; "siteUrl"?: string; [field: string]: unknown }): Promise<unknown> {
     const all: Record<string, unknown> = { ...(input ?? {}) };
     const query: Record<string, unknown> = {};
     return this.call("POST", `/api/v1/projects`, query, all);
   }
 
   /** Locales a project (POST /api/v1/projects/{id}/locales) */
-  projectsCreateLocales(id: string, input: { "tag": string; "fallback"?: string; "rtl"?: boolean }): Promise<unknown> {
+  projectsCreateLocales(id: string, input: { "tag": string; "fallback"?: string; "rtl"?: boolean; [field: string]: unknown }): Promise<unknown> {
     const all: Record<string, unknown> = { ...(input ?? {}) };
     const query: Record<string, unknown> = {};
     return this.call("POST", `/api/v1/projects/${encodeURIComponent(id)}/locales`, query, all);
   }
 
   /** Namespaces a project (POST /api/v1/projects/{id}/namespaces) */
-  projectsCreateNamespaces(id: string, input: { "name": string; "reviewPolicy"?: "standard" | "gated" }): Promise<unknown> {
+  projectsCreateNamespaces(id: string, input: { "name": string; "reviewPolicy"?: "standard" | "gated"; [field: string]: unknown }): Promise<unknown> {
     const all: Record<string, unknown> = { ...(input ?? {}) };
     const query: Record<string, unknown> = {};
     return this.call("POST", `/api/v1/projects/${encodeURIComponent(id)}/namespaces`, query, all);
   }
 
   /** Publish. (POST /api/v1/projects/{id}/releases) */
-  projectsCreateReleases(id: string, input: { "locale": string }): Promise<unknown> {
+  projectsCreateReleases(id: string, input: { "locale": string; [field: string]: unknown }): Promise<unknown> {
     const all: Record<string, unknown> = { ...(input ?? {}) };
     const query: Record<string, unknown> = {};
     return this.call("POST", `/api/v1/projects/${encodeURIComponent(id)}/releases`, query, all);
@@ -212,42 +212,42 @@ export class GeneratedApi {
   }
 
   /** The extract/push endpoint. (PUT /api/v1/projects/{id}/keys) */
-  projectsSetKeys(id: string, input: { "keys": unknown[]; "prune"?: boolean }): Promise<unknown> {
+  projectsSetKeys(id: string, input: { "keys": unknown[]; "prune"?: boolean; [field: string]: unknown }): Promise<unknown> {
     const all: Record<string, unknown> = { ...(input ?? {}) };
     const query: Record<string, unknown> = {};
     return this.call("PUT", `/api/v1/projects/${encodeURIComponent(id)}/keys`, query, all);
   }
 
   /** Queue a machine first pass for a locale. (POST /api/v1/projects/{id}/translate) */
-  projectsTranslate(id: string, input: { "locale": string }): Promise<unknown> {
+  projectsTranslate(id: string, input: { "locale": string; [field: string]: unknown }): Promise<unknown> {
     const all: Record<string, unknown> = { ...(input ?? {}) };
     const query: Record<string, unknown> = {};
     return this.call("POST", `/api/v1/projects/${encodeURIComponent(id)}/translate`, query, all);
   }
 
   /** Update a project (PATCH /api/v1/projects/{id}) */
-  projectsUpdate(id: string, input?: { "name"?: string; "siteUrl"?: string }): Promise<unknown> {
+  projectsUpdate(id: string, input?: { "name"?: string; "siteUrl"?: string; [field: string]: unknown }): Promise<unknown> {
     const all: Record<string, unknown> = { ...(input ?? {}) };
     const query: Record<string, unknown> = {};
     return this.call("PATCH", `/api/v1/projects/${encodeURIComponent(id)}`, query, all);
   }
 
   /** Update a locale (PATCH /api/v1/projects/{id}/locales/{tag}) */
-  projectsUpdateLocales(id: string, tag: string, input?: { "fallback"?: string; "rtl"?: boolean; "enabled"?: boolean }): Promise<unknown> {
+  projectsUpdateLocales(id: string, tag: string, input?: { "fallback"?: string; "rtl"?: boolean; "enabled"?: boolean; [field: string]: unknown }): Promise<unknown> {
     const all: Record<string, unknown> = { ...(input ?? {}) };
     const query: Record<string, unknown> = {};
     return this.call("PATCH", `/api/v1/projects/${encodeURIComponent(id)}/locales/${encodeURIComponent(tag)}`, query, all);
   }
 
   /** Update a namespace (PATCH /api/v1/projects/{id}/namespaces/{name}) */
-  projectsUpdateNamespaces(id: string, name: string, input: { "reviewPolicy": "standard" | "gated" }): Promise<unknown> {
+  projectsUpdateNamespaces(id: string, name: string, input: { "reviewPolicy": "standard" | "gated"; [field: string]: unknown }): Promise<unknown> {
     const all: Record<string, unknown> = { ...(input ?? {}) };
     const query: Record<string, unknown> = {};
     return this.call("PATCH", `/api/v1/projects/${encodeURIComponent(id)}/namespaces/${encodeURIComponent(name)}`, query, all);
   }
 
   /** Create a preview (POST /api/v1/public/preview) */
-  publicCreatePreview(input: { "url": string; "targetLocale"?: string }): Promise<unknown> {
+  publicCreatePreview(input: { "url": string; "targetLocale"?: string; [field: string]: unknown }): Promise<unknown> {
     const all: Record<string, unknown> = { ...(input ?? {}) };
     const query: Record<string, unknown> = {};
     return this.call("POST", `/api/v1/public/preview`, query, all);
@@ -298,14 +298,14 @@ export class GeneratedApi {
   }
 
   /** Reject a translation (POST /api/v1/translations/{id}/reject) */
-  translationsReject(id: string, input: { "reason": string }): Promise<unknown> {
+  translationsReject(id: string, input: { "reason": string; [field: string]: unknown }): Promise<unknown> {
     const all: Record<string, unknown> = { ...(input ?? {}) };
     const query: Record<string, unknown> = {};
     return this.call("POST", `/api/v1/translations/${encodeURIComponent(id)}/reject`, query, all);
   }
 
   /** Create a webhook subscription (POST /api/v1/webhook-subscriptions) */
-  webhookSubscriptionsCreate(input: { "url": string; "events"?: unknown[] }): Promise<unknown> {
+  webhookSubscriptionsCreate(input: { "url": string; "events"?: unknown[]; [field: string]: unknown }): Promise<unknown> {
     const all: Record<string, unknown> = { ...(input ?? {}) };
     const query: Record<string, unknown> = {};
     return this.call("POST", `/api/v1/webhook-subscriptions`, query, all);
@@ -322,7 +322,7 @@ export class GeneratedApi {
   }
 
   /** Update a webhook subscription (PATCH /api/v1/webhook-subscriptions/{id}) */
-  webhookSubscriptionsUpdate(id: string, input: { "active": boolean }): Promise<unknown> {
+  webhookSubscriptionsUpdate(id: string, input: { "active": boolean; [field: string]: unknown }): Promise<unknown> {
     const all: Record<string, unknown> = { ...(input ?? {}) };
     const query: Record<string, unknown> = {};
     return this.call("PATCH", `/api/v1/webhook-subscriptions/${encodeURIComponent(id)}`, query, all);
