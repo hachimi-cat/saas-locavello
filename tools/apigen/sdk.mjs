@@ -2,12 +2,15 @@
 //
 //   node <apigen>/sdk.mjs --lang python --spec backend/openapi.json --out sdk/python/<pkg>/api_generated.py
 //   node <apigen>/sdk.mjs --lang node   --spec backend/openapi.json --out sdk/node/src/api.generated.ts
+//   node <apigen>/sdk.mjs --lang go --package <pkg> --spec backend/openapi.json --out sdk/go/api_generated.go
 //
-// Writes one file with a class `GeneratedApi`: one method per route, named <area>_<action>
-// (python) / <area><Action> (node), taking the path parameters, then query / body fields.
-// Every call goes through the SDK client's own `_apigen_request` / `apigenRequest` (a few
-// hand-written lines per SDK: its sign-in and envelope), so the generated surface signs
-// requests exactly like the rest of that SDK. `--check` exits 1 when the file is stale.
+// Writes one file with a class `GeneratedApi` (python, node) / type `GeneratedAPI` (go):
+// one method per route, named <area>_<action> (python) / <area><Action> (node) /
+// <Area><Action> (go), taking the path parameters, then query / body fields. Every call
+// goes through the SDK client's own `_apigen_request` / `apigenRequest` (a few hand-written
+// lines per SDK: its sign-in and envelope), so the generated surface signs requests exactly
+// like the rest of that SDK. `--check` exits 1 when the file is stale (a text comparison:
+// no Go toolchain is needed, the go output is written gofmt-clean).
 import fs from 'node:fs';
 import { isFeature } from './common.mjs';
 
@@ -60,6 +63,7 @@ for (const [p, item] of Object.entries(spec.paths ?? {})) {
       pathParams: (op.parameters ?? []).filter((x) => x.in === 'path'),
       query: (op.parameters ?? []).filter((x) => x.in === 'query'),
       body: body && body.properties ? body : null,
+      bodySchema: body ?? null,
       bodyRequired: !!op.requestBody?.required,
     });
   }
@@ -175,7 +179,251 @@ function node() {
   return out.join('\n');
 }
 
-const text = LANG === 'python' ? python() : node();
+// ─── go ────────────────────────────────────────────────────────────────────────────────
+// Go-cased names (golint initialisms), a per-route `<Method>Args` struct (query fields
+// tagged `query:"…"`, body fields `json:"…"`; required fields plain values, optional ones
+// pointers or nil-able slices/maps), and `Body map[string]any` for the whole JSON body where
+// python has `json_body`. Written gofmt-clean by construction: every struct field stands in
+// its own comment-led paragraph, so nothing needs column alignment.
+const GO_INITIALISMS = new Set(['acl', 'api', 'ascii', 'cpu', 'css', 'dns', 'eof', 'guid', 'html', 'http', 'https', 'id', 'ip', 'json', 'lhs', 'qps', 'ram', 'rhs', 'rpc', 'sla', 'smtp', 'sql', 'ssh', 'tcp', 'tls', 'ttl', 'udp', 'ui', 'uid', 'uuid', 'uri', 'url', 'utf8', 'vm', 'xml', 'xmpp', 'xsrf', 'xss']);
+const GO_KEYWORDS = new Set(['break', 'case', 'chan', 'const', 'continue', 'default', 'defer', 'else', 'fallthrough', 'for', 'func', 'go', 'goto', 'if', 'import', 'interface', 'map', 'package', 'range', 'return', 'select', 'struct', 'switch', 'type', 'var']);
+// names a method body uses (receiver, locals, packages) or predeclared identifiers
+const GO_TAKEN = new Set([...GO_KEYWORDS, 'a', 'p', 'q', 'ctx', 'path', 'payload', 'ok', 'context', 'json', 'fmt', 'url', 'strconv', 'nil', 'true', 'false', 'iota', 'string', 'int', 'bool', 'any', 'error', 'byte', 'rune', 'float64', 'len', 'cap', 'new', 'make', 'append', 'copy', 'delete', 'panic', 'print', 'println', 'recover', 'close', 'min', 'max', 'clear']);
+const goWord = (w) =>
+  GO_INITIALISMS.has(w) ? w.toUpperCase()
+    : w.endsWith('s') && GO_INITIALISMS.has(w.slice(0, -1)) ? `${w.slice(0, -1).toUpperCase()}s` // IDs, URLs
+      : w[0].toUpperCase() + w.slice(1);
+const goPascal = (s) => { const n = words(s).map(goWord).join('') || 'Value'; return /^\d/.test(n) ? `N${n}` : n; };
+function goArg(s) {
+  const w = words(s);
+  let n = w.length ? [w[0], ...w.slice(1).map(goWord)].join('') : 'value';
+  if (/^\d/.test(n)) n = `n${n}`;
+  return GO_TAKEN.has(n) ? `${n}Arg` : n;
+}
+const goStr = (s) => JSON.stringify(s); // a JSON string is a valid Go string literal for these names
+const goLine = (s) => String(s ?? '').replace(/\s+/g, ' ').trim();
+
+// the body's fields; an anyOf / oneOf body (one of several shapes) offers every variant's
+// fields, each optional
+function bodyFields(schema) {
+  if (!schema) return null;
+  if (schema.properties) return { properties: schema.properties, required: schema.required ?? [] };
+  const variants = schema.anyOf ?? schema.oneOf;
+  if (variants) {
+    const properties = {};
+    for (const v of variants.map(bodyFields).filter(Boolean)) {
+      for (const [k, s] of Object.entries(v.properties)) {
+        const prev = properties[k];
+        if (prev?.enum && s.enum) properties[k] = { ...prev, enum: [...new Set([...prev.enum, ...s.enum])] };
+        else if (!prev) properties[k] = s;
+      }
+    }
+    return Object.keys(properties).length ? { properties, required: [] } : null;
+  }
+  if (schema.allOf) {
+    const parts = schema.allOf.map(bodyFields).filter(Boolean);
+    return parts.length ? { properties: Object.assign({}, ...parts.map((x) => x.properties)), required: parts.flatMap((x) => x.required) } : null;
+  }
+  return null;
+}
+
+// a Go type for a schema, and whether it is a scalar (optional → pointer)
+function goType(schema) {
+  if (!schema) return { t: 'any', scalar: false };
+  if (schema.enum) return schema.enum.every((v) => typeof v === 'string') ? { t: 'string', scalar: true } : { t: 'any', scalar: false };
+  let t = Array.isArray(schema.type) ? schema.type.find((x) => x !== 'null') : schema.type;
+  if (!t && (schema.anyOf || schema.oneOf)) {
+    const ts = [...new Set((schema.anyOf ?? schema.oneOf).map((v) => goType(v).t).filter((x) => x !== 'nil'))];
+    if (ts.length === 1 && ['string', 'int', 'float64', 'bool'].includes(ts[0])) return { t: ts[0], scalar: true };
+    return { t: 'any', scalar: false };
+  }
+  if (t === 'null') return { t: 'nil', scalar: false };
+  const scalar = { string: 'string', integer: 'int', number: 'float64', boolean: 'bool' }[t];
+  if (scalar) return { t: scalar, scalar: true };
+  if (t === 'array') {
+    const it = goType(schema.items);
+    return { t: `[]${it.scalar ? it.t : 'any'}`, scalar: false };
+  }
+  if (t === 'object' || schema.properties) return { t: 'map[string]any', scalar: false };
+  return { t: 'any', scalar: false };
+}
+const zeroTest = { string: '!= ""', int: '!= 0', float64: '!= 0', bool: '' };
+
+function go() {
+  const pkg = args.package && args.package !== true ? args.package : words(BRAND).join('') || 'sdk';
+  const taken = new Set();
+  const out = [
+    `// Code generated by apigen from backend/openapi.json. DO NOT EDIT.`,
+    '',
+    `package ${pkg}`,
+    '',
+    'import (',
+    '\t"context"',
+    '\t"encoding/json"',
+    '\t"fmt"',
+    '\t"net/url"',
+    '\t"strconv"',
+    ')',
+    '',
+    '// apigenTransport is the call behind every GeneratedAPI method: the SDK client sends it',
+    '// with its own sign-in and unwraps its own response envelope (a few hand-written lines',
+    '// in the client, apigenRequest). query is nil or the query string; body is nil (no body)',
+    '// or the JSON body. It returns the envelope\'s data, as JSON.',
+    'type apigenTransport interface {',
+    '\tapigenRequest(ctx context.Context, method, path string, query url.Values, body map[string]any) (json.RawMessage, error)',
+    '}',
+    '',
+    `// GeneratedAPI has all ${routes.length} feature routes of the ${BRAND} API, one method each`,
+    '// (generated from the API spec). A method takes the path parameters, then an *<Method>Args',
+    '// with the query fields (tagged query) and the JSON body fields (tagged json): required',
+    '// fields are plain values, optional ones pointers, slices or maps that nil leaves out,',
+    '// and Body passes the whole body. Each returns the response\'s data as JSON.',
+    'type GeneratedAPI struct{ c apigenTransport }',
+    '',
+    '// Ptr returns a pointer to v, for the optional fields of the *Args structs.',
+    'func Ptr[T any](v T) *T { return &v }',
+  ];
+  for (const r of routes) {
+    let name = goPascal(r.fullName);
+    for (let i = 2; taken.has(name); i++) name = `${goPascal(r.fullName)}${i}`;
+    taken.add(name);
+    const summary = goLine(r.summary).replace(/\.$/, '');
+    const argNames = new Set();
+    const pathArgs = r.pathParams.map((p) => {
+      let a = goArg(p.name);
+      for (let i = 2; argNames.has(a); i++) a = `${goArg(p.name)}${i}`;
+      argNames.add(a);
+      return { name: p.name, arg: a };
+    });
+    const body = bodyFields(r.bodySchema);
+    const hasBody = !!r.bodySchema;
+    const fieldNames = new Set(hasBody ? ['Body'] : []);
+    const field = (wire, where) => {
+      let f = goPascal(wire);
+      if (fieldNames.has(f)) f = `${f}${where === 'query' ? 'Query' : 'Field'}`;
+      for (let i = 2; fieldNames.has(f); i++) f = `${goPascal(wire)}${i}`;
+      fieldNames.add(f);
+      return f;
+    };
+    const fields = [];
+    for (const q of r.query) fields.push({ wire: q.name, where: 'query', required: !!q.required, schema: q.schema, ...goType(q.schema), go: field(q.name, 'query') });
+    if (body) {
+      const req = new Set(body.required);
+      for (const [n, s] of Object.entries(body.properties)) fields.push({ wire: n, where: 'body', required: req.has(n), schema: s, ...goType(s), go: field(n, 'body') });
+    }
+    const hasArgs = fields.length > 0 || hasBody;
+    const argsType = `${name}Args`;
+
+    // the path, as a Go expression
+    const parts = [];
+    let rest = r.path;
+    for (const p of pathArgs) {
+      const i = rest.indexOf(`{${p.name}}`);
+      if (i < 0) continue;
+      if (i > 0) parts.push(goStr(rest.slice(0, i)));
+      parts.push(`url.PathEscape(${p.arg})`);
+      rest = rest.slice(i + p.name.length + 2);
+    }
+    if (rest || !parts.length) parts.push(goStr(rest));
+
+    if (hasArgs) {
+      out.push('', `// ${argsType} are the inputs of GeneratedAPI.${name}.`);
+      out.push(`type ${argsType} struct {`);
+      fields.forEach((f, i) => {
+        const optional = !f.required;
+        const t = optional && f.scalar ? `*${f.t}` : f.t;
+        const notes = [`${goStr(f.wire)} in the ${f.where === 'query' ? 'query' : 'body'}${f.required ? ', required' : ''}.`];
+        if (f.schema?.enum) notes.push(`One of: ${f.schema.enum.map((v) => goLine(v)).join(', ')}.`);
+        const desc = goLine(f.schema?.description);
+        if (desc) notes.push(desc);
+        const tag = f.where === 'query' ? `query:${goStr(f.wire)}` : `json:${goStr(f.required ? f.wire : `${f.wire},omitempty`)}`;
+        if (i) out.push('');
+        out.push(`\t// ${f.go} is ${notes.join(' ')}`, `\t${f.go} ${t} \`${tag}\``);
+      });
+      if (hasBody) {
+        if (fields.length) out.push('');
+        out.push('\t// Body is the whole JSON body, for what the fields above do not cover; the fields', '\t// that are set replace its keys.', '\tBody map[string]any `json:"-"`');
+      }
+      out.push('}');
+    }
+
+    const sig = ['ctx context.Context', ...pathArgs.map((p) => `${p.arg} string`)];
+    if (hasArgs) sig.push(`p *${argsType}`);
+    out.push('', `// ${name} calls ${r.method} ${r.path}${summary ? `: ${summary}` : ''}.`);
+    out.push(`func (a *GeneratedAPI) ${name}(${sig.join(', ')}) (json.RawMessage, error) {`);
+    if (hasArgs) out.push('\tif p == nil {', `\t\tp = &${argsType}{}`, '\t}');
+    const qf = fields.filter((f) => f.where === 'query');
+    const bf = fields.filter((f) => f.where === 'body');
+    if (qf.length) {
+      out.push('\tq := url.Values{}');
+      for (const f of qf) {
+        if (f.required && f.scalar) out.push(`\tq.Set(${goStr(f.wire)}, ${f.t === 'string' ? `p.${f.go}` : `apigenQueryValue(p.${f.go})`})`);
+        else out.push(`\tif p.${f.go} != nil {`, `\t\tq.Set(${goStr(f.wire)}, apigenQueryValue(${f.scalar ? '*' : ''}p.${f.go}))`, '\t}');
+      }
+    }
+    if (hasBody) {
+      out.push('\tpayload := apigenBody(p.Body)');
+      for (const f of bf) {
+        const key = goStr(f.wire);
+        if (!f.required) {
+          out.push(`\tif p.${f.go} != nil {`, `\t\tpayload[${key}] = ${f.scalar ? '*' : ''}p.${f.go}`, '\t}');
+        } else if (f.t === 'string' || !f.scalar) {
+          out.push(`\tif p.${f.go} ${f.scalar ? '!= ""' : '!= nil'} {`, `\t\tpayload[${key}] = p.${f.go}`, '\t}');
+        } else {
+          // a number or boolean that is required is sent as given (zero included), unless
+          // Body carries it and the field was left at zero
+          out.push(`\tif _, ok := payload[${key}]; !ok || p.${f.go}${zeroTest[f.t] ? ` ${zeroTest[f.t]}` : ''} {`, `\t\tpayload[${key}] = p.${f.go}`, '\t}');
+        }
+      }
+      for (const f of bf.filter((x) => x.required && (x.t === 'string' || !x.scalar))) {
+        out.push(`\tif _, ok := payload[${goStr(f.wire)}]; !ok {`, `\t\treturn nil, apigenMissing(${goStr(name)}, ${goStr(f.go)})`, '\t}');
+      }
+    }
+    // a path with parameters is built first: gofmt would pack the `+` inside the call
+    if (parts.length > 1) out.push(`\tpath := ${parts.join(' + ')}`);
+    out.push(`\treturn a.c.apigenRequest(ctx, ${goStr(r.method)}, ${parts.length > 1 ? 'path' : parts[0]}, ${qf.length ? 'q' : 'nil'}, ${hasBody ? 'payload' : 'nil'})`, '}');
+  }
+  out.push(
+    '',
+    '// apigenBody copies Body, so the fields set over it never change the caller\'s map.',
+    'func apigenBody(body map[string]any) map[string]any {',
+    '\tout := make(map[string]any, len(body))',
+    '\tfor k, v := range body {',
+    '\t\tout[k] = v',
+    '\t}',
+    '\treturn out',
+    '}',
+    '',
+    '// apigenQueryValue writes a query value the way the server reads it: strings as they are,',
+    '// numbers and booleans as JSON writes them, anything else as JSON.',
+    'func apigenQueryValue(v any) string {',
+    '\tswitch x := v.(type) {',
+    '\tcase string:',
+    '\t\treturn x',
+    '\tcase bool:',
+    '\t\treturn strconv.FormatBool(x)',
+    '\tcase int:',
+    '\t\treturn strconv.Itoa(x)',
+    '\tcase float64:',
+    "\t\treturn strconv.FormatFloat(x, 'f', -1, 64)",
+    '\t}',
+    '\tb, err := json.Marshal(v)',
+    '\tif err != nil {',
+    '\t\treturn fmt.Sprint(v)',
+    '\t}',
+    '\treturn string(b)',
+    '}',
+    '',
+    '// apigenMissing is the error for a required body field that was neither set nor in Body.',
+    'func apigenMissing(method, field string) error {',
+    '\treturn fmt.Errorf("%s needs %s (or its key in Body)", method, field)',
+    '}',
+    '',
+  );
+  return out.join('\n');
+}
+
+const text = LANG === 'python' ? python() : LANG === 'go' ? go() : node();
 const current = OUT && fs.existsSync(OUT) ? fs.readFileSync(OUT, 'utf8') : null;
 if (CHECK) {
   console.log(`apigen sdk ${LANG}: ${routes.length} methods — ${current === text ? 'up to date' : 'stale'}`);
