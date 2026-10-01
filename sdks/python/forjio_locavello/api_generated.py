@@ -206,13 +206,17 @@ class GeneratedApi:
         """Get a project (GET /api/v1/projects/{id})."""
         return self._call("GET", f"/api/v1/projects/{_q(id_)}", {}, None)
 
+    def projects_get_jobs(self, job_id: str) -> Any:
+        """Get a job (GET /api/v1/projects/jobs/{jobId})."""
+        return self._call("GET", f"/api/v1/projects/jobs/{_q(job_id)}", {}, None)
+
+    def projects_get_releases(self, release_id: str) -> Any:
+        """The frozen catalog (Mode B serving + diffs read this). (GET /api/v1/projects/releases/{releaseId})."""
+        return self._call("GET", f"/api/v1/projects/releases/{_q(release_id)}", {}, None)
+
     def projects_jobs(self, id_: str) -> Any:
         """List jobs (GET /api/v1/projects/{id}/jobs)."""
         return self._call("GET", f"/api/v1/projects/{_q(id_)}/jobs", {}, None)
-
-    def projects_jobs_2(self, job_id: str) -> Any:
-        """Get a job (GET /api/v1/projects/jobs/{jobId})."""
-        return self._call("GET", f"/api/v1/projects/jobs/{_q(job_id)}", {}, None)
 
     def projects_keys(self, id_: str, *, archived: Optional[Any] = None, locale: Optional[Any] = None, namespace: Optional[Any] = None, q: Optional[Any] = None, status: Optional[Any] = None) -> Any:
         """The workbench list. (GET /api/v1/projects/{id}/keys)."""
@@ -237,10 +241,6 @@ class GeneratedApi:
     def projects_releases(self, id_: str, *, locale: Optional[Any] = None) -> Any:
         """List releases (GET /api/v1/projects/{id}/releases)."""
         return self._call("GET", f"/api/v1/projects/{_q(id_)}/releases", {"locale": locale}, None)
-
-    def projects_releases_2(self, release_id: str) -> Any:
-        """The frozen catalog (Mode B serving + diffs read this). (GET /api/v1/projects/releases/{releaseId})."""
-        return self._call("GET", f"/api/v1/projects/releases/{_q(release_id)}", {}, None)
 
     def projects_releases_diff(self, a: str, b: str) -> Any:
         """Key-level diff between two releases. (GET /api/v1/projects/releases/{a}/diff/{b})."""
@@ -327,7 +327,7 @@ class GeneratedApi:
         """Poll a preview. previewId is an unguessable ULID; returns {status: 'running'|'done'|'failed', pairs?} and finalizes the job row on the first terminal poll. (GET /api/v1/public/preview/{id})."""
         return self._call("GET", f"/api/v1/public/preview/{_q(id_)}", {}, None)
 
-    def public_projects_catalog(self, id_: str, *, locale: Optional[Any] = None) -> Any:
+    def public_projects_catalog(self, id_: str, *, locale: Any) -> Any:
         """What locavello.js consumes. (GET /api/v1/public/projects/{id}/catalog)."""
         return self._call("GET", f"/api/v1/public/projects/{_q(id_)}/catalog", {"locale": locale}, None)
 
@@ -335,11 +335,11 @@ class GeneratedApi:
         """Browse the whole memory, newest-first, cursor-paged. (GET /api/v1/tm)."""
         return self._call("GET", f"/api/v1/tm", {"target": target}, None)
 
-    def tm_search(self, *, q: Optional[Any] = None, target: Optional[Any] = None) -> Any:
+    def tm_search(self, *, q: Any, target: Optional[Any] = None) -> Any:
         """The TM screen's cross-project search. (GET /api/v1/tm/search)."""
         return self._call("GET", f"/api/v1/tm/search", {"q": q, "target": target}, None)
 
-    def tm_suggest(self, *, target: Optional[Any] = None, text: Optional[Any] = None) -> Any:
+    def tm_suggest(self, *, target: Any, text: Any) -> Any:
         """Workbench + agent suggestions. (GET /api/v1/tm/suggest)."""
         return self._call("GET", f"/api/v1/tm/suggest", {"target": target, "text": text}, None)
 
@@ -389,6 +389,14 @@ class GeneratedApi:
         if "active" not in payload:
             raise ValueError("webhook_subscriptions_update needs active")
         return self._call("PATCH", f"/api/v1/webhook-subscriptions/{_q(id_)}", {}, payload)
+
+    def projects_jobs_2(self, *args: Any, **kwargs: Any) -> Any:
+        """Deprecated: the old name of ``projects_get_jobs`` (GET /api/v1/projects/jobs/{jobId})."""
+        return self.projects_get_jobs(*args, **kwargs)
+
+    def projects_releases_2(self, *args: Any, **kwargs: Any) -> Any:
+        """Deprecated: the old name of ``projects_get_releases`` (GET /api/v1/projects/releases/{releaseId})."""
+        return self.projects_get_releases(*args, **kwargs)
 
 
 def _q(value: Any) -> str:

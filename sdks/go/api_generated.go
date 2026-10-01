@@ -483,15 +483,21 @@ func (a *GeneratedAPI) ProjectsGet(ctx context.Context, id string) (json.RawMess
 	return a.c.apigenRequest(ctx, "GET", path, nil, nil)
 }
 
-// ProjectsJobs calls GET /api/v1/projects/{id}/jobs: List jobs.
-func (a *GeneratedAPI) ProjectsJobs(ctx context.Context, id string) (json.RawMessage, error) {
-	path := "/api/v1/projects/" + url.PathEscape(id) + "/jobs"
+// ProjectsGetJobs calls GET /api/v1/projects/jobs/{jobId}: Get a job.
+func (a *GeneratedAPI) ProjectsGetJobs(ctx context.Context, jobID string) (json.RawMessage, error) {
+	path := "/api/v1/projects/jobs/" + url.PathEscape(jobID)
 	return a.c.apigenRequest(ctx, "GET", path, nil, nil)
 }
 
-// ProjectsJobs2 calls GET /api/v1/projects/jobs/{jobId}: Get a job.
-func (a *GeneratedAPI) ProjectsJobs2(ctx context.Context, jobID string) (json.RawMessage, error) {
-	path := "/api/v1/projects/jobs/" + url.PathEscape(jobID)
+// ProjectsGetReleases calls GET /api/v1/projects/releases/{releaseId}: The frozen catalog (Mode B serving + diffs read this).
+func (a *GeneratedAPI) ProjectsGetReleases(ctx context.Context, releaseID string) (json.RawMessage, error) {
+	path := "/api/v1/projects/releases/" + url.PathEscape(releaseID)
+	return a.c.apigenRequest(ctx, "GET", path, nil, nil)
+}
+
+// ProjectsJobs calls GET /api/v1/projects/{id}/jobs: List jobs.
+func (a *GeneratedAPI) ProjectsJobs(ctx context.Context, id string) (json.RawMessage, error) {
+	path := "/api/v1/projects/" + url.PathEscape(id) + "/jobs"
 	return a.c.apigenRequest(ctx, "GET", path, nil, nil)
 }
 
@@ -597,12 +603,6 @@ func (a *GeneratedAPI) ProjectsReleases(ctx context.Context, id string, p *Proje
 	}
 	path := "/api/v1/projects/" + url.PathEscape(id) + "/releases"
 	return a.c.apigenRequest(ctx, "GET", path, q, nil)
-}
-
-// ProjectsReleases2 calls GET /api/v1/projects/releases/{releaseId}: The frozen catalog (Mode B serving + diffs read this).
-func (a *GeneratedAPI) ProjectsReleases2(ctx context.Context, releaseID string) (json.RawMessage, error) {
-	path := "/api/v1/projects/releases/" + url.PathEscape(releaseID)
-	return a.c.apigenRequest(ctx, "GET", path, nil, nil)
 }
 
 // ProjectsReleasesDiff calls GET /api/v1/projects/releases/{a}/diff/{b}: Key-level diff between two releases.
@@ -817,7 +817,7 @@ func (a *GeneratedAPI) PublicPreview(ctx context.Context, id string) (json.RawMe
 
 // PublicProjectsCatalogArgs are the inputs of GeneratedAPI.PublicProjectsCatalog.
 type PublicProjectsCatalogArgs struct {
-	// Locale is "locale" in the query.
+	// Locale is "locale" in the query, required.
 	Locale any `query:"locale"`
 }
 
@@ -854,7 +854,7 @@ func (a *GeneratedAPI) TmList(ctx context.Context, p *TmListArgs) (json.RawMessa
 
 // TmSearchArgs are the inputs of GeneratedAPI.TmSearch.
 type TmSearchArgs struct {
-	// Q is "q" in the query.
+	// Q is "q" in the query, required.
 	Q any `query:"q"`
 
 	// Target is "target" in the query.
@@ -878,10 +878,10 @@ func (a *GeneratedAPI) TmSearch(ctx context.Context, p *TmSearchArgs) (json.RawM
 
 // TmSuggestArgs are the inputs of GeneratedAPI.TmSuggest.
 type TmSuggestArgs struct {
-	// Target is "target" in the query.
+	// Target is "target" in the query, required.
 	Target any `query:"target"`
 
-	// Text is "text" in the query.
+	// Text is "text" in the query, required.
 	Text any `query:"text"`
 }
 
@@ -995,6 +995,20 @@ func (a *GeneratedAPI) WebhookSubscriptionsUpdate(ctx context.Context, id string
 	}
 	path := "/api/v1/webhook-subscriptions/" + url.PathEscape(id)
 	return a.c.apigenRequest(ctx, "PATCH", path, nil, payload)
+}
+
+// ProjectsJobs2 is the old name of ProjectsGetJobs (GET /api/v1/projects/jobs/{jobId}).
+//
+// Deprecated: use ProjectsGetJobs.
+func (a *GeneratedAPI) ProjectsJobs2(ctx context.Context, jobID string) (json.RawMessage, error) {
+	return a.ProjectsGetJobs(ctx, jobID)
+}
+
+// ProjectsReleases2 is the old name of ProjectsGetReleases (GET /api/v1/projects/releases/{releaseId}).
+//
+// Deprecated: use ProjectsGetReleases.
+func (a *GeneratedAPI) ProjectsReleases2(ctx context.Context, releaseID string) (json.RawMessage, error) {
+	return a.ProjectsGetReleases(ctx, releaseID)
 }
 
 // apigenBody copies Body, so the fields set over it never change the caller's map.

@@ -139,7 +139,7 @@
      "guards": [
       "adminGuard"
      ],
-     "body": "read-unknown"
+     "body": "read-unvalidated"
     },
     "requestBody": {
      "required": false,
@@ -147,7 +147,12 @@
       "application/json": {
        "schema": {
         "type": "object",
-        "properties": {}
+        "properties": {
+         "description": {},
+         "enabled": {},
+         "label": {},
+         "rollout": {}
+        }
        }
       }
      }
@@ -2049,7 +2054,7 @@
      {
       "name": "locale",
       "in": "query",
-      "required": false,
+      "required": true,
       "schema": {}
      }
     ],
@@ -2114,7 +2119,7 @@
      {
       "name": "q",
       "in": "query",
-      "required": false,
+      "required": true,
       "schema": {}
      },
      {
@@ -2142,13 +2147,13 @@
      {
       "name": "target",
       "in": "query",
-      "required": false,
+      "required": true,
       "schema": {}
      },
      {
       "name": "text",
       "in": "query",
-      "required": false,
+      "required": true,
       "schema": {}
      }
     ],
@@ -2380,7 +2385,7 @@
   "matched": 57,
   "bodies": {
    "validated": 19,
-   "fieldsOnly": 0,
+   "fieldsOnly": 1,
    "takesBody": 20
   }
  }

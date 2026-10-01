@@ -77,7 +77,7 @@ fallback chain, pre-flattened so the client does zero logic).
 
 | Name | Type | Required | Notes |
 |---|---|---|---|
-| `locale` | any | no |  |
+| `locale` | any | yes |  |
 
 ### Example
 

@@ -139,14 +139,19 @@ export class GeneratedApi {
     return this.call("GET", `/api/v1/projects/${encodeURIComponent(id)}`, {}, undefined);
   }
 
+  /** Get a job (GET /api/v1/projects/jobs/{jobId}) */
+  projectsGetJobs(jobId: string): Promise<unknown> {
+    return this.call("GET", `/api/v1/projects/jobs/${encodeURIComponent(jobId)}`, {}, undefined);
+  }
+
+  /** The frozen catalog (Mode B serving + diffs read this). (GET /api/v1/projects/releases/{releaseId}) */
+  projectsGetReleases(releaseId: string): Promise<unknown> {
+    return this.call("GET", `/api/v1/projects/releases/${encodeURIComponent(releaseId)}`, {}, undefined);
+  }
+
   /** List jobs (GET /api/v1/projects/{id}/jobs) */
   projectsJobs(id: string): Promise<unknown> {
     return this.call("GET", `/api/v1/projects/${encodeURIComponent(id)}/jobs`, {}, undefined);
-  }
-
-  /** Get a job (GET /api/v1/projects/jobs/{jobId}) */
-  projectsJobs2(jobId: string): Promise<unknown> {
-    return this.call("GET", `/api/v1/projects/jobs/${encodeURIComponent(jobId)}`, {}, undefined);
   }
 
   /** The workbench list. (GET /api/v1/projects/{id}/keys) */
@@ -191,11 +196,6 @@ export class GeneratedApi {
     const query: Record<string, unknown> = {};
     query["locale"] = all["locale"]; delete all["locale"];
     return this.call("GET", `/api/v1/projects/${encodeURIComponent(id)}/releases`, query, undefined);
-  }
-
-  /** The frozen catalog (Mode B serving + diffs read this). (GET /api/v1/projects/releases/{releaseId}) */
-  projectsReleases2(releaseId: string): Promise<unknown> {
-    return this.call("GET", `/api/v1/projects/releases/${encodeURIComponent(releaseId)}`, {}, undefined);
   }
 
   /** Key-level diff between two releases. (GET /api/v1/projects/releases/{a}/diff/{b}) */
@@ -259,7 +259,7 @@ export class GeneratedApi {
   }
 
   /** What locavello.js consumes. (GET /api/v1/public/projects/{id}/catalog) */
-  publicProjectsCatalog(id: string, input?: { "locale"?: unknown }): Promise<unknown> {
+  publicProjectsCatalog(id: string, input: { "locale": unknown }): Promise<unknown> {
     const all: Record<string, unknown> = { ...(input ?? {}) };
     const query: Record<string, unknown> = {};
     query["locale"] = all["locale"]; delete all["locale"];
@@ -275,7 +275,7 @@ export class GeneratedApi {
   }
 
   /** The TM screen's cross-project search. (GET /api/v1/tm/search) */
-  tmSearch(input?: { "q"?: unknown; "target"?: unknown }): Promise<unknown> {
+  tmSearch(input: { "q": unknown; "target"?: unknown }): Promise<unknown> {
     const all: Record<string, unknown> = { ...(input ?? {}) };
     const query: Record<string, unknown> = {};
     query["q"] = all["q"]; delete all["q"];
@@ -284,7 +284,7 @@ export class GeneratedApi {
   }
 
   /** Workbench + agent suggestions. (GET /api/v1/tm/suggest) */
-  tmSuggest(input?: { "target"?: unknown; "text"?: unknown }): Promise<unknown> {
+  tmSuggest(input: { "target": unknown; "text": unknown }): Promise<unknown> {
     const all: Record<string, unknown> = { ...(input ?? {}) };
     const query: Record<string, unknown> = {};
     query["target"] = all["target"]; delete all["target"];
@@ -326,5 +326,15 @@ export class GeneratedApi {
     const all: Record<string, unknown> = { ...(input ?? {}) };
     const query: Record<string, unknown> = {};
     return this.call("PATCH", `/api/v1/webhook-subscriptions/${encodeURIComponent(id)}`, query, all);
+  }
+
+  /** @deprecated The old name of `projectsGetJobs` (GET /api/v1/projects/jobs/{jobId}). */
+  projectsJobs2(...args: Parameters<GeneratedApi["projectsGetJobs"]>): Promise<unknown> {
+    return this.projectsGetJobs(...args);
+  }
+
+  /** @deprecated The old name of `projectsGetReleases` (GET /api/v1/projects/releases/{releaseId}). */
+  projectsReleases2(...args: Parameters<GeneratedApi["projectsGetReleases"]>): Promise<unknown> {
+    return this.projectsGetReleases(...args);
   }
 }

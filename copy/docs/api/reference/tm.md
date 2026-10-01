@@ -47,7 +47,7 @@ GET /tm/search?q=&target= — the TM screen's cross-project search.
 
 | Name | Type | Required | Notes |
 |---|---|---|---|
-| `q` | any | no |  |
+| `q` | any | yes |  |
 | `target` | any | no |  |
 
 ### Example
@@ -72,8 +72,8 @@ product is built around.
 
 | Name | Type | Required | Notes |
 |---|---|---|---|
-| `target` | any | no |  |
-| `text` | any | no |  |
+| `target` | any | yes |  |
+| `text` | any | yes |  |
 
 ### Example
 

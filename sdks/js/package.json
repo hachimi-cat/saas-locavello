@@ -1,6 +1,6 @@
 {
   "name": "@forjio/locavello",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Locavello SDK — typed JS/TS client for the locavello.forjio.com REST API. Sister to the Python + Go SDKs.",
   "license": "UNLICENSED",
   "private": false,
