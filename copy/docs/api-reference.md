@@ -361,6 +361,23 @@ Your keys: `name`, display `prefix`, `lastUsedAt`, `revokedAt`.
 Revokes the key (it stops authenticating immediately; the row is kept
 for audit display).
 
+## Webhook subscriptions
+
+Your endpoints for `locavello.*` events, and the log of what was
+delivered to them — signing, the event catalogue, retries and the
+delivery log are on [Webhooks](/docs/webhooks).
+
+| Method | Path | |
+|---|---|---|
+| GET | `/webhook-subscriptions` | Your endpoints (never with their secret) |
+| POST | `/webhook-subscriptions` | Add one: `{ "url": "https://…", "events": ["locavello.release.*"] }` — returns the `whsec_…` secret **once** |
+| PATCH | `/webhook-subscriptions/:id` | Change `url` / `events`, or `active` |
+| DELETE | `/webhook-subscriptions/:id` | Remove it |
+| GET | `/webhook-subscriptions/event-types` | The event catalogue |
+| GET | `/webhook-subscriptions/deliveries` | The delivery log (`subscriptionId`, `status`, `type`, `limit`, `cursor`) |
+| GET | `/webhook-subscriptions/deliveries/:id` | One delivery, with every attempt |
+| POST | `/webhook-subscriptions/deliveries/:id/retry` | Send it again now (`202`) |
+
 ## Public endpoints (no auth)
 
 #### POST /public/preview

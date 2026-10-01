@@ -44,6 +44,7 @@ export const DOC_NAV: DocMeta[] = [
   { slug: 'concepts', title: 'Concepts', group: 'Guides', href: '/docs/concepts' },
   { slug: 'placeholder-safety', title: 'Placeholder safety', group: 'Guides', href: '/docs/placeholder-safety' },
   { slug: 'review-workflow', title: 'Review workflow', group: 'Guides', href: '/docs/review-workflow' },
+  { slug: 'webhooks', title: 'Webhooks', group: 'Guides', href: '/docs/webhooks' },
   { slug: 'nextjs-adapter', title: 'Next.js adapter', group: 'Reference', href: '/docs/nextjs-adapter' },
   { slug: 'cli-reference', title: 'CLI reference', group: 'Reference', href: '/docs/cli-reference' },
   { slug: 'api-reference', title: 'API reference', group: 'Reference', href: '/docs/api-reference' },
