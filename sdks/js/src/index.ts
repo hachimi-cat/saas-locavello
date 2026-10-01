@@ -17,6 +17,8 @@
 import { GeneratedApi } from './api.generated.js';
 
 export { GeneratedApi } from './api.generated.js';
+export { verifyWebhook } from './webhooks.js';
+export type { LocavelloEventType, LocavelloWebhookEvent } from './webhooks.js';
 
 // ─── Envelope + error ─────────────────────────────────────────────────
 
