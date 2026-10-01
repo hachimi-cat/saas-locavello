@@ -1,6 +1,6 @@
 [project]
 name = "forjio-locavello"
-version = "0.2.0"
+version = "0.3.0"
 description = "Locavello SDK — typed Python client for the locavello.forjio.com REST API. Sister to the JS + Go SDKs."
 authors = [{ name = "Forjio", email = "support@forjio.com" }]
 license = { text = "Proprietary" }

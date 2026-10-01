@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.3.0
 - `locavello api webhook-subscriptions deliveries` (`--subscription-id`, `--status`, `--type`, paged), `get-deliveries <id>` (with every attempt), `deliveries-retry <id>` and `event-types`; `update <id>` also takes `--url` and `--events`.
 
 ## 0.2.0
