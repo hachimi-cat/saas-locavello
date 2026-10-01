@@ -17,4 +17,4 @@ Every Locavello feature, route by route, generated from the product's own code (
 | [Public](/docs/api/reference/public) | 3 |
 | [Tm](/docs/api/reference/tm) | 3 |
 | [Translations](/docs/api/reference/translations) | 2 |
-| [Webhook subscriptions](/docs/api/reference/webhook-subscriptions) | 4 |
+| [Webhook subscriptions](/docs/api/reference/webhook-subscriptions) | 8 |

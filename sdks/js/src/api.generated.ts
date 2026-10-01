@@ -7,7 +7,7 @@ export interface ApigenTransport {
   apigenRequest(method: string, path: string, query: Record<string, unknown> | undefined, body: unknown): Promise<unknown>;
 }
 
-/** All 47 feature routes of the Locavello API. */
+/** All 51 feature routes of the Locavello API. */
 export class GeneratedApi {
   constructor(private readonly client: ApigenTransport) {}
 
@@ -304,7 +304,7 @@ export class GeneratedApi {
     return this.call("POST", `/api/v1/translations/${encodeURIComponent(id)}/reject`, query, all);
   }
 
-  /** Create a webhook subscription (POST /api/v1/webhook-subscriptions) */
+  /** Add an endpoint. (POST /api/v1/webhook-subscriptions) */
   webhookSubscriptionsCreate(input: { "url": string; "events"?: unknown[]; [field: string]: unknown }): Promise<unknown> {
     const all: Record<string, unknown> = { ...(input ?? {}) };
     const query: Record<string, unknown> = {};
@@ -316,13 +316,40 @@ export class GeneratedApi {
     return this.call("DELETE", `/api/v1/webhook-subscriptions/${encodeURIComponent(id)}`, {}, undefined);
   }
 
+  /** List webhook deliveries. (GET /api/v1/webhook-subscriptions/deliveries) */
+  webhookSubscriptionsDeliveries(input?: { "limit"?: number; "cursor"?: string; "subscriptionId"?: string; "status"?: "pending" | "succeeded" | "failed"; "type"?: string }): Promise<unknown> {
+    const all: Record<string, unknown> = { ...(input ?? {}) };
+    const query: Record<string, unknown> = {};
+    query["limit"] = all["limit"]; delete all["limit"];
+    query["cursor"] = all["cursor"]; delete all["cursor"];
+    query["subscriptionId"] = all["subscriptionId"]; delete all["subscriptionId"];
+    query["status"] = all["status"]; delete all["status"];
+    query["type"] = all["type"]; delete all["type"];
+    return this.call("GET", `/api/v1/webhook-subscriptions/deliveries`, query, undefined);
+  }
+
+  /** Retry a webhook delivery. (POST /api/v1/webhook-subscriptions/deliveries/{id}/retry) */
+  webhookSubscriptionsDeliveriesRetry(id: string): Promise<unknown> {
+    return this.call("POST", `/api/v1/webhook-subscriptions/deliveries/${encodeURIComponent(id)}/retry`, {}, undefined);
+  }
+
+  /** The event types a subscription can name: every locavello.*.v1 type Locavello sends, with what it means. (GET /api/v1/webhook-subscriptions/event-types) */
+  webhookSubscriptionsEventTypes(): Promise<unknown> {
+    return this.call("GET", `/api/v1/webhook-subscriptions/event-types`, {}, undefined);
+  }
+
+  /** Get a webhook delivery, with every attempt made at it. (GET /api/v1/webhook-subscriptions/deliveries/{id}) */
+  webhookSubscriptionsGetDeliveries(id: string): Promise<unknown> {
+    return this.call("GET", `/api/v1/webhook-subscriptions/deliveries/${encodeURIComponent(id)}`, {}, undefined);
+  }
+
   /** List webhook subscriptions (GET /api/v1/webhook-subscriptions) */
   webhookSubscriptionsList(): Promise<unknown> {
     return this.call("GET", `/api/v1/webhook-subscriptions`, {}, undefined);
   }
 
-  /** Update a webhook subscription (PATCH /api/v1/webhook-subscriptions/{id}) */
-  webhookSubscriptionsUpdate(id: string, input: { "active": boolean; [field: string]: unknown }): Promise<unknown> {
+  /** Update an endpoint. `active: false` pauses it (its queued deliveries become failed); `active: true` re-enables it — also after Locavello switched it off for failing — and clears its failure streak. (PATCH /api/v1/webhook-subscriptions/{id}) */
+  webhookSubscriptionsUpdate(id: string, input?: { "active"?: boolean; "url"?: string; "events"?: unknown[]; [field: string]: unknown }): Promise<unknown> {
     const all: Record<string, unknown> = { ...(input ?? {}) };
     const query: Record<string, unknown> = {};
     return this.call("PATCH", `/api/v1/webhook-subscriptions/${encodeURIComponent(id)}`, query, all);
