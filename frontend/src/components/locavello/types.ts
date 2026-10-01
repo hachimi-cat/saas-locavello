@@ -272,8 +272,48 @@ export interface WebhookSubscriptionRow {
   url: string;
   events: string[];
   active: boolean;
+  /** Failed attempts in a row since the last 2xx. */
+  consecutiveFailures?: number;
+  failingSince?: string | null;
+  /** Set when Locavello switched the endpoint off because it kept failing. */
+  disabledAt?: string | null;
+  disabledReason?: string | null;
   createdAt: string;
   updatedAt: string;
+}
+
+/** GET /webhook-subscriptions/event-types entry. */
+export interface WebhookEventType {
+  type: string;
+  description: string;
+}
+
+/** One HTTP attempt at a delivery. */
+export interface WebhookDeliveryAttempt {
+  attemptNumber: number;
+  status: 'succeeded' | 'failed';
+  responseCode: number | null;
+  durationMs: number;
+  error: string | null;
+  nextRetryAt: string | null;
+  attemptedAt: string;
+}
+
+/** GET /webhook-subscriptions/deliveries row: one event to one endpoint. */
+export interface WebhookDeliveryRow {
+  id: string;
+  subscriptionId: string;
+  eventId: string;
+  type: string;
+  status: 'pending' | 'succeeded' | 'failed';
+  attempts: number;
+  nextRetryAt: string | null;
+  lastAttemptAt: string | null;
+  deliveredAt: string | null;
+  responseCode: number | null;
+  lastError: string | null;
+  createdAt: string;
+  attemptLog: WebhookDeliveryAttempt[];
 }
 
 /** POST /webhook-subscriptions — the whsec_ secret appears exactly once, here. */
