@@ -1,4 +1,4 @@
-import { describe, it, expect, afterAll } from 'vitest';
+import { describe, it, expect, afterAll, beforeAll } from 'vitest';
 import request from 'supertest';
 import express from 'express';
 import type { NextFunction, Request, Response } from 'express';
@@ -23,6 +23,7 @@ import {
   SIGNATURE_HEADER,
 } from '../lib/webhook-signature.js';
 import { subscriptionMatchesType } from '../services/outbox-worker.js';
+import { __setWebhookResolver } from '../lib/webhook-target.js';
 
 const ACCOUNT = `acc_test_${randomBytes(6).toString('hex')}`;
 const OTHER_ACCOUNT = `acc_test_${randomBytes(6).toString('hex')}`;
@@ -55,7 +56,17 @@ function makeApp() {
 
 const app = makeApp();
 
+// Adding an endpoint runs the SSRF guard (lib/webhook-target.ts), which
+// resolves the host: answer example.com from a table, not the network.
+beforeAll(() => {
+  __setWebhookResolver(async (host) => {
+    if (host === 'example.com') return [{ address: '93.184.216.34', family: 4 }];
+    throw new Error('ENOTFOUND');
+  });
+});
+
 afterAll(async () => {
+  __setWebhookResolver(null);
   await prisma.webhookSubscription.deleteMany({
     where: { accountId: { in: [ACCOUNT, OTHER_ACCOUNT] } },
   });
@@ -210,7 +221,7 @@ describe('webhook signature — Locavello-Signature t=…,v1=…', () => {
 });
 
 describe('outbox fan-out — allowlist matcher', () => {
-  it('matches "*" and exact types only', () => {
+  it('matches "*", exact types and prefixes ending in "*"', () => {
     expect(subscriptionMatchesType(['*'], 'locavello.release.published.v1')).toBe(true);
     expect(
       subscriptionMatchesType(
@@ -221,6 +232,8 @@ describe('outbox fan-out — allowlist matcher', () => {
     expect(
       subscriptionMatchesType(['locavello.project.created.v1'], 'locavello.release.published.v1'),
     ).toBe(false);
+    expect(subscriptionMatchesType(['locavello.release.*'], 'locavello.release.published.v1')).toBe(true);
+    expect(subscriptionMatchesType(['locavello.release.*'], 'locavello.project.created.v1')).toBe(false);
     expect(subscriptionMatchesType([], 'locavello.release.published.v1')).toBe(false);
     expect(subscriptionMatchesType('not-an-array', 'locavello.release.published.v1')).toBe(false);
   });

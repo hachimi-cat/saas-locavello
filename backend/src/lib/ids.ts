@@ -28,6 +28,8 @@ export type IdPrefix =
   | 'rst' // roster identity (SSO display cache — admin CRM)
   | 'rmb' // roster membership (identity ↔ accountId sighting)
   | 'whs' // webhook subscription (customer endpoint)
+  | 'whd' // webhook delivery (one event to one subscription)
+  | 'wda' // webhook delivery attempt
   | 'aud'; // audit event (append-only workspace trail)
 
 export function newId(prefix: IdPrefix): string {

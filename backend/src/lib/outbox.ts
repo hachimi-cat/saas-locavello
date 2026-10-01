@@ -1,14 +1,17 @@
 import type { Prisma } from '@prisma/client';
 import { newId } from './ids.js';
+import type { EventType } from './event-types.js';
 
 /**
  * Write an outbox event inside the caller's transaction (ADR-0006).
- * The polling worker in services/outbox-worker.ts publishes it.
+ * The outbox worker (services/outbox-worker.ts) fans it out to the
+ * merchant's webhook subscriptions. `type` must be in the event catalogue
+ * (lib/event-types.ts) — the types the dashboard and the docs offer.
  */
 export async function writeOutbox(
   tx: Prisma.TransactionClient,
   event: {
-    type: string;
+    type: EventType;
     accountId?: string | null;
     aggregateId?: string | null;
     data: Prisma.InputJsonValue;
