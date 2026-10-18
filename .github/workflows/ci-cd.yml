@@ -111,6 +111,10 @@ jobs:
         env:
           NEXT_PUBLIC_API_URL: /api/v1
           NEXT_PUBLIC_MIDTRANS_CLIENT_KEY: ${{ secrets.MIDTRANS_CLIENT_KEY }}
+          # Cloudflare Turnstile ("Forjio Daily Auth" widget, forjio.com and its
+          # subdomains). A site key is public by design: it is in every login page.
+          # The backend verifies with TURNSTILE_SECRET_KEY (@forjio/sdk >= 0.10).
+          NEXT_PUBLIC_TURNSTILE_SITE_KEY: 0x4AAAAAADq51t0tvcSO5mFW
         run: cd frontend && npm ci && npm run build
       - name: Upload backend dist
         uses: actions/upload-artifact@v6
