@@ -14,7 +14,7 @@
   "dependencies": {
     "@forjio/admin-ui": "^0.1.0",
     "@forjio/agent-ui": "^0.25.0",
-    "@forjio/auth-ui": "^0.8.1",
+    "@forjio/auth-ui": "file:vendor/forjio-auth-ui-0.10.0.tgz",
     "@forjio/portal-ui": "^0.8.1",
     "@forjio/sdk": "^0.9.0",
     "@forjio/website-ui": "^0.2.3",
