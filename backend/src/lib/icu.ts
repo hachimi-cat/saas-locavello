@@ -27,47 +27,85 @@ export interface IcuPlaceholder {
  */
 export function extractPlaceholders(message: string): IcuPlaceholder[] {
   const found = new Map<string, IcuPlaceholder>();
-  let i = 0;
-  let inQuote = false;
-  while (i < message.length) {
-    const ch = message[i];
-    if (ch === "'") {
-      // ICU quoting: '' is a literal apostrophe; otherwise toggles quote.
-      if (message[i + 1] === "'") {
-        i += 2;
-        continue;
+  const n = message.length;
+  const isName = (c: string | undefined) => !!c && /[A-Za-z0-9_]/.test(c);
+  const skipSpaces = (i: number) => {
+    while (i < n && /\s/.test(message[i]!)) i += 1;
+    return i;
+  };
+  // ICU's apostrophe rule (DOUBLE_OPTIONAL, what intl-messageformat and ICU4J
+  // use): '' is a literal apostrophe; a single apostrophe opens a quoted span
+  // only right before a syntax character ({ } # |); anywhere else — "portal's"
+  // — it is just an apostrophe. Returns the index after the quote handling.
+  const quote = (i: number) => {
+    if (message[i + 1] === "'") return i + 2;
+    if (!'{}#|'.includes(message[i + 1] ?? '')) return i + 1;
+    let j = i + 1;
+    while (j < n) {
+      if (message[j] === "'") {
+        if (message[j + 1] === "'") { j += 2; continue; }
+        return j + 1;
       }
-      inQuote = !inQuote;
+      j += 1;
+    }
+    return n;
+  };
+  // A message (or a plural/select branch's body) up to its closing brace.
+  const text = (i: number, nested: boolean): number => {
+    while (i < n) {
+      const ch = message[i];
+      if (ch === "'") { i = quote(i); continue; }
+      if (ch === '{') { i = argument(i); continue; }
+      if (ch === '}' && nested) return i;
       i += 1;
-      continue;
     }
-    if (!inQuote && ch === '{') {
-      // Scan the argument up to a comma or closing brace at depth 0.
-      let j = i + 1;
-      let name = '';
-      while (j < message.length && /[A-Za-z0-9_]/.test(message[j]!)) {
-        name += message[j];
-        j += 1;
-      }
-      if (name.length > 0) {
-        // Peek what follows the name to classify.
-        let k = j;
-        while (k < message.length && message[k] === ' ') k += 1;
-        let kind = 'simple';
-        if (message[k] === ',') {
-          const rest = message.slice(k + 1).trimStart();
-          const m = rest.match(/^([A-Za-z]+)/);
-          const type = m?.[1] ?? '';
-          if (type === 'plural' || type === 'select' || type === 'selectordinal') kind = type;
-          else kind = 'typed';
+    return i;
+  };
+  // {name}, {name, type, style}, or {name, plural|select|selectordinal, … {branch} …}.
+  // Anything that is not one of those is read as literal text, so a
+  // malformed message still reports what it can.
+  const argument = (open: number): number => {
+    let i = skipSpaces(open + 1);
+    let name = '';
+    while (i < n && isName(message[i])) { name += message[i]; i += 1; }
+    i = skipSpaces(i);
+    if (!name || (message[i] !== '}' && message[i] !== ',')) return open + 1;
+    if (message[i] === '}') {
+      if (!found.has(name)) found.set(name, { name, kind: 'simple' });
+      return i + 1;
+    }
+    i = skipSpaces(i + 1);
+    let type = '';
+    while (i < n && /[A-Za-z]/.test(message[i]!)) { type += message[i]; i += 1; }
+    if (type === 'plural' || type === 'select' || type === 'selectordinal') {
+      if (!found.has(name)) found.set(name, { name, kind: type });
+      i = skipSpaces(i);
+      if (message[i] === ',') i += 1;
+      // Branches: selector (one, other, =0, offset:1…) then {body}.
+      while (i < n) {
+        i = skipSpaces(i);
+        if (message[i] === '}') return i + 1;
+        if (message[i] === '{') {
+          i = text(i + 1, true);
+          if (message[i] === '}') i += 1;
+          continue;
         }
-        if (!found.has(name)) found.set(name, { name, kind });
+        while (i < n && !/[\s{}]/.test(message[i]!)) i += 1;
       }
-      i = j;
-      continue;
+      return i;
     }
-    i += 1;
-  }
+    if (!found.has(name)) found.set(name, { name, kind: 'typed' });
+    // A typed argument's style runs to its own closing brace.
+    let depth = 1;
+    while (i < n && depth > 0) {
+      if (message[i] === "'") { i = quote(i); continue; }
+      if (message[i] === '{') depth += 1;
+      else if (message[i] === '}') depth -= 1;
+      i += 1;
+    }
+    return i;
+  };
+  text(0, false);
   return [...found.values()];
 }
 

@@ -127,3 +127,27 @@ describe('catalog canonicalization', () => {
     expect(catalogKeyName('marketing', 'hero.title')).toBe('marketing.hero.title');
   });
 });
+
+// 18 Oct 2026, STIA's catalogs: two real translations were refused.
+describe('extractPlaceholders — ICU apostrophes and branch bodies', () => {
+  it('reads an apostrophe in ordinary text as an apostrophe', () => {
+    const src = "the portal's service user could not sign in (status {v1} {v2})";
+    expect(extractPlaceholders(src).map((p) => p.name)).toEqual(['v1', 'v2']);
+    expect(checkPlaceholders(src, 'akun layanan portal tidak dapat masuk (status {v1} {v2})').ok).toBe(true);
+  });
+  it('still honours a quoted brace', () => {
+    expect(extractPlaceholders("use '{name}' literally, then {real}").map((p) => p.name)).toEqual(['real']);
+  });
+  it('does not read a plural branch that starts with a word as a placeholder', () => {
+    const src = '{n, plural, one {in # day} other {in # days}}';
+    expect(extractPlaceholders(src)).toEqual([{ name: 'n', kind: 'plural' }]);
+    expect(checkPlaceholders(src, '{n, plural, other {# hari lagi}}').ok).toBe(true);
+  });
+  it('finds placeholders inside branches and selects', () => {
+    const src = '{role, select, student {Your {count} grades} other {{count} marks for {name}}}';
+    expect(extractPlaceholders(src).map((p) => p.name).sort()).toEqual(['count', 'name', 'role']);
+  });
+  it('handles exact selectors, offsets and typed arguments', () => {
+    expect(extractPlaceholders('{n, plural, offset:1 =0 {none} one {# item} other {# items}} by {when, date, short}').map((p) => p.name)).toEqual(['n', 'when']);
+  });
+});
