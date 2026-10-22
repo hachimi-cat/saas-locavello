@@ -69,36 +69,24 @@ dependency of the family.
 | `frontend/` | Next.js 15 App Router. Marketing at `/`, dashboard at `/dashboard`, OIDC at `/callback`. Built-in admin portal at `/admin/*` (the `(admin)` route group: login/forgot/reset + a gated `(portal)` dashboard via `@forjio/portal-ui` `brandTag="Admin"`; admin BFF proxy at `app/api/v1/console/[...path]`). `src/lib/api.ts` (client fetch) + `src/lib/api-server.ts` (RSC cookie forwarding). Error + loading boundaries at `src/app/(dashboard)/` and `src/app/(admin)/admin/(portal)/`. |
 | `deploy/` | `nginx/<brand>.conf` — reference vhost. `^~ /api/v1/console/` → frontend (admin BFF proxy), everything else under `/api/v1/` → backend, default → frontend. `scripts/install.sh` symlinks it into `sites-enabled`. |
 | `cli/` | Commander-based CLI. `auth login/whoami/logout` ship; session stored via `src/lib/session.ts` at `~/.locavello/session.json`. |
-| `e2e/` | Playwright. `playwright.config.ts` (local dev) + `playwright.ci.config.ts` (CI against staging — see ci-cd.yml). Health smoke ships; add per-flow tests per milestone. |
+| `e2e/` | Playwright. `playwright.config.ts` (local dev) + `playwright.ci.config.ts` (run locally; there is no staging, so CI does not run them). Health smoke ships; add per-flow tests per milestone. |
 
-### CI/CD — shared staging E2E pattern
+### CI/CD — no staging
 
-- **CI runs on Depllo, not GitHub Actions** (family standard since
-  2026-07-15 — GHA quota). `.github/workflows/ci-cd.yml` is kept as an
-  inert fallback with push/PR triggers disabled; the live pipeline is
-  the Depllo project `saas-locavello`.
-- Job sequence: `lint → test → build → deploy-staging → e2e-staging →
-  deploy-production → release`.
-- **Frontend deploys as a dynamic Next app** (`next start` under pm2,
-  the pawpado/ripllo model): the Build job ships `.next/`
-  (`include-hidden-files: true` on upload-artifact — without it the
-  dotdir is silently dropped) and the deploy step runs
+- **There is no staging** (bang, 22 Oct 2026: "no more staging server";
+  the shared staging box was destroyed on 11 Oct 2026). Never add a
+  staging job, a `STAGING_HOST` secret or a `staging-<brand>` DNS record.
+- Depllo runs `.depllo-ci.yml` on every push to master: checks → build →
+  `deploy-production` → `verify-production` (read-only: the site must
+  answer 200 within two minutes). `.github/workflows/ci-cd.yml` is the
+  manual (workflow_dispatch) fallback.
+- `deploy-production` rsyncs over ssh with `SSH_PRIVATE_KEY`; its public
+  half is in root's `authorized_keys` on the production box
+  (prod-share-v2, 139.59.218.224). Without it every deploy fails with
+  "Permission denied (publickey)".
+- **Frontend deploys as a dynamic Next app** (`next start` under pm2):
+  the build job ships `.next/` and the deploy step runs
   `npm ci --omit=dev` + `pm2 start npm -- start`. No static `out/`.
-- **E2E reaches staging at `http://${{ secrets.STAGING_HOST }}/`** over
-  the **tailnet** — the SHARED staging box is reachable only over the
-  tailnet (live box `stg-share`, tailnet IP `100.66.19.22`, public
-  `159.223.51.169` — the old `100.123.65.113` box is dead), so both `deploy-staging`
-  and `e2e-staging` first join the tailnet as an ephemeral CI node via
-  `tailscale/github-action` (new required secret **`TS_AUTHKEY`**, a
-  reusable + ephemeral Tailscale auth key). `STAGING_HOST` stays the
-  **`staging-<brand>.forjio.com`** hostname — `e2e-staging` maps it to the
-  tailnet IP in the runner's `/etc/hosts` so nginx still routes the
-  product's staging vhost by Host header — with `E2E_BYPASS_SECRET` gating
-  auth. Staging lives on the shared box (the 2026-06-15 consolidation),
-  NOT a per-product droplet. Requires secrets `TS_AUTHKEY` +
-  `E2E_BYPASS_SECRET` + `SSH_PRIVATE_KEY` + `STAGING_HOST` +
-  `PRODUCTION_HOST`. Register the product on the shared box per the
-  spawn-product skill's Phase 1 step 8.
 
 ### Backend conventions
 
@@ -177,10 +165,8 @@ dependency of the family.
   runs with `--passWithNoTests` so scaffolding doesn't break CI
   before coverage ramps.
 - E2E in `e2e/tests/` (Playwright). Run locally against
-  `localhost:3270/4270`; CI hits `${{ secrets.STAGING_HOST }}` =
-  `staging-<brand>.forjio.com` (the shared box, reached over the tailnet —
-  the runner joins via `TS_AUTHKEY` and maps the hostname to the box's
-  tailnet IP in `/etc/hosts`).
+  `localhost:3270/4270`. There is no staging, so CI does not run them;
+  after each production deploy `verify-production` checks the site.
   `e2e/package-lock.json` is committed — CI's `npm ci` requires it.
 - CLI tests in `cli/src/__tests__/`.
 - `npm run type-check` at each dir = `tsc --noEmit`. CI's
@@ -224,8 +210,7 @@ dependency of the family.
 - **Spawn-time operational path today**: flat files under
   `/root/.forjio-admin-secrets/` on agent-box (one file per concern:
   `<product>`, `<product>-plugipay`, `<product>-resend`, …), plus box
-  env at `/opt/saas/<product>/backend/.env` on the prod droplet and
-  the shared staging box. Full migration of per-product secrets into
+  env at `/opt/saas/<product>/backend/.env` on the production box. Full migration of per-product secrets into
   Secronna is a separate project — don't block a spawn on it.
 - CI secrets are seeded per-repo via `scripts/seed-ci-secrets.sh`
   (`gh secret set`). Never commit `.env`; commit `.env.example`.
